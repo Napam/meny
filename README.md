@@ -24,7 +24,9 @@ python .\console.py
 ```
 
 # How to implement
-Simply implement the cases (as functions) in consolecases.py. You can import whatever you want to in there. You will need to implement docstrings to every case. The first line of of text in the docstring will be used as the description in the console interface. 
+Simply implement the cases (as functions) in consolecases.py. You can import whatever you want in there. You will need to implement docstrings to every case. The first line of of text in the docstring will be used as the description in the console interface. 
 
 The order of the cases is alphabetically sorted by the function name. 
+
+The rest of the code will automatically integrate the function to the console interface without you needing to worry about anything.
 

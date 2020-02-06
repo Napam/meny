@@ -11,54 +11,21 @@ docstring
 
 Feel free to import whatever
 '''
-from common import join_threads
-from threading import Thread
-from pandas import to_numeric 
+from random import randint
 from time import sleep
-import scrapeconfig as scng
-import numpy as np
+from importlib import reload
+import sys 
 
-def a_sample_case():
+def a_sample_case1():
     '''
-    Get a random number
+    Get a random integer
     '''
-    print(np.random.randint(10))
-    sleep(1)
+    print(randint(0,9))
+    sleep(0.5)
 
-def case1():
+def a_sample_case2():
     '''
-    Update all data
+    Print Hello World
     '''
-    print('Omae wa shinderu')
-    sleep(1)
-
-def case2():
-    '''
-    Obtain Oslo Bors quotes and returns
-    '''
-    from get_osebx_html_files import get_htmlfile 
-    print('Obtaining HTML files from Oslo Bors')
-    args = (
-        (scng.BORS_QUOTES_URL, scng.QUOTES_TARGET_FILE, scng.QUOTES_WAIT_TARGET_CLASS),
-        (scng.BORS_RETURNS_URL, scng.RETURNS_TARGET_FILE, scng.RETURNS_WAIT_TARGET_CLASS)
-    )
-
-    threads = [Thread(target=get_htmlfile, args=a) for a in args]
-    [th.start() for th in threads]
-    join_threads(threads, verbose=False)
-    print('Obtained HTML files')
-
-def case3():
-    '''
-    Scrape Oslo bors HTML files
-    '''
-
-def case4():
-    '''
-    Scrape Yahoo Finance
-    '''
-
-def case5():
-    '''
-    Backup current data
-    '''
+    print('Hello world!')
+    sleep(0.5)

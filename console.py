@@ -1,8 +1,11 @@
-import consolestrings as strings
-import time 
-import consoleconfig as ccng 
-import consolecases
+'''
+Run this file to run console 
+'''
+from time import sleep
 from os import system
+import consolecases
+import consolestrings as strings
+import consoleconfig as ccng 
 from funcmap import construct_funcmap, print_funcmap
 from consolecommon import clear_screen
 
@@ -10,7 +13,7 @@ def logo_title(title: str):
     '''Prints logo title'''
     print("{:-^40s}".format(title))
 
-def start_menu(funcmap: dict):
+def show_cases(funcmap: dict):
     '''Prints function map prettily'''
     logo_title(strings.LOGO_TITLE)
     print_funcmap(funcmap)
@@ -25,7 +28,7 @@ def case_decorator(func):
     def wrapboi(*args, **kwargs):
         clear_screen()
         retobj = func(*args, **kwargs)
-        time.sleep(ccng.CASE_EXIT_WAIT_TIME) 
+        sleep(ccng.CASE_EXIT_WAIT_TIME) 
         return retobj
 
     # "Inherit" docstring
@@ -37,7 +40,7 @@ def exit_program():
     Exit program
     '''
     print(strings.EXIT_MSG)
-    time.sleep(ccng.MSG_WAIT_TIME)
+    sleep(ccng.MSG_WAIT_TIME)
     clear_screen()
     exit()
 
@@ -52,7 +55,7 @@ def main_interface():
     try:
         while run:
             clear_screen()
-            start_menu(funcmap)
+            show_cases(funcmap)
 
             # Get key to func map
             command = enter_prompt()  
@@ -67,7 +70,7 @@ def main_interface():
                 funcmap[command][1]()
             else:
                 print(strings.INVALID_TERMINAL_INPUT_MSG)
-                time.sleep(ccng.MSG_WAIT_TIME)
+                sleep(ccng.MSG_WAIT_TIME)
 
     except KeyboardInterrupt:
         # Ensures proper exit when Kbinterrupt

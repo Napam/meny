@@ -1,7 +1,7 @@
-START_MSG = 'Starting datascraper'
-LOGO_TITLE = ' Mulababy420 '
+START_MSG = 'Starting console interface'
+LOGO_TITLE = ' Title here '
 
-ENTER_PROMPT = '8===D~~:'
+ENTER_PROMPT = 'Enter choice:'
 
 EXIT_MSG = 'Exiting program'
 INVALID_TERMINAL_INPUT_MSG = 'Invalid input'

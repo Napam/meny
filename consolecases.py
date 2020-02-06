@@ -13,8 +13,6 @@ Feel free to import whatever
 '''
 from random import randint
 from time import sleep
-from importlib import reload
-import sys 
 
 def a_sample_case1():
     '''

@@ -16,6 +16,7 @@ For example here is an application.
 Enter choice: 
 ```
 Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all the things. This framework will enable a very quick implementation of a console. 
+Without the console I would need to find the right file to run (and maybe comment things out first as well). The console organizes everything into one place. 
 
 # What to run
 ```

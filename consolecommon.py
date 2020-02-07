@@ -2,9 +2,10 @@
 Common stuff for console stuff
 '''
 
-from os import system
+import os 
 
+__CLEAR_COMMAND = 'cls' if os.name == 'nt' else 'clear'
 def clear_screen():
     '''Obvious'''
-    system('cls')
+    os.system(__CLEAR_COMMAND)
 

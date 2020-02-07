@@ -4,7 +4,7 @@ import consoleconfig as ccng
 def case_decorator(func):
     '''Decorator to enforce commmon behavior for cases'''
     def case_wrapper(*args, **kwargs):
-        '''Enter function'''
+        '''Feel free to customize wrapper'''
         retobj = func(*args, **kwargs)
         sleep(ccng.CASE_EXIT_WAIT_TIME) 
         return retobj

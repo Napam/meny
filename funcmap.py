@@ -54,7 +54,6 @@ def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, de
     Each item is a tuple with first element as description of case, second element
     is the function itself:
     ('Scrape OSEBX', function object)
-
     '''
     if type(cases) == ModuleType:
         funcs = __get_module_cases(cases)

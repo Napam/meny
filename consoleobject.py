@@ -2,8 +2,6 @@
 Run this file to run console 
 '''
 from time import sleep
-from os import system
-import consolecases
 import consolestrings as strings
 import consoleconfig as ccng 
 from funcmap import construct_funcmap, print_funcmap
@@ -19,7 +17,7 @@ def show_cases(funcmap: dict, title=strings.LOGO_TITLE):
     logo_title(title)
     print_funcmap(funcmap)
 
-def enter_prompt(msg: strings.ENTER_PROMPT):
+def enter_prompt(msg: str=strings.ENTER_PROMPT):
     '''Prints enter prompt message and than returns input()'''
     print(msg, end=': ')
     return input()
@@ -77,12 +75,15 @@ class CLI:
                 print('Entering blank returns/exits')
                 command = enter_prompt(strings.ENTER_PROMPT)  
 
-                # Pressing enter without specifying input exits program
+                # Pressing enter without specifying enables if test
                 clear_screen()
                 if not command:
                     self.blank_proceedure()
                     continue
 
+                # Obtain case function from funcmap and 
+                # calls said function. Recall that items are 
+                # (description, function), hence the [1]
                 if command in self.funcmap:
                     self.funcmap[command][1]()
                 else:

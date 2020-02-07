@@ -70,33 +70,33 @@ def case2():
     print(randint(0,9))
     sleep(0.5)
 
-# def case3():
-#     '''
-#     A nested menu 
+def case3():
+    '''
+    A nested menu 
 
-#     This nested menu loads cases from a module
-#     '''
-#     CLI(cases=consolecases_example, title=' So deep ').run()
+    This nested menu loads cases from a module
+    '''
+    CLI(cases=consolecases_example, title=' Money menu ').run()
 
-# def case4():
-#     '''
-#     Another nested menu
+def case4():
+    '''
+    Another nested menu
 
-#     This nested menu gets the cases from a list.
-#     '''
-#     def subcase1():
-#         '''
-#         Print smiley
-#         '''
-#         print(':^)')
-#         sleep(0.5)
+    This nested menu gets the cases from a list.
+    '''
+    def subcase1():
+        '''
+        Print smiley
+        '''
+        print(':^)')
+        sleep(0.5)
 
-#     def subcase2():
-#         '''
-#         Print frown
-#         '''
-#         print(':^(')
-#         sleep(0.5)
+    def subcase2():
+        '''
+        Print frown
+        '''
+        print(':^(')
+        sleep(0.5)
 
-#     CLI(cases=[subcase1, subcase2], title=' Moody ').run()
+    CLI(cases=[subcase1, subcase2], title=' Moody ').run()
     

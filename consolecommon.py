@@ -1,7 +1,6 @@
 '''
 Common stuff for console stuff
 '''
-
 import os 
 
 __CLEAR_COMMAND = 'cls' if os.name == 'nt' else 'clear'

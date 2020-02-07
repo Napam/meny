@@ -10,25 +10,37 @@ Name of cases in console interface will be first line of
 docstring
 
 Feel free to import whatever
+
+If you want to implement nested cases, then simply import 
+the CLI (command line interface) class from consoleobject:
+
+from consoleobject import CLI
+
+then you can either create another module with the nested 
+cases:
+
+import consolecases2
+CLI(consolecases, title= ' Title here ').run()
+
+or you can give a list functions:
+
+def case3():
+    def subcase1():
+        \'''docstring1\'''
+        pass
+
+    def subcase2():
+        \'''docstring\'''
+        pass
+
+    CLI([subcase1, subcase2], title= ' Title here ').run()
 '''
 from random import randint
 from time import sleep
 from consoleobject import CLI
-import consolecases2
+import consolecases_example
 
 def case1():
-    '''
-    Print a random integer
-    '''
-    print(randint(0,9))
-
-def case2():
-    '''
-    Print Hello World
-    '''
-    print('Hello world!')
-
-def case3():
     '''
     FizzBuzz!
 
@@ -38,46 +50,53 @@ def case3():
     for i in range(21):
         stringy = ''
 
-        fizzcase = True if i % 3 == 0 else False
-        buzzcase = True if i % 5 == 0 else False
+        fizz = i % 3 == 0 
+        buzz = i % 5 == 0 
         
-        if fizzcase:
+        if fizz:
             stringy = stringy + 'Fizz'
-        if buzzcase:
+        if buzz:
             stringy = stringy + 'Buzz'
-        if not (fizzcase or buzzcase):
+        if not (fizz or buzz):
             stringy = i
 
         print(stringy) 
         sleep(0.1)
 
-def case4():
+def case2():
     '''
-    A nested menu 
-
-    This nested menu loads cases from a module
+    Print a small random integer 
     '''
-    CLI(consolecases2, title=' So deep ').run()
+    print(randint(0,9))
+    sleep(0.5)
 
-def case5():
-    '''
-    Another nested menu
+# def case3():
+#     '''
+#     A nested menu 
 
-    This nested menu gets the cases from a list 
-    '''
-    def innercase1():
-        '''
-        Print smiley
-        '''
-        print(':^)')
-        sleep(0.5)
+#     This nested menu loads cases from a module
+#     '''
+#     CLI(cases=consolecases_example, title=' So deep ').run()
 
-    def innercase2():
-        '''
-        Print frown
-        '''
-        print(':^(')
-        sleep(0.5)
+# def case4():
+#     '''
+#     Another nested menu
 
-    CLI(cases=[innercase1, innercase2], title=' Moody ').run()
+#     This nested menu gets the cases from a list.
+#     '''
+#     def subcase1():
+#         '''
+#         Print smiley
+#         '''
+#         print(':^)')
+#         sleep(0.5)
+
+#     def subcase2():
+#         '''
+#         Print frown
+#         '''
+#         print(':^(')
+#         sleep(0.5)
+
+#     CLI(cases=[subcase1, subcase2], title=' Moody ').run()
     

@@ -4,7 +4,11 @@ Simple but sexy framework for console interface
 
 # What to run
 ```
+# For Windows/Mac
 python console.py
+
+# For Linux
+python3 console.py
 ```
 There are sample functions implemented. 
 
@@ -15,9 +19,87 @@ The order of the cases is alphabetically sorted by the function name.
 
 The rest of the code will automatically integrate the function to the console interface without you needing to worry about anything.
 
+For example implementing this in consolecases.py:
+```python
+from random import randint
+from time import sleep
+
+def case1():
+    '''
+    FizzBuzz!
+
+    When you get the urge to fizz your buzz 
+    if you know what I mean
+    '''
+    for i in range(21):
+        stringy = ''
+
+        fizz = i % 3 == 0 
+        buzz = i % 5 == 0 
+        
+        if fizz:
+            stringy = stringy + 'Fizz'
+        if buzz:
+            stringy = stringy + 'Buzz'
+        if not (fizz or buzz):
+            stringy = i
+
+        print(stringy) 
+        sleep(0.1)
+
+def case2():
+    '''
+    Print a small random integer 
+    '''
+    print(randint(0,9))
+    sleep(0.5)
+```
+
+will result with this when running ```python console.py```:
+
+```
+-------------- Main menu ---------------
+1. FizzBuzz!
+2. Print a small random integer
+3. Exit program
+
+Entering blank returns/exits
+Enter choice:
+```
+
+## Nested cases
+If you want to implement nested cases, then simply import 
+the CLI (command line interface) class from consoleobject.py:
+```python
+from consoleobject import CLI
+```
+then you can either create another module with the nested cases:
+```python
+import consolecases2
+
+def samplecase():
+    '''Foo'''
+    CLI(consolecases, title= ' Title here ').run()
+```
+
+or you can give a list functions:
+
+```python
+def samplecase():
+    '''Bar'''
+    def subcase1():
+        '''docstring1'''
+        pass
+
+    def subcase2():
+        '''docstring2'''
+        pass
+
+    CLI([subcase1, subcase2], title= ' Title here ').run()
+```
+
 ## Optional: Decorator
 The case functions are decorated to enforce a common behavior of all cases. For example that the program should wait a little when exiting a case function. The decorator can be changed in consoledecorator.py
-
 
 # Why
 Sometimes you want to have a simple console interface so you can do things step by step. 

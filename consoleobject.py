@@ -73,6 +73,8 @@ class CLI:
                 show_cases(self.funcmap, self.title)
 
                 # Get key to func map
+                print()
+                print('Entering blank returns/exits')
                 command = enter_prompt(strings.ENTER_PROMPT)  
 
                 # Pressing enter without specifying input exits program

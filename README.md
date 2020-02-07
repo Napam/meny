@@ -82,7 +82,7 @@ def samplecase():
     CLI(consolecases, title= ' Title here ').run()
 ```
 
-or you can give a list functions:
+or you can give a list of functions:
 
 ```python
 def samplecase():

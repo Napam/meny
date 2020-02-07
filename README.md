@@ -75,11 +75,11 @@ from consoleobject import CLI
 ```
 then you can either create another module for the nested cases:
 ```python
-import consolecases2
+import other_cases
 
 def samplecase():
     '''Foo'''
-    CLI(consolecases, title= ' Title here ').run()
+    CLI(other_cases, title= ' Title here ').run()
 ```
 
 or you can give a list of functions:

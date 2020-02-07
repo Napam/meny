@@ -7,3 +7,4 @@ from os import system
 def clear_screen():
     '''Obvious'''
     system('cls')
+

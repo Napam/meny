@@ -14,16 +14,37 @@ Feel free to import whatever
 from random import randint
 from time import sleep
 
-def a_sample_case1():
+def case1():
     '''
-    Get a random integer
+    Print a random integer
     '''
     print(randint(0,9))
-    sleep(0.5)
 
-def a_sample_case2():
+def case2():
     '''
     Print Hello World
     '''
     print('Hello world!')
-    sleep(0.5)
+
+def case3():
+    '''
+    FizzBuzz!
+
+    When you get the urge to fizz your buzz
+    '''
+    for i in range(21):
+        stringy = ''
+
+        fizzcase = True if i % 3 == 0 else False
+        buzzcase = True if i % 5 == 0 else False
+        
+        if fizzcase:
+            stringy = stringy + 'Fizz'
+        if buzzcase:
+            stringy = stringy + 'Buzz'
+        if not (fizzcase or buzzcase):
+            stringy = i
+
+        print(stringy) 
+        sleep(0.2)
+

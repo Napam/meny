@@ -8,6 +8,7 @@ import consolestrings as strings
 import consoleconfig as ccng 
 from funcmap import construct_funcmap, print_funcmap
 from consolecommon import clear_screen
+from consoledecorator import case_decorator
 
 def logo_title(title: str):
     '''Prints logo title'''
@@ -22,18 +23,6 @@ def enter_prompt():
     '''Prints enter prompt message and than returns input()'''
     print(strings.ENTER_PROMPT, end=' ')
     return input()
-
-def case_decorator(func):
-    '''Decorator to enforce commmon behavior for cases'''
-    def wrapboi(*args, **kwargs):
-        clear_screen()
-        retobj = func(*args, **kwargs)
-        sleep(ccng.CASE_EXIT_WAIT_TIME) 
-        return retobj
-
-    # "Inherit" docstring
-    wrapboi.__doc__ = func.__doc__
-    return wrapboi
 
 def exit_program():
     '''

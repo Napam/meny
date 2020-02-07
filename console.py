@@ -50,11 +50,10 @@ def main_interface():
             command = enter_prompt()  
 
             # Pressing enter without specifying input exits program
+            clear_screen()
             if not command:
-                clear_screen()
                 exit_program()
 
-            clear_screen()
             if command in funcmap:
                 funcmap[command][1]()
             else:

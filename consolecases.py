@@ -46,5 +46,5 @@ def case3():
             stringy = i
 
         print(stringy) 
-        sleep(0.2)
+        sleep(0.1)
 

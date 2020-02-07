@@ -73,7 +73,7 @@ the CLI (command line interface) class from consoleobject.py:
 ```python
 from consoleobject import CLI
 ```
-then you can either create another module with the nested cases:
+then you can either create another module for the nested cases:
 ```python
 import consolecases2
 

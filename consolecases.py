@@ -1,5 +1,5 @@
 '''
-File containing cases for console interface
+File containing cases for default console interface
 
 Each case should be a function.
 The ordering of the cases in the console interface
@@ -13,6 +13,8 @@ Feel free to import whatever
 '''
 from random import randint
 from time import sleep
+from consoleobject import CLI
+import consolecases2
 
 def case1():
     '''
@@ -30,7 +32,8 @@ def case3():
     '''
     FizzBuzz!
 
-    When you get the urge to fizz your buzz
+    When you get the urge to fizz your buzz 
+    if you know what I mean
     '''
     for i in range(21):
         stringy = ''
@@ -48,3 +51,33 @@ def case3():
         print(stringy) 
         sleep(0.1)
 
+def case4():
+    '''
+    A nested menu 
+
+    This nested menu loads cases from a module
+    '''
+    CLI(consolecases2, title=' So deep ').run()
+
+def case5():
+    '''
+    Another nested menu
+
+    This nested menu gets the cases from a list 
+    '''
+    def innercase1():
+        '''
+        Print smiley
+        '''
+        print(':^)')
+        sleep(0.5)
+
+    def innercase2():
+        '''
+        Print frown
+        '''
+        print(':^(')
+        sleep(0.5)
+
+    CLI(cases=[innercase1, innercase2], title=' Moody ').run()
+    

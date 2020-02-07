@@ -1,4 +1,7 @@
 from inspect import getmembers, isfunction, getmodule
+from types import ModuleType
+from typing import Union
+from collections import Iterable
 
 def __docstring_firstline(func):
     '''Get first line of docstring of func'''
@@ -14,12 +17,27 @@ def print_funcmap(func_map):
     for key, tup in func_map.items():
         print(key + '.', tup[0])  
 
-def construct_funcmap(module, other_cases: list=None, decorator: 'Decorator'=None):
+def __get_module_cases(module):
+    # Get all functions defined in module
+    funcs = getmembers(module, lambda f: True if isfunction(f) and getmodule(f) == module else False) 
+    # getmembers return a tuple with the func names as first element and function object as second
+    # unpack dat shit yo
+    funcs = [f[1] for f in funcs]
+    return funcs
+
+def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, decorator: 'Decorator'=None):
     '''
     Input
     -----
-    module: module containing functions that serves as cases a user can pick from terminal interface.
-    The module should not implement any other functions
+    cases: 
+
+    if given a module: module containing functions that serves as cases a user can pick from terminal interface. 
+    the module should not implement any other functions. 
+    
+    if given a list: will simply use function in list as cases.
+
+    First line of docstring becomes case description
+    ALL CASES MUST CONTAIN DOCSTRINGS
 
     other_cases: optional, list of other additional cases (functions). These functions will simply be appended
     to the end of an already existing list. 
@@ -38,11 +56,12 @@ def construct_funcmap(module, other_cases: list=None, decorator: 'Decorator'=Non
     ('Scrape OSEBX', function object)
 
     '''
-    # Get all functions defined in module
-    funcs = getmembers(module, lambda f: True if isfunction(f) and getmodule(f) == module else False) 
-    # getmembers return a tuple with the func names as first element and function object as second
-    # unpack dat shit yo
-    funcs = [f[1] for f in funcs]
+    if type(cases) == ModuleType:
+        funcs = __get_module_cases(cases)
+    elif type(cases) == list:
+        funcs = cases
+    else:
+        raise TypeError('Unsupported type for cases')
 
     # Append other functions if specified
     if other_cases != None:

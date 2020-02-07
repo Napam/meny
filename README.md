@@ -4,7 +4,7 @@ Simple but sexy framework for console interface
 
 # What to run
 ```
-python .\console.py
+python console.py
 ```
 There are sample functions implemented. 
 

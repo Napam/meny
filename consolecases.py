@@ -39,6 +39,7 @@ from random import randint
 from time import sleep
 from consoleobject import CLI
 import consolecases_example
+from consolecommon import list_local_cases
 
 def case1():
     '''
@@ -82,7 +83,7 @@ def case4():
     '''
     Another nested menu
 
-    This nested menu gets the cases from a list.
+    This nested menu gets the cases from a user defined list.
     '''
     def subcase1():
         '''
@@ -99,4 +100,31 @@ def case4():
         sleep(0.5)
 
     CLI(cases=[subcase1, subcase2], title=' Moody ').run()
-    
+
+def case5():
+    '''
+    Even another nested menu
+
+    This menu obtains the nested case functions by 
+    using list_local_cases.
+    '''
+    def subcase1():
+        '''
+        Print triangle
+        '''
+        # for i in range(10):
+        for j in range(10):
+            print('*' * j)
+
+        sleep(0.5)
+
+    def subcase2():
+        '''
+        Print rectangle
+        '''
+        for i in range(10):
+            print('#' * 10)
+
+        sleep(0.5)
+
+    CLI(cases=list_local_cases(locals()), title=' Shapes ').run()

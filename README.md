@@ -98,6 +98,25 @@ def samplecase():
     CLI([subcase1, subcase2], title= ' Title here ').run()
 ```
 
+or use the list_local_cases function that automatically finds and lists the local functions. The function will sort the local functions alphabetically by function names. 
+Simply give the output from locals() to list_local_cases.
+
+```python
+from consolecommon import list_local_functions
+
+def samplecase():
+    '''Fizz'''
+    def subcase1():
+        '''docstring1'''
+        pass
+
+    def subcase2():
+        '''docstring2'''
+        pass
+
+    CLI(list_local_functions(locals()), title= ' Title here ').run()
+```
+
 ## Optional: Decorator
 The case functions are decorated to enforce a common behavior of all cases. For example that the program should wait a little when exiting a case function. The decorator can be changed in consoledecorator.py
 

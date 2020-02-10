@@ -40,8 +40,15 @@ class CLI:
         '''
         Input
         -----
-        module: module containing functions that serves as cases a user can pick from terminal interface.
-                The module should not implement any other functions
+        cases: 
+
+        if given a module: module containing functions that serves as cases a user can pick from terminal interface. 
+        the module should not implement any other functions. 
+        
+        if given a list: will simply use function in list as cases.
+
+        First line of docstring becomes case description
+        ALL CASES MUST CONTAIN DOCSTRINGS
 
         title: String to print over alternatives 
 
@@ -73,19 +80,19 @@ class CLI:
                 # Get key to func map
                 print()
                 print('Entering blank returns/exits')
-                command = enter_prompt(strings.ENTER_PROMPT)  
+                inputstring = enter_prompt(strings.ENTER_PROMPT)
 
                 # Pressing enter without specifying enables if test
                 clear_screen()
-                if not command:
+                if not inputstring:
                     self.blank_proceedure()
                     continue
 
                 # Obtain case function from funcmap and 
                 # calls said function. Recall that items are 
                 # (description, function), hence the [1]
-                if command in self.funcmap:
-                    self.funcmap[command][1]()
+                if inputstring in self.funcmap:
+                    self.funcmap[inputstring][1]()
                 else:
                     print(strings.INVALID_TERMINAL_INPUT_MSG)
                     sleep(ccng.MSG_WAIT_TIME)

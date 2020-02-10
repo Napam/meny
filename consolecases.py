@@ -35,11 +35,10 @@ def case3():
 
     CLI([subcase1, subcase2], title= ' Title here ').run()
 '''
-from random import randint
 from time import sleep
 from consoleobject import CLI
 import consolecases_example
-from consolecommon import list_local_cases
+from consolecommon import nested_menu
 
 def case1():
     '''
@@ -64,12 +63,18 @@ def case1():
         print(stringy) 
         sleep(0.1)
 
-def case2():
+def case2(a: int=60, b: int=9):
     '''
-    Print a small random integer 
+    Add numbers (two args)
     '''
-    print(randint(0,9))
-    sleep(0.5)
+    def plusser(a, b):
+        return a + b
+
+    print('Input a string: ', end='')
+    string = input()
+    print(string)
+    exit()
+    # sleep(0.5)
 
 def case3():
     '''
@@ -99,7 +104,7 @@ def case4():
         print(':^(')
         sleep(0.5)
 
-    CLI(cases=[subcase1, subcase2], title=' Moody ').run()
+    nested_menu([subcase1, subcase2], title=' Moody ')
 
 def case5():
     '''
@@ -112,7 +117,6 @@ def case5():
         '''
         Print triangle
         '''
-        # for i in range(10):
         for j in range(10):
             print('*' * j)
 
@@ -127,4 +131,4 @@ def case5():
 
         sleep(0.5)
 
-    CLI(cases=list_local_cases(locals()), title=' Shapes ').run()
+    nested_menu(locals(), title=' Shapes ')

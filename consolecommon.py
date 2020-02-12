@@ -5,6 +5,7 @@ import os
 from inspect import isfunction
 from typing import Union, Callable
 from types import ModuleType
+from shlex import shlex
 
 __CLEAR_COMMAND = 'cls' if os.name == 'nt' else 'clear'
 def clear_screen():
@@ -19,6 +20,16 @@ def list_local_cases(locals_):
     '''
     name_func_pairs = sorted(list(locals_.items()), key= lambda x: x[0])
     return [pairs[1] for pairs in name_func_pairs if isfunction(pairs[1])]
+
+def input_splitter(argstring: str):
+    '''
+    Split string
+    '''
+    # Doing it this way instead of using shlex.split will
+    # not remove quote symbols in dicts and lists and whatever 
+    shlexysmexy = shlex(argstring)
+    shlexysmexy.whitespace_split=True
+    return [token for token in shlexysmexy]
 
 def nested_menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
                 blank_proceedure: Union[str, Callable] ='return', 

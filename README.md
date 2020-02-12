@@ -66,6 +66,54 @@ will result with this when running ```python console.py```:
 Entering blank returns/exits
 Input:
 ```
+## Arguments
+The cases can take arguments as well! Simply implement them as functions with type hints:
+````python
+def case1(a: int, b: int):
+    '''Add two integers'''
+    print(a+b)
+
+def case1(a: str, b: str):
+    '''Append two strings'''
+    print(a+b)
+````
+Then simply give the arguments along with the choice:
+````
+-------------- Main menu ---------------
+1. Add two integers
+2. Append two strings
+3. Exit program
+
+Entering blank returns/exits
+Input: 1 60 9
+
+>>> 69
+````
+or if you are giving strings:
+````
+-------------- Main menu ---------------
+1. Add two integers
+2. Append two strings
+3. Exit program
+
+Entering blank returns/exits
+Input: 2 "cat and dog" mathemathics
+
+>>> cat and dogmathemathics
+(note that single token strings don't even need quotes)
+````
+
+The program will read the desired types from the function signature, then it will convert the 
+input into the appropriate types. The only supported types are the built in Python types:
+- str
+- int
+- float
+- tuple
+- list
+- set
+- dict
+
+You can try to use other types as well, but do that on your own risk. 
 
 ## Nested cases
 If you want to implement nested cases, then simply import 
@@ -149,6 +197,3 @@ Without the console I would need to find the right file to run (and maybe commen
 7. Exit
 ```
 I log my rent and power bills in a SQL database. I have made a Python API to manage the database, and I just do everything through the interface. No need to script anything or write any SQL queries.
-
-# WIP
-Argument handling 

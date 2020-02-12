@@ -5,8 +5,9 @@ from time import sleep
 import consolestrings as strings
 import consoleconfig as ccng 
 from funcmap import construct_funcmap, print_funcmap
-from consolecommon import clear_screen
+from consolecommon import clear_screen, input_splitter
 from typing import Union, Callable
+from inspect import getfullargspec, unwrap, signature
 
 def logo_title(title: str):
     '''Prints logo title'''
@@ -30,6 +31,43 @@ def exit_program():
     sleep(ccng.MSG_WAIT_TIME)
     clear_screen()
     exit()
+
+__SPECIAL_ARG_CASES = {
+    str: lambda x: str(x.strip("\"\'")), # Removes outer " or ' characters
+    tuple:eval, 
+    list:eval, 
+    dict:eval,
+    set:eval
+}
+
+def _handle_arglist(func, arglist):
+    '''
+    Handles list of strings that are the arguments 
+    The function turns the strings from the list into 
+    their designated types (found from function signature).
+    '''
+    argsspec = getfullargspec(unwrap(func))
+    args = argsspec.args
+    argtypes = argsspec.annotations
+
+    if len(arglist) > len(args):
+        raise TypeError(f'Got too many arguments, should be {len(args)}, but got {len(arglist)}')
+
+    # Special proceedures for special classes
+    typed_arglist = [] 
+    for arg, type_ in zip(arglist, argtypes.values()):
+        if type_ in __SPECIAL_ARG_CASES:
+            typed_arglist.append(__SPECIAL_ARG_CASES[type_](arg))
+        else:
+            typed_arglist.append(type_(arg))
+
+    return typed_arglist
+
+def _error_info(error, func):
+    print(strings.ERROR_INDICATOR)
+    print(error)
+    print(f'Function signature: {signature(func)}')
+    sleep(ccng.MSG_WAIT_TIME*2)
 
 class CLI:
     '''
@@ -88,11 +126,24 @@ class CLI:
                     self.blank_proceedure()
                     continue
 
+                inputlist = input_splitter(inputstring)
+                case = inputlist.pop(0)
+                
                 # Obtain case function from funcmap and 
                 # calls said function. Recall that items are 
                 # (description, function), hence the [1]
-                if inputstring in self.funcmap:
-                    self.funcmap[inputstring][1]()
+                if case in self.funcmap:
+                    casefunc = self.funcmap[case][1]
+                    try:
+                        if inputlist:
+                            # Raiseses TypeError if wrong number of arguments 
+                            casefunc(*_handle_arglist(casefunc, inputlist))
+                        else:
+                            # Will raise TypeError if casefunc() actually requires arguments
+                            casefunc()
+                    except TypeError as e:
+                        _error_info(e, casefunc)
+
                 else:
                     print(strings.INVALID_TERMINAL_INPUT_MSG)
                     sleep(ccng.MSG_WAIT_TIME)

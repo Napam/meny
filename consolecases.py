@@ -40,14 +40,14 @@ from consoleobject import CLI
 import consolecases_example
 from consolecommon import nested_menu
 
-def case1():
+def case1(n: int=20, waittime: float=0.1):
     '''
     FizzBuzz!
 
     When you get the urge to fizz your buzz 
     if you know what I mean
     '''
-    for i in range(21):
+    for i in range(n+1):
         stringy = ''
 
         fizz = i % 3 == 0 
@@ -61,20 +61,14 @@ def case1():
             stringy = i
 
         print(stringy) 
-        sleep(0.1)
+        sleep(waittime)
 
-def case2(a: int=60, b: int=9):
+def case2(a: str, b: str):
     '''
-    Add numbers (two args)
+    Append two strings
     '''
-    def plusser(a, b):
-        return a + b
-
-    print('Input a string: ', end='')
-    string = input()
-    print(string)
-    exit()
-    # sleep(0.5)
+    print(a+b)
+    sleep(0.5)
 
 def case3():
     '''
@@ -86,25 +80,27 @@ def case3():
 
 def case4():
     '''
-    Another nested menu
+    Math menu
 
     This nested menu gets the cases from a user defined list.
     '''
-    def subcase1():
+    def subcase1(x: float, y: float):
         '''
-        Print smiley
+        Multiply two floats
         '''
-        print(':^)')
+        print(x*y)
         sleep(0.5)
 
-    def subcase2():
+    def subcase2(x: float, y: float):
         '''
-        Print frown
+        Divide two floats
         '''
-        print(':^(')
+        if y == 0:
+            print("You can't divide by zero!!!")
+        print(x/y)
         sleep(0.5)
 
-    nested_menu([subcase1, subcase2], title=' Moody ')
+    nested_menu([subcase1, subcase2], title=' Quick maths ')
 
 def case5():
     '''

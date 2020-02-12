@@ -99,7 +99,6 @@ Input: 2 "cat and dog" mathemathics
 cat and dogmathemathics
 (note that single token strings don't even need quotes)
 ````
-or a list:
 ````
 Input: 3 ['cat',69,420.0]
 

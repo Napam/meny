@@ -64,7 +64,7 @@ will result with this when running ```python console.py```:
 3. Exit program
 
 Entering blank returns/exits
-Enter choice:
+Input:
 ```
 
 ## Nested cases

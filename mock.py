@@ -14,15 +14,11 @@ def wrappy(func):
     return wrap
 
 @wrappy
-def a(lol: str, x: int, y: int, z: float = 2, w: list = [1,2]):
+def a(lol: str, x: int, y: float, z: list, i: dict, j: tuple):
     print(locals())
 
 
-input_string = '"cat and dog" 1 2 3 [1,2,3,4]'
-
-# b = inspect.getfullargspec(inspect.unwrap(a))
-# print(b)
-# args = b.args
+input_string = '"cat and dog" 1 2 [1,2,3] \{1:1,2:2\} (1,2,3)'
 
 # Enforce type hints
 
@@ -36,7 +32,9 @@ def handle_string_of_args(func, argstring):
 
     special_cases = {tuple:eval, list:eval, dict:eval}
 
-    # TODO: Handle list of strings
+    print(split(argstring))
+
+    # TODO: Handle lists, tuples, dicts of strings
     arglist = [] 
     for arg, type_ in zip(split(argstring), argtypes.values()):
         if type_ in special_cases:
@@ -50,6 +48,4 @@ def handle_string_of_args(func, argstring):
 
 handle_string_of_args(a, input_string)
 
-# print(split(str("1 2 3 'a b c'")))
-# print(split(input(), posix=False))
 

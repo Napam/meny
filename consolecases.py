@@ -82,7 +82,7 @@ def case3():
 
     This nested menu loads cases from a module
     '''
-    CLI(cases=consolecases_example, title=' Money menu ').run()
+    nested_menu(consolecases_example, title=' Moody ')
 
 def case4():
     '''

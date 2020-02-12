@@ -69,9 +69,9 @@ Enter choice:
 
 ## Nested cases
 If you want to implement nested cases, then simply import 
-the CLI (command line interface) class from consoleobject.py:
+the nested_menu from consolecommon.py.
 ```python
-from consoleobject import CLI
+from consolecommon import nested_menu
 ```
 then you can either create another module for the nested cases:
 ```python
@@ -79,7 +79,7 @@ import other_cases
 
 def samplecase():
     '''Foo'''
-    CLI(other_cases, title= ' Title here ').run()
+    nested_menu(other_cases, title= ' Title here ')
 ```
 
 or you can give a list of functions:
@@ -95,11 +95,9 @@ def samplecase():
         '''docstring2'''
         pass
 
-    CLI([subcase1, subcase2], title= ' Title here ').run()
+    nested_menu([subcase1, subcase2], title= ' Title here ')
 ```
-
-or use the list_local_cases function that automatically finds and lists the local functions. The function will sort the local functions alphabetically by function names. 
-Simply give the output from locals() to list_local_cases.
+Or simply give the output from locals() (which is a dictionary of local elements) to nested_menu()
 
 ```python
 from consolecommon import list_local_functions
@@ -114,7 +112,7 @@ def samplecase():
         '''docstring2'''
         pass
 
-    CLI(list_local_functions(locals()), title= ' Title here ').run()
+    nested_menu(locals(), title= ' Title here ')
 ```
 
 ## Optional: Decorator
@@ -151,3 +149,6 @@ Without the console I would need to find the right file to run (and maybe commen
 7. Exit
 ```
 I log my rent and power bills in a SQL database. I have made a Python API to manage the database, and I just do everything through the interface. No need to script anything or write any SQL queries.
+
+# WIP
+Argument handling 

@@ -5,12 +5,12 @@ from random import randint
 from time import sleep
 from tqdm import tqdm
 
-def case1():
+def case1(a: list):
     '''
-    Print a large random integer 
+    Print elements in list and their types
     '''
-    print(randint(1e3, 1e9))
-    sleep(0.5)
+    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem in enumerate(a)]
+    sleep(1)
 
 def case2():
     '''

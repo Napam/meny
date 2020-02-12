@@ -76,6 +76,10 @@ def case1(a: int, b: int):
 def case1(a: str, b: str):
     '''Append two strings'''
     print(a+b)
+
+def case3(a: list):
+    '''Print elements in list and their types'''
+    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem in enumerate(a)]
 ````
 Then simply give the arguments along with the choice:
 ````
@@ -87,24 +91,26 @@ Then simply give the arguments along with the choice:
 Entering blank returns/exits
 Input: 1 60 9
 
->>> 69
+69
 ````
-or if you are giving strings:
 ````
--------------- Main menu ---------------
-1. Add two integers
-2. Append two strings
-3. Exit program
-
-Entering blank returns/exits
 Input: 2 "cat and dog" mathemathics
 
->>> cat and dogmathemathics
+cat and dogmathemathics
 (note that single token strings don't even need quotes)
 ````
+or a list:
+````
+Input: 3 ['cat',69,420.0]
 
-The program will read the desired types from the function signature, then it will convert the 
-input into the appropriate types. The only supported types are the built in Python types:
+Element 0: cat, type: <class 'str'>    
+Element 1: 69, type: <class 'int'>     
+Element 2: 420.0, type: <class 'float'>
+
+Note: You cannot have any spaces when giving lists, tuples, dicts and such as the input parser will break them. 
+````
+
+The program will read the desired types from the function signature, then it will convert the input into the appropriate types. The only supported types are the built in Python types:
 - str
 - int
 - float

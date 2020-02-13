@@ -107,7 +107,7 @@ def case5():
     Even another nested menu
 
     This menu obtains the nested case functions by 
-    using list_local_cases.
+    sending the return value of locals() into nested_menu()
     '''
     def subcase1():
         '''

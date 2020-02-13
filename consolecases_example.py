@@ -3,7 +3,6 @@ Example module for nested cases
 '''
 from random import randint
 from time import sleep
-from tqdm import tqdm
 
 def case1(a: list):
     '''
@@ -16,6 +15,5 @@ def case2():
     '''
     Get money
     '''
-    print('Getting fat stacks:')
-    for i in tqdm(range(100)):
-        sleep(0.01)
+    print('$$$$$$')
+    sleep(0.5)

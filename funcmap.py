@@ -3,7 +3,7 @@ from types import ModuleType
 from typing import Union
 from collections import Iterable
 
-def __docstring_firstline(func):
+def _docstring_firstline(func):
     '''Get first line of docstring of func'''
     return func.__doc__.strip().split('\n')[0]
 
@@ -70,9 +70,9 @@ def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, de
 
     if decorator != None:
         for i, func in enumerate(funcs, start=1):
-            func_map[str(i)] = (__docstring_firstline(func), decorator(func))
+            func_map[str(i)] = (_docstring_firstline(func), decorator(func))
     else:
         for i, func in enumerate(funcs, start=1):
-            func_map[str(i)] = (__docstring_firstline(func), func)
+            func_map[str(i)] = (_docstring_firstline(func), func)
 
     return func_map

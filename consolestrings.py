@@ -13,8 +13,11 @@ END = '\033[0m'
 START_MSG = 'Starting console interface'
 LOGO_TITLE = ' Main menu '
 
+
 ENTER_PROMPT = 'Input'
 
 EXIT_MSG = 'Exiting program'
 INVALID_TERMINAL_INPUT_MSG = 'Invalid input'
 ERROR_INDICATOR = BOLD + RED + f"{' ERROR ':#^40}" + END
+INPUT_BLANK_HINT = 'Entering blank returns/exits'
+INPUT_WAIT_PROMPT_MSG = 'Press enter to continue'

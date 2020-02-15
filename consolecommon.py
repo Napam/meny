@@ -65,7 +65,7 @@ def nested_menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
         raise TypeError('Invalid type')
 
     # TODO: Think over import cycle
-    from consoleobject import CLI
+    from consoleclass import CLI
 
     CLIobject = CLI(cases=cases_to_send, title=title, blank_proceedure=blank_proceedure, 
                     decorator=decorator)

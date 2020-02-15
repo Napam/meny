@@ -55,7 +55,7 @@ def case2():
     sleep(0.5)
 ```
 
-will result with this when running ```python console.py```:
+will result with this when running: ```python console.py```:
 
 ```
 -------------- Main menu ---------------
@@ -86,7 +86,8 @@ Then simply give the arguments along with the choice:
 -------------- Main menu ---------------
 1. Add two integers
 2. Append two strings
-3. Exit program
+3. Print elements in list and their types
+4. Exit program
 
 Entering blank returns/exits
 Input: 1 60 9

@@ -4,7 +4,7 @@ Run this file to run console
 if __name__ == '__main__':
     import consolecases
     import consoleconfig as ccng
-    from consoleobject import CLI
+    from consoleclass import CLI
     import consolestrings as strings
 
     if ccng.DEFAULT_DECORATE:

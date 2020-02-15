@@ -36,7 +36,6 @@ def case3():
     CLI([subcase1, subcase2], title= ' Title here ').run()
 '''
 from time import sleep
-from consoleobject import CLI
 import consolecases_example
 from consolecommon import nested_menu
 
@@ -76,7 +75,7 @@ def case3():
 
     This nested menu loads cases from a module
     '''
-    nested_menu(consolecases_example, title=' Moody ')
+    nested_menu(consolecases_example, title=' Nested! ')
 
 def case4():
     '''
@@ -97,6 +96,9 @@ def case4():
         '''
         if y == 0:
             print("You can't divide by zero!!!")
+            sleep(0.5)
+            return 
+
         print(x/y)
         sleep(0.5)
 

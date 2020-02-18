@@ -1,6 +1,7 @@
 '''
 Example module for nested cases 
 '''
+from time import sleep
 
 def case1(a: list):
     '''

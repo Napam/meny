@@ -1,13 +1,20 @@
+'''
+This module primarily conatins a the construct_funcmap
+function. The function constructs the dictionary that contains 
+the console cases. The dictionary keys consists of a range of integers
+and the values are the cases (which are functions). 
+'''
+
 from inspect import getmembers, isfunction, getmodule
 from types import ModuleType
-from typing import Union
+from typing import Union, Callable
 from collections import Iterable
 
-def _docstring_firstline(func):
+def _docstring_firstline(func: Callable):
     '''Get first line of docstring of func'''
     return func.__doc__.strip().split('\n')[0]
 
-def print_funcmap(func_map):
+def print_funcmap(func_map: dict):
     '''
     Prints a func_map dictionary
 
@@ -19,40 +26,44 @@ def print_funcmap(func_map):
 
 def __get_module_cases(module):
     # Get all functions defined in module
-    funcs = getmembers(module, lambda f: True if isfunction(f) and getmodule(f) == module else False) 
-    # getmembers return a tuple with the func names as first element and function object as second
+    f_ = lambda f: True if isfunction(f) and getmodule(f) == module else False
+    funcs = getmembers(module, f_) 
+    # getmembers returns a tuple with the func names as first element 
+    # and function object as second
+
     # unpack dat shit yo
     funcs = [f[1] for f in funcs]
     return funcs
 
-def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, decorator: 'Decorator'=None):
+def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, 
+                      decorator: Callable=None):
     '''
-    Input
-    -----
-    cases: 
-
-    if given a module: module containing functions that serves as cases a user can pick from terminal interface. 
-    the module should not implement any other functions. 
+    Parameters
+    ------------
+    cases: if given a module: module containing functions that serves as 
+           cases a user can pick from terminal interface. the module should
+           not implement any other functions. 
     
-    if given a list: will simply use function in list as cases.
+           if given a list: will simply use function in list as cases.
 
-    First line of docstring becomes case description
-    ALL CASES MUST CONTAIN DOCSTRINGS
+           First line of docstring becomes case description
+           ALL CASES MUST CONTAIN DOCSTRINGS
 
-    other_cases: optional, list of other additional cases (functions). These functions will simply be appended
-    to the end of an already existing list. 
+    other_cases: optional, list of other additional cases (functions).
+                 These functions will simply be appended to the end of 
+                 an already existing list. 
+
+                 IMPORTANT: All case functions must have docstrings 
 
     decorator: optional, a decorator to decorate all case functions 
 
-    IMPORTANT: All case functions must have docstrings 
-
     Returns
-    -------
+    --------
     Returns dictionary to be used in console interface
 
     Keys of dictionary are enumeration 1, 2, 3 ... for interface.
-    Each item is a tuple with first element as description of case, second element
-    is the function itself:
+    Each item is a tuple with first element as description of case, 
+    second element is the function itself:
     ('Scrape OSEBX', function object)
     '''
     if type(cases) == ModuleType:
@@ -60,15 +71,15 @@ def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, de
     elif type(cases) == list:
         funcs = cases
     else:
-        raise TypeError('Unsupported type for cases')
+        raise TypeError('Unsupported type for cases container')
 
     # Append other functions if specified
-    if other_cases != None:
+    if other_cases is not None:
         funcs = funcs + other_cases
 
     func_map = {}
 
-    if decorator != None:
+    if decorator is not None:
         for i, func in enumerate(funcs, start=1):
             func_map[str(i)] = (_docstring_firstline(func), decorator(func))
     else:

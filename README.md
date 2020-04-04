@@ -123,9 +123,9 @@ You can try to use other types as well, but do that on your own risk.
 
 ## Nested cases
 If you want to implement nested cases, then simply import 
-the nested_menu from consolecommon.py.
+the menu from consolecommon.py.
 ```python
-from consolecommon import nested_menu
+from consolecommon import menu
 ```
 then you can either create another module for the nested cases:
 ```python
@@ -133,7 +133,7 @@ import other_cases
 
 def samplecase():
     '''Foo'''
-    nested_menu(other_cases, title= ' Title here ')
+    menu(other_cases, title= ' Title here ')
 ```
 
 or you can give a list of functions:
@@ -149,9 +149,9 @@ def samplecase():
         '''docstring2'''
         pass
 
-    nested_menu([subcase1, subcase2], title= ' Title here ')
+    menu([subcase1, subcase2], title= ' Title here ')
 ```
-Or simply give the output from locals() (which is a dictionary of local elements) to nested_menu()
+Or simply give the output from locals() (which is a dictionary of local elements) to menu()
 
 ```python
 from consolecommon import list_local_functions
@@ -166,7 +166,7 @@ def samplecase():
         '''docstring2'''
         pass
 
-    nested_menu(locals(), title= ' Title here ')
+    menu(locals(), title= ' Title here ')
 ```
 
 ## Optional: Decorator

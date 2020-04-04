@@ -24,7 +24,7 @@ def enter_prompt(msg: str=strings.ENTER_PROMPT):
     print(msg, end=': ')
     return input()
 
-def exit_program():
+def exit_program(*args, **kwargs):
     '''
     Exit program
     '''
@@ -77,15 +77,17 @@ class CLI:
     '''
     Command Line Interface class 
     '''
-    def __init__(self, cases, title: str=strings.LOGO_TITLE, blank_proceedure: Union[str, Callable]='return', 
-                decorator: Callable=None):
+    def __init__(self, cases, title: str=strings.LOGO_TITLE, 
+                 blank_proceedure: Union[str, Callable]='return', 
+                 decorator: Callable=None):
         '''
         Input
         -----
         cases: 
 
-        if given a module: module containing functions that serves as cases a user can pick from terminal interface. 
-        the module should not implement any other functions. 
+        if given a module: module containing functions that serves as cases a 
+        user can pick from terminal interface. the module should not implement
+        any other functions. 
         
         if given a list: will simply use function in list as cases.
 
@@ -94,20 +96,44 @@ class CLI:
 
         title: String to print over alternatives 
 
-        blank_proceedure: What to do when given blank input (defaults to stopping current view (without exiting))
+        blank_proceedure: What to do when given blank input (defaults to 
+                          stopping current view (without exiting))
         '''
-        self.funcmap = construct_funcmap(cases, [exit_program], decorator)
+        self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
 
         if blank_proceedure == 'return':
             self.blank_proceedure = self.__return_to_parent
+        elif blank_proceedure is 'pass':
+            self.blank_proceedure = self.__pass
         elif blank_proceedure == 'exit':
             self.blank_proceedure = exit_program
         else:
             self.blank_proceedure = blank_proceedure
 
+        # Special options
+        self.special_cases = {
+            '..':self.__return_to_parent,
+            'q':exit_program
+        }
+
     def __return_to_parent(self):
         self.active = False
+    
+    def __pass(self):
+        pass
+
+    def _handle_case(self, casefunc, inputlist):
+        try:
+            if inputlist:
+                # Raises TypeError if wrong number of arguments 
+                casefunc(*_handle_arglist(casefunc, inputlist))
+            else:
+                # Will raise TypeError if casefunc() actually 
+                # requires arguments
+                casefunc()
+        except TypeError as e:
+            _error_info(e, casefunc)
 
     def run(self):
         '''
@@ -130,24 +156,22 @@ class CLI:
                     self.blank_proceedure()
                     continue
 
+                # Tokenize input
                 inputlist = input_splitter(inputstring)
+                # Get case
                 case = inputlist.pop(0)
-                
-                # Obtain case function from funcmap and 
-                # calls said function. Recall that items are 
-                # (description, function), hence the [1]
-                if case in self.funcmap:
-                    casefunc = self.funcmap[case][1]
-                    try:
-                        if inputlist:
-                            # Raises TypeError if wrong number of arguments 
-                            casefunc(*_handle_arglist(casefunc, inputlist))
-                        else:
-                            # Will raise TypeError if casefunc() actually requires arguments
-                            casefunc()
-                    except TypeError as e:
-                        _error_info(e, casefunc)
 
+                if case in self.funcmap:
+                    # Obtain case function from funcmap and 
+                    # calls said function. Recall that items are 
+                    # (description, function), hence the [1]
+                    casefunc = self.funcmap[case][1]
+                    self._handle_case(casefunc, inputlist)
+                elif case in self.special_cases:
+                    # Items in special_cases are not tuples, but the 
+                    # actual functions, so no need to do [1]
+                    casefunc = self.special_cases[case]
+                    self._handle_case(casefunc, inputlist)
                 else:
                     print(strings.INVALID_TERMINAL_INPUT_MSG)
                     sleep(ccng.MSG_WAIT_TIME)

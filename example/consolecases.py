@@ -35,9 +35,14 @@ def case3():
 
     CLI([subcase1, subcase2], title= ' Title here ').run()
 '''
+
+# To enable import from parent folder
+import sys 
+sys.path.append('..')
+
 from time import sleep
-import consolecases_example
-from consolecommon import nested_menu
+import consolecases_nested
+from consolecommon import menu
 
 def case1(n: int=20, waittime: float=0.1):
     '''
@@ -75,7 +80,7 @@ def case3():
 
     This nested menu loads cases from a module
     '''
-    nested_menu(consolecases_example, title=' Nested! ')
+    menu(consolecases_nested, title=' Nested! ')
 
 def case4():
     '''
@@ -102,14 +107,14 @@ def case4():
         print(x/y)
         sleep(0.5)
 
-    nested_menu([subcase1, subcase2], title=' Quick maths ')
+    menu([subcase1, subcase2], title=' Quick maths ')
 
 def case5():
     '''
     Even another nested menu
 
     This menu obtains the nested case functions by 
-    sending the return value of locals() into nested_menu()
+    sending the return value of locals() into menu()
     '''
     def subcase1():
         '''
@@ -129,4 +134,7 @@ def case5():
 
         sleep(0.5)
 
-    nested_menu(locals(), title=' Shapes ')
+    menu(locals(), title=' Shapes ')
+
+if __name__ == '__main__':
+    menu(locals(), main=True, blank_proceedure='pass')

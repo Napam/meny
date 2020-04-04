@@ -14,7 +14,9 @@ def clear_screen():
 
 def list_local_cases(locals_: dict, main: bool=False):
     '''
-    Input: is the return value of locals()
+    Parameters
+    -------------
+    locals_: return value of locals()
     
     Returns a list of functions sorted alphabetically by function names. 
     '''
@@ -31,27 +33,28 @@ def input_splitter(argstring: str):
     shlexysmexy.whitespace_split=True
     return [token for token in shlexysmexy]
 
-def nested_menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
-                blank_proceedure: Union[str, Callable] ='return', 
-                decorator=None, run: bool=True):
+def menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
+                blank_proceedure: Union[str, Callable]='return', 
+                decorator: Callable=None, run: bool=True, main: bool=False):
     '''
-    For conveinience when creating nested menus. Simply give the required argument, then the
-    function will initialize another menu. The menu structure will follow the same paradigm 
-    as for any other cases. 
+    For convenience when creating nested menus. Simply give the required 
+    arguments, then the function will initialize another menu. The menu 
+    structure will follow the same paradigm as for any other cases. 
 
-    Input
+    Parameters
     ------
     cases: should be locals() from where this function is called
 
     title: title of menu
 
-    blank_proceedure: blank_proceedure: What to do when given blank input (defaults to stopping current view (without exiting))
+    blank_proceedure: blank_proceedure: What to do when given blank input 
+                      (defaults to stopping current view (without exiting))
 
     decorator: Whether to decorate functions
 
     run: To run menu instantly or not
 
-    Return:
+    Returns
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu. 
     '''
@@ -59,6 +62,14 @@ def nested_menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
         cases_to_send = cases
     elif type(cases) == dict:
         cases_to_send = list_local_cases(cases)
+        # If this menu is the first menu initialized, and is given the locally
+        # defined functions, then must filter the functions that are defined 
+        # in __main__
+        if main:
+            cases_to_send =\
+                [c for c in cases_to_send if c.__module__ == '__main__']
+            blank_proceedure='pass'
+
     elif type(cases) == ModuleType:
         cases_to_send = cases
     else:
@@ -67,8 +78,8 @@ def nested_menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
     # TODO: Think over import cycle
     from consoleclass import CLI
 
-    CLIobject = CLI(cases=cases_to_send, title=title, blank_proceedure=blank_proceedure, 
-                    decorator=decorator)
+    CLIobject = CLI(cases=cases_to_send, title=title, 
+                    blank_proceedure=blank_proceedure, decorator=decorator)
     if run:
         CLIobject.run()
     

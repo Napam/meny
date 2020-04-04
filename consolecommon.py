@@ -12,13 +12,13 @@ def clear_screen():
     '''Obvious'''
     os.system(__CLEAR_COMMAND)
 
-def list_local_cases(locals_):
+def list_local_cases(locals_: dict, main: bool=False):
     '''
     Input: is the return value of locals()
     
     Returns a list of functions sorted alphabetically by function names. 
     '''
-    name_func_pairs = sorted(list(locals_.items()), key= lambda x: x[0])
+    name_func_pairs = sorted(list(locals_.items()), key=lambda x: x[0])
     return [pairs[1] for pairs in name_func_pairs if isfunction(pairs[1])]
 
 def input_splitter(argstring: str):

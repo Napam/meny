@@ -220,6 +220,10 @@ def menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
 
     run: To invoke .run() method on CLI object or not.
 
+    main: Tells the function whether or not the menu is the main menu (i.e. the 
+          first menu) or not. This is very import to specify when you give a 
+          dictionary (e.g. the return value of locals()).
+
     Returns
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu. 

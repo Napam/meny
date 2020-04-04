@@ -1,5 +1,5 @@
 # PyPat-Console
-A simple and sexy way to make an console interface 
+A simple and sexy way to make an console interface
 
 # How to setup
 First install the package with the command (make sure you have Python 3.6 or higher)
@@ -14,28 +14,28 @@ Simply implement the cases (as functions) in a Python file, then to initialize t
 from pypatconsole import menu
 
             .
-            . 
+            .
             .
 
 menu(locals(), title=' Main menu title here ', main=True)
 ```
-You can import whatever modules, classes and functions you want in there without them interfering with the functions defined your file. You will need to implement docstrings to every case. The first line of text in the docstring will be used as the description in the console interface. 
+You can import whatever modules, classes and functions you want in the file without them interfering with the functions defined your file. You will need to implement docstrings to every case. The first line of text in the docstring will be used as the description in the console interface.
 
-The order of the cases is alphabetically sorted by the function name. 
+The order of the cases is alphabetically sorted by the function name.
 
-The function signature along with its docstring is as follows:
+The function signature of ``menu`` along with its docstring is as follows:
 ```python
-def menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
-                blank_proceedure: Union[str, Callable]='return', 
+def menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
+                blank_proceedure: Union[str, Callable]='return',
                 decorator: Callable=None, run: bool=True, main: bool=False):
     '''
-    Factory function for the CLI class. This function initializes a menu. 
+    Factory function for the CLI class. This function initializes a menu.
 
     Parameters
     ------------
-    cases: Can be output of locals() (a dictionary) from the scope of the cases 
-           
-           Or a list functions 
+    cases: Can be output of locals() (a dictionary) from the scope of the cases
+
+           Or a list functions
 
            Or a module containing the case functions
 
@@ -44,11 +44,11 @@ def menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
     blank_proceedure: What to do the when given blank input. Can be user defined
                       function, or it can be a string. Available string options
                       are:
-                      
+
                       'return', will return to parent menu, if you are at main
                       menu, this will exit the program
 
-                      'pass', does nothing. This should only be used for the 
+                      'pass', does nothing. This should only be used for the
                       main menu
 
                       'exit', exits the program
@@ -59,9 +59,9 @@ def menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
 
     Returns
     --------
-    CLI (Command Line Interface) object. Use .run() method to activate menu. 
+    CLI (Command Line Interface) object. Use .run() method to activate menu.
     '''
-```      
+```
 
 ### Examples
 
@@ -75,15 +75,15 @@ def case1():
     '''
     FizzBuzz!
 
-    When you get the urge to fizz your buzz 
+    When you get the urge to fizz your buzz
     if you know what I mean
     '''
     for i in range(21):
         stringy = ''
 
-        fizz = i % 3 == 0 
-        buzz = i % 5 == 0 
-        
+        fizz = i % 3 == 0
+        buzz = i % 5 == 0
+
         if fizz:
             stringy = stringy + 'Fizz'
         if buzz:
@@ -91,12 +91,12 @@ def case1():
         if not (fizz or buzz):
             stringy = i
 
-        print(stringy) 
+        print(stringy)
         sleep(0.1)
 
 def case2():
     '''
-    Print a small random integer 
+    Print a small random integer
     '''
     print(randint(0,9))
     sleep(0.5)
@@ -114,7 +114,7 @@ will result with this when running: ```python console.py```:
 Input:
 ```
 ## Special cases
-Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program as well
+Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program.
 
 Entering ``q`` will exit the program (of course Ctrl+C works as well)
 
@@ -135,7 +135,7 @@ def case1(a: str, b: str):
 
 def case3(a: list):
     '''Print elements in list and their types'''
-    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem 
+    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem
                                                         in enumerate(a)]
 
 menu(locals(), title=' Main menu ', main=True)
@@ -162,11 +162,11 @@ Note: Single token strings don't even need quotes
 ````
 Input: 3 ['cat',69,420.0]
 
-Element 0: cat, type: <class 'str'>    
-Element 1: 69, type: <class 'int'>     
+Element 0: cat, type: <class 'str'>
+Element 1: 69, type: <class 'int'>
 Element 2: 420.0, type: <class 'float'>
 
-Note: You cannot have any spaces when giving lists, tuples, dicts and such as the input parser will break them. 
+Note: You cannot have any spaces when giving lists, tuples, dicts and such as the input parser will break them.
 ````
 
 The program will read the desired types from the function signature, then it will convert the input into the appropriate types. The only supported types are the built in Python types:
@@ -195,7 +195,7 @@ def parentcase1():
         pass
 
     menu(locals(), title= ' Title here ')
-menu(locals(), title=' Main menu ')
+menu(locals(), title=' Main menu ', main=True)
 ```
 You can create another module for the other cases and pass them as well:
 ```python
@@ -246,7 +246,7 @@ def case_decorator(func):
         sleep(1)
         return retobj
 
-    # "Inherits" docstring, not really necessary but kinda nice 
+    # "Inherits" docstring, not really necessary but kinda nice
     case_wrapper.__doc__ = func.__doc__
     # This is necessary in order to unwrap using inspect module
     case_wrapper.__wrapped__ = func
@@ -257,13 +257,13 @@ Since the decorator is a function, you cannot have it in the same namespace as t
 from pypatconsole import menu
 from case_decorator import case_decorator
 
-# A lot of cases here 
+# A lot of cases here
 
-menu(locals(), decorator=case_decorator)
+menu(locals(), decorator=case_decorator, main=True)
 ```
 
 # Why
-Sometimes you want to have a simple console interface so you can do things step by step. 
+Sometimes you want to have a simple console interface so you can do things step by step.
 Here are some applications:
 
 ## Stock data pipeline
@@ -276,10 +276,10 @@ Data scraping and data cleaning pipeline for stock data
 4. Scrape Yahoo Finance
 5. Backup current data
 6. Exit program
-Enter choice: 
+Enter choice:
 ```
-Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. PyPat-Console will enable a very quick implementation of a console. 
-Without the console I would need to find the right file to run (and maybe comment things out first as well). The console organizes everything into one place. 
+Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. PyPat-Console will enable a very quick implementation of a console.
+Without the console I would need to find the right file to run (and maybe comment things out first as well). The console organizes everything into one place.
 
 ## Database interface
 ```
@@ -293,3 +293,17 @@ Without the console I would need to find the right file to run (and maybe commen
 7. Exit
 ```
 I log my rent and power bills in a SQL database. I have made a Python API to manage the database, and I just do everything through the interface. No need to script anything or write any SQL queries.
+
+## Control your Google Compute VM
+```
+----------------GCE-----------------                                                                      1. SSH to personal instance
+2. SSH to project instance
+3. start/stop personal instance (0 to stop, 1 to start, 2 to restart)
+4. start/stop project instance (0 to stop, 1 to start, 2 to restart)
+5. Get status personal instance
+6. Get status project instance
+7. Other instance control      
+
+Entering blank returns to parent menu
+Input:
+```

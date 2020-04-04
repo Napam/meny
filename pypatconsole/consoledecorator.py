@@ -1,3 +1,7 @@
+'''
+Not used in current version
+'''
+
 from time import sleep
 import consoleconfig as ccng
 

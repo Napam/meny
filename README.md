@@ -229,7 +229,7 @@ menu(locals(), title=' Main menu ')
 Of what I can think of: you can either define your functions in another python file and import that, or you can create a class (in the same file as the case functions) that consists of your functions as static methods.
 
 ## Optional: Decorator
-To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the ``menu`` function. However, it is important that the decorator implemets ``__wrapped__`` attribute. Generally, it should look like this
+To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the ``menu`` function. However, it is important that the decorator  implements the ``__wrapped__`` attribute (this is to handle docstrings of wrappers as arguments for wrapped functions). Generally, it should look like this
 
 ```python
 import sleep
@@ -245,9 +245,6 @@ def case_decorator(func):
         print('Woah! Going out!')
         sleep(1)
         return retobj
-
-    # "Inherits" docstring, not really necessary but kinda nice
-    case_wrapper.__doc__ = func.__doc__
     # This is necessary in order to unwrap using inspect module
     case_wrapper.__wrapped__ = func
     return case_wrapper
@@ -296,7 +293,8 @@ I log my rent and power bills in a SQL database. I have made a Python API to man
 
 ## Control your Google Compute VM
 ```
-----------------GCE-----------------                                                                      1. SSH to personal instance
+----------------GCE-----------------                                                                      
+1. SSH to personal instance
 2. SSH to project instance
 3. start/stop personal instance (0 to stop, 1 to start, 2 to restart)
 4. start/stop project instance (0 to stop, 1 to start, 2 to restart)

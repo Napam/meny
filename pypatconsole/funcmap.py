@@ -5,13 +5,17 @@ the console cases. The dictionary keys consists of a range of integers
 and the values are the cases (which are functions). 
 '''
 
-from inspect import getmembers, isfunction, getmodule
+from inspect import getmembers, isfunction, getmodule, unwrap
 from types import ModuleType
 from typing import Union, Callable
 from collections import Iterable
 
 def _docstring_firstline(func: Callable):
     '''Get first line of docstring of func'''
+    # Unwrap in case the function is wrapped
+    func = unwrap(func)
+    if func.__doc__ is None:
+        raise NotImplementedError(f'Missing docstring in function {func}')
     return func.__doc__.strip().split('\n')[0]
 
 def print_funcmap(func_map: dict):

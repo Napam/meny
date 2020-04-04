@@ -51,12 +51,17 @@ def _handle_arglist(func, arglist):
     The function turns the strings from the list into 
     their designated types (found from function signature).
     '''
-    argsspec = getfullargspec(unwrap(func))
+    # Unwrap in case the function is wrapped
+    func = unwrap(func)
+    argsspec = getfullargspec(func)
     args = argsspec.args
     argtypes = argsspec.annotations
 
+    if len(args) > len(argtypes):
+        raise NotImplementedError(f'Missing typehints in {unwrap(func)}')
+
     if len(arglist) > len(args):
-        raise TypeError(f'Got too many arguments, should be {len(args)}, but got {len(arglist)}')
+        raise ValueError(f'Got too many arguments, should be {len(args)}, but got {len(arglist)}')
 
     # Special proceedures for special classes
     typed_arglist = [] 

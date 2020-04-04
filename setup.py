@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pypatconsole", 
-    version="0.0.1",
+    version="0.0.2",
     author="Naphat Amundsen",
     author_email="naphat@live.com",
-    description="Easy to use console interface",
+    description="Simple and sexy console interface",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Laohachot/PyPat-Console",

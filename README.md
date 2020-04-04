@@ -6,7 +6,7 @@ First install the package with the command (make sure you have Python 3.6 or hig
 ```
 pip install pypatconsole
 ```
-Then you can import ``pypatconsole`` in Python. 
+Then you can import ``pypatconsole`` in Python. The package lets you import two functions: ``menu`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``clear_screen`` clears your screen, so hence the name.
 
 # How to implement
 Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the ``menu`` function at the bottom
@@ -225,6 +225,8 @@ def parentcase1():
     menu([subcase2, subcase1], title= ' Title here ')
 menu(locals(), title=' Main menu ')
 ```
+## What if want to define functions without having them displayed in the menu?
+Of what I can think of: you can either define your functions in another python file and import that, or you can create a class (in the same file as the case functions) that consists of your functions as static methods.
 
 ## Optional: Decorator
 To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the ``menu`` function. However, it is important that the decorator implemets ``__wrapped__`` attribute. Generally, it should look like this

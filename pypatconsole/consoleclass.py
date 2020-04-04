@@ -1,14 +1,18 @@
 '''
-Contains the command line interface (CLI) class. 
+Contains the command line interface (CLI) class, along its factory function:
+menu()
 '''
 
 from time import sleep
-import consolestrings as strings
-import consoleconfig as ccng 
-from funcmap import construct_funcmap, print_funcmap, _docstring_firstline
-from consolecommon import clear_screen, input_splitter
+import pypatconsole.consolestrings as strings
+import pypatconsole.consoleconfig as ccng 
+from pypatconsole.funcmap import (construct_funcmap, print_funcmap, 
+                                 _docstring_firstline)
+from pypatconsole.consolecommon import (clear_screen, input_splitter, 
+                                        list_local_cases, print_help)
 from typing import Union, Callable
 from inspect import getfullargspec, unwrap, signature
+from types import ModuleType
 
 def logo_title(title: str):
     '''Prints logo title'''
@@ -103,10 +107,13 @@ class CLI:
         self.title = title
 
         if blank_proceedure == 'return':
+            self.blank_hint = strings.INPUT_BLANK_HINT_RETURN
             self.blank_proceedure = self.__return_to_parent
         elif blank_proceedure is 'pass':
+            self.blank_hint = strings.INPUT_BLANK_HINT_PASS
             self.blank_proceedure = self.__pass
         elif blank_proceedure == 'exit':
+            self.blank_hint = strings.INPUT_BLANK_EXIT
             self.blank_proceedure = exit_program
         else:
             self.blank_proceedure = blank_proceedure
@@ -114,7 +121,8 @@ class CLI:
         # Special options
         self.special_cases = {
             '..':self.__return_to_parent,
-            'q':exit_program
+            'q':exit_program,
+            'h':print_help
         }
 
     def __return_to_parent(self):
@@ -147,7 +155,7 @@ class CLI:
 
                 # Get key to func map
                 print()
-                print(strings.INPUT_BLANK_HINT)
+                print(self.blank_hint)
                 inputstring = enter_prompt(strings.ENTER_PROMPT)
 
                 # Pressing enter without specifying enables if test
@@ -180,3 +188,62 @@ class CLI:
             # Ensures proper exit when Kbinterrupt
             exit_program()
     
+def menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
+                blank_proceedure: Union[str, Callable]='return', 
+                decorator: Callable=None, run: bool=True, main: bool=False):
+    '''
+    Factory function for the CLI class. This function initializes a menu. 
+
+    Parameters
+    ------------
+    cases: Can be output of locals() (a dictionary) from the scope of the cases 
+           
+           Or a list functions 
+
+           Or a module containing the case functions
+
+    title: title of menu
+
+    blank_proceedure: What to do the when given blank input. Can be user defined
+                      function, or it can be a string. Available string options
+                      are:
+                      
+                      'return', will return to parent menu, if you are at main
+                      menu, this will exit the program
+
+                      'pass', does nothing. This should only be used for the 
+                      main menu
+
+                      'exit', exits the program
+
+    decorator: Decorator for case functions
+
+    run: To invoke .run() method on CLI object or not.
+
+    Returns
+    --------
+    CLI (Command Line Interface) object. Use .run() method to activate menu. 
+    '''
+    if type(cases) == list:
+        cases_to_send = cases
+    elif type(cases) == dict:
+        cases_to_send = list_local_cases(cases)
+        # If this menu is the first menu initialized, and is given the locally
+        # defined functions, then must filter the functions that are defined 
+        # in __main__
+        if main:
+            cases_to_send =\
+                [c for c in cases_to_send if c.__module__ == '__main__']
+            blank_proceedure='pass'
+
+    elif type(cases) == ModuleType:
+        cases_to_send = cases
+    else:
+        raise TypeError('Invalid type')
+
+    cli = CLI(cases=cases_to_send, title=title, 
+              blank_proceedure=blank_proceedure, decorator=decorator)
+    if run:
+        cli.run()
+    
+    return cli

@@ -1,5 +1,5 @@
 '''
-File containing cases for default console interface
+How to implement:
 
 Each case should be a function.
 The ordering of the cases in the console interface
@@ -12,15 +12,14 @@ docstring
 Feel free to import whatever
 
 If you want to implement nested cases, then simply import 
-the CLI (command line interface) class from consoleobject:
+reuse the main function
 
-from consoleobject import CLI
+from pypatconsole import menu
 
 then you can either create another module with the nested 
 cases:
 
-import consolecases2
-CLI(consolecases, title= ' Title here ').run()
+menu(consolecases_nested, title= ' Title here ').
 
 or you can give a list functions:
 
@@ -33,16 +32,13 @@ def case3():
         \'''docstring\'''
         pass
 
-    CLI([subcase1, subcase2], title= ' Title here ').run()
+    menu([subcase1, subcase2], title= ' Title here ')
 '''
 
 # To enable import from parent folder
-import sys 
-sys.path.append('..')
-
 from time import sleep
 import consolecases_nested
-from consolecommon import menu
+from pypatconsole import menu 
 
 def case1(n: int=20, waittime: float=0.1):
     '''
@@ -106,7 +102,6 @@ def case4():
 
         print(x/y)
         sleep(0.5)
-
     menu([subcase1, subcase2], title=' Quick maths ')
 
 def case5():
@@ -136,5 +131,4 @@ def case5():
 
     menu(locals(), title=' Shapes ')
 
-if __name__ == '__main__':
-    menu(locals(), main=True, blank_proceedure='pass')
+menu(locals(), main=True, blank_proceedure='pass')

@@ -12,6 +12,6 @@ def case_decorator(func):
 
     # "Inherit" docstring (not really neccessary, but kinda nice to have)
     case_wrapper.__doc__ = func.__doc__
-    # This is necessary in order to unwrap function from insepct module
+    # This is necessary in order to unwrap function from inspect module
     case_wrapper.__wrapped__ = func
     return case_wrapper

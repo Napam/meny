@@ -19,5 +19,9 @@ ENTER_PROMPT = 'Input'
 EXIT_MSG = 'Exiting program'
 INVALID_TERMINAL_INPUT_MSG = 'Invalid input'
 ERROR_INDICATOR = BOLD + RED + f"{' ERROR ':#^40}" + END
-INPUT_BLANK_HINT = 'Entering blank returns/exits'
+
+INPUT_BLANK_HINT_RETURN = 'Enter blank to return to parent menu'
+INPUT_BLANK_HINT_PASS = ''
+INPUT_BLANK_HINT_EXIT = 'Enter blank to exit program'
+
 INPUT_WAIT_PROMPT_MSG = 'Press enter to continue'

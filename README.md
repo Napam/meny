@@ -1,28 +1,75 @@
 # PyPat-Console
-Simple but sexy framework for console interface 
+A simple and sexy way to make an console interface 
 
-
-# What to run
+# How to setup
+First install the package with the command (make sure you have Python 3.6 or higher)
 ```
-# For Windows/Mac
-python console.py
-
-# For Linux
-python3 console.py
+pip install pypatconsole
 ```
-There are sample functions implemented. 
+Then you can import ``pypatconsole`` in Python. 
 
 # How to implement
-Simply implement the cases (as functions) in consolecases.py. You can import whatever you want in there. You will need to implement docstrings to every case. The first line of of text in the docstring will be used as the description in the console interface. 
+Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the ``menu`` function at the bottom
+```python
+from pypatconsole import menu
+
+            .
+            . 
+            .
+
+menu(locals(), title=' Main menu title here ', main=True)
+```
+You can import whatever modules, classes and functions you want in there without them interfering with the functions defined your file. You will need to implement docstrings to every case. The first line of text in the docstring will be used as the description in the console interface. 
 
 The order of the cases is alphabetically sorted by the function name. 
 
-The rest of the code will automatically integrate the function to the console interface without you needing to worry about anything.
+The function signature along with its docstring is as follows:
+```python
+def menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
+                blank_proceedure: Union[str, Callable]='return', 
+                decorator: Callable=None, run: bool=True, main: bool=False):
+    '''
+    Factory function for the CLI class. This function initializes a menu. 
 
-For example implementing this in consolecases.py:
+    Parameters
+    ------------
+    cases: Can be output of locals() (a dictionary) from the scope of the cases 
+           
+           Or a list functions 
+
+           Or a module containing the case functions
+
+    title: title of menu
+
+    blank_proceedure: What to do the when given blank input. Can be user defined
+                      function, or it can be a string. Available string options
+                      are:
+                      
+                      'return', will return to parent menu, if you are at main
+                      menu, this will exit the program
+
+                      'pass', does nothing. This should only be used for the 
+                      main menu
+
+                      'exit', exits the program
+
+    decorator: Whether to decorate functions
+
+    run: To run menu instantly or not
+
+    Returns
+    --------
+    CLI (Command Line Interface) object. Use .run() method to activate menu. 
+    '''
+```      
+
+### Examples
+
+Say we are editing console.py
 ```python
 from random import randint
 from time import sleep
+from pypatconsole import menu
 
 def case1():
     '''
@@ -53,6 +100,8 @@ def case2():
     '''
     print(randint(0,9))
     sleep(0.5)
+
+menu(locals(), title=' Main menu ', main=True, blank_proceedure='pass')
 ```
 
 will result with this when running: ```python console.py```:
@@ -61,14 +110,21 @@ will result with this when running: ```python console.py```:
 -------------- Main menu ---------------
 1. FizzBuzz!
 2. Print a small random integer
-3. Exit program
 
-Entering blank returns/exits
 Input:
 ```
+## Special cases
+Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program as well
+
+Entering ``q`` will exit the program (of course Ctrl+C works as well)
+
+Entering ``h`` will display this text that explains the special cases.
+
 ## Arguments
-The cases can take arguments as well! Simply implement them as functions with type hints:
+The cases can take arguments as well! Simply implement them as functions with type hints (type hints are mandatory for the case functions):
 ````python
+from pypatconsole import menu
+
 def case1(a: int, b: int):
     '''Add two integers'''
     print(a+b)
@@ -79,7 +135,10 @@ def case1(a: str, b: str):
 
 def case3(a: list):
     '''Print elements in list and their types'''
-    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem in enumerate(a)]
+    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem 
+                                                        in enumerate(a)]
+
+menu(locals(), title=' Main menu ', main=True)
 ````
 Then simply give the arguments along with the choice:
 ````
@@ -87,9 +146,8 @@ Then simply give the arguments along with the choice:
 1. Add two integers
 2. Append two strings
 3. Print elements in list and their types
-4. Exit program
 
-Entering blank returns/exits
+
 Input: 1 60 9
 
 69
@@ -98,7 +156,8 @@ Input: 1 60 9
 Input: 2 "cat and dog" mathemathics
 
 cat and dogmathemathics
-(note that single token strings don't even need quotes)
+
+Note: Single token strings don't even need quotes
 ````
 ````
 Input: 3 ['cat',69,420.0]
@@ -119,44 +178,13 @@ The program will read the desired types from the function signature, then it wil
 - set
 - dict
 
-You can try to use other types as well, but do that on your own risk. 
-
 ## Nested cases
-If you want to implement nested cases, then simply import 
-the menu from consolecommon.py.
-```python
-from consolecommon import menu
-```
-then you can either create another module for the nested cases:
-```python
-import other_cases
-
-def samplecase():
-    '''Foo'''
-    menu(other_cases, title= ' Title here ')
-```
-
-or you can give a list of functions:
+If you want to implement nested cases, then you can simply reuse the menu function in the function scope. When doing nested cases, you should not give the keyword ``main=True`` to the ``menu`` function.
 
 ```python
-def samplecase():
-    '''Bar'''
-    def subcase1():
-        '''docstring1'''
-        pass
+from pypatconsole import menu
 
-    def subcase2():
-        '''docstring2'''
-        pass
-
-    menu([subcase1, subcase2], title= ' Title here ')
-```
-Or simply give the output from locals() (which is a dictionary of local elements) to menu()
-
-```python
-from consolecommon import list_local_functions
-
-def samplecase():
+def parentcase1():
     '''Fizz'''
     def subcase1():
         '''docstring1'''
@@ -167,10 +195,70 @@ def samplecase():
         pass
 
     menu(locals(), title= ' Title here ')
+menu(locals(), title=' Main menu ')
+```
+You can create another module for the other cases and pass them as well:
+```python
+from pypatconsole import menu
+import other_cases
+
+def samplecase():
+    '''Foo'''
+    menu(other_cases, title= ' Title here ')
+menu(other_cases, title= ' Main menu ', main=True)
+```
+
+or you can give a list of functions, which will enable you to force the ordering of the cases as well:
+```python
+from pypatconsole import menu
+
+def parentcase1():
+    '''Fizz'''
+    def subcase1():
+        '''docstring1'''
+        pass
+
+    def subcase2():
+        '''docstring2'''
+        pass
+
+    menu([subcase2, subcase1], title= ' Title here ')
+menu(locals(), title=' Main menu ')
 ```
 
 ## Optional: Decorator
-The case functions are decorated to enforce a common behavior of all cases. For example that the program should wait a little when exiting a case function. The decorator can be changed in consoledecorator.py
+To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the ``menu`` function. However, it is important that the decorator implemets ``__wrapped__`` attribute. Generally, it should look like this
+
+```python
+import sleep
+
+def case_decorator(func):
+    '''Decorator to enforce commmon behavior for cases'''
+
+    def case_wrapper(*args, **kwargs):
+        '''Verbosity wrapper'''
+        print('Yeah! Going in!')
+        sleep(1)
+        retobj = func(*args, **kwargs)
+        print('Woah! Going out!')
+        sleep(1)
+        return retobj
+
+    # "Inherits" docstring, not really necessary but kinda nice 
+    case_wrapper.__doc__ = func.__doc__
+    # This is necessary in order to unwrap using inspect module
+    case_wrapper.__wrapped__ = func
+    return case_wrapper
+```
+Since the decorator is a function, you cannot have it in the same namespace as the case functions, so you can for example implement it in another file. To use it you do as following:
+```python
+from pypatconsole import menu
+from case_decorator import case_decorator
+
+# A lot of cases here 
+
+menu(locals(), decorator=case_decorator)
+```
 
 # Why
 Sometimes you want to have a simple console interface so you can do things step by step. 
@@ -188,7 +276,7 @@ Data scraping and data cleaning pipeline for stock data
 6. Exit program
 Enter choice: 
 ```
-Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. This framework will enable a very quick implementation of a console. 
+Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. PyPat-Console will enable a very quick implementation of a console. 
 Without the console I would need to find the right file to run (and maybe comment things out first as well). The console organizes everything into one place. 
 
 ## Database interface

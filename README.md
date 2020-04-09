@@ -6,7 +6,7 @@ First install the package with the command (make sure you have Python 3.6 or hig
 ```
 pip install pypatconsole
 ```
-Then you can import ``pypatconsole`` in Python. The package lets you import two functions: ``menu`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``clear_screen`` clears your screen, so hence the name.
+Then you can import ``pypatconsole`` in Python. The package lets you import three functions: ``menu``, ``list_local_cases`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``list_local_cases`` takes the output from ``locals()`` and lists all the functions in the local scope. ``clear_screen`` clears your screen, hence the name.
 
 # How to implement
 Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the ``menu`` function at the bottom

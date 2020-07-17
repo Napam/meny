@@ -61,7 +61,8 @@ def _handle_arglist(func, arglist):
         raise NotImplementedError(f'Missing typehints in {unwrap(func)}')
 
     if len(arglist) > len(args):
-        raise ValueError(f'Got too many arguments, should be {len(args)}, but got {len(arglist)}')
+        # TypeError will be caught and handled
+        raise TypeError(f'Got too many arguments, should be {len(args)}, but got {len(arglist)}')
 
     # Special proceedures for special classes
     typed_arglist = [] 
@@ -160,7 +161,10 @@ class CLI:
 
                 # Get key to func map
                 print()
-                print(self.blank_hint)
+
+                # Empty string will evulate to False
+                if self.blank_hint: print(self.blank_hint)
+                
                 inputstring = enter_prompt(strings.ENTER_PROMPT)
 
                 # Pressing enter without specifying enables if test

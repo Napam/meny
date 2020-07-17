@@ -1,0 +1,16 @@
+Instructions on how to update package (since you never remember how)
+
+Ensure latest version of setuptools and wheel are installed:
+    python3 -m pip install --upgrade setuptools wheel
+
+In same directory as setup.py, run:
+    python3 setup.py sdist bdist_wheel
+
+Install twine, a Python package used to communicate with PyPi index 
+    python3 -m pip install --upgrade twine
+
+To upload package to PyPi index:
+    twine upload dist/*
+
+More info:
+    https://packaging.python.org/tutorials/packaging-projects/ 

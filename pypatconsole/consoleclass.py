@@ -107,7 +107,8 @@ class CLI:
         title: String to print over alternatives 
 
         blank_proceedure: What to do when given blank input (defaults to 
-                          stopping current view (without exiting))
+                          stopping current view (without exiting)). See 
+                          docstring for menu() for more info.
         '''
         self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
@@ -115,7 +116,7 @@ class CLI:
         if blank_proceedure == 'return':
             self.blank_hint = strings.INPUT_BLANK_HINT_RETURN
             self.blank_proceedure = self.__return_to_parent
-        elif blank_proceedure is 'pass':
+        elif blank_proceedure == 'pass':
             self.blank_hint = strings.INPUT_BLANK_HINT_PASS
             self.blank_proceedure = self.__pass
         elif blank_proceedure == 'exit':

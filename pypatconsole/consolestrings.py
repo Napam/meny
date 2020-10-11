@@ -13,7 +13,6 @@ END = '\033[0m'
 START_MSG = 'Starting console interface'
 LOGO_TITLE = ' Main menu '
 
-
 ENTER_PROMPT = 'Input'
 
 EXIT_MSG = 'Exiting program'
@@ -25,3 +24,5 @@ INPUT_BLANK_HINT_PASS = ''
 INPUT_BLANK_HINT_EXIT = 'Enter blank to exit program'
 
 INPUT_WAIT_PROMPT_MSG = 'Press enter to continue'
+
+DEFAULT_TITLE = ' Title '

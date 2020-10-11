@@ -3,16 +3,17 @@ Common stuff for console stuff
 '''
 import os 
 from inspect import isfunction
-from typing import Union, Callable
-from types import ModuleType
+from typing import Callable, List, Dict
 from shlex import shlex
 
+# *Nix uses clear, windows uses cls
 __CLEAR_COMMAND = 'cls' if os.name == 'nt' else 'clear'
-def clear_screen():
+
+def clear_screen() -> None:
     '''Obvious'''
     os.system(__CLEAR_COMMAND)
 
-def list_local_cases(locals_: dict, main: bool=False):
+def list_local_cases(locals_: Dict[str, Callable], main: bool=False) -> List[Callable]:
     '''
     Parameters
     -------------
@@ -23,7 +24,7 @@ def list_local_cases(locals_: dict, main: bool=False):
     name_func_pairs = sorted(list(locals_.items()), key=lambda x: x[0])
     return [pairs[1] for pairs in name_func_pairs if isfunction(pairs[1])]
 
-def input_splitter(argstring: str):
+def input_splitter(argstring: str) -> List[str]:
     '''
     Split string
     '''
@@ -33,7 +34,7 @@ def input_splitter(argstring: str):
     shlexysmexy.whitespace_split=True
     return [token for token in shlexysmexy]
 
-def print_help(*args, **kwargs):
+def print_help(*args, **kwargs) -> None:
     print(
         '''
         To exit console: Enter q or press Ctrl+c
@@ -47,3 +48,7 @@ def print_help(*args, **kwargs):
     )
     input()
 
+
+if __name__ == '__main__':
+    # print(list_local_cases(locals()))
+    print(locals())

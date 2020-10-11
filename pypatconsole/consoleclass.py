@@ -10,25 +10,25 @@ from pypatconsole.funcmap import (construct_funcmap, print_funcmap,
                                  _docstring_firstline)
 from pypatconsole.consolecommon import (clear_screen, input_splitter, 
                                         list_local_cases, print_help)
-from typing import Union, Callable
+from typing import List, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
 from types import ModuleType
 
-def logo_title(title: str):
+def logo_title(title: str) -> None:
     '''Prints logo title'''
     print("{:-^40s}".format(title))
 
-def show_cases(funcmap: dict, title=strings.LOGO_TITLE):
+def show_cases(funcmap: dict, title=strings.LOGO_TITLE) -> None:
     '''Prints function map prettily with a given title'''
     logo_title(title)
     print_funcmap(funcmap)
 
-def enter_prompt(msg: str=strings.ENTER_PROMPT):
+def enter_prompt(msg: str=strings.ENTER_PROMPT) -> str:
     '''Prints enter prompt message and than returns input()'''
     print(msg, end=': ')
     return input()
 
-def exit_program(*args, **kwargs):
+def exit_program(*args, **kwargs) -> None:
     '''
     Exit program
     '''
@@ -37,6 +37,9 @@ def exit_program(*args, **kwargs):
     clear_screen()
     exit()
 
+# Strategy method for special cases
+# Cases that are not special are e.g. int, since you can directly
+# use int() as a function
 __SPECIAL_ARG_CASES = {
     str: lambda x: str(x.strip("\"\'")), # Removes outer " or ' characters
     tuple:eval, 
@@ -45,7 +48,7 @@ __SPECIAL_ARG_CASES = {
     set:eval
 }
 
-def _handle_arglist(func, arglist):
+def _handle_arglist(func: Callable, arglist: list) -> List:
     '''
     Handles list of strings that are the arguments 
     The function turns the strings from the list into 
@@ -74,7 +77,14 @@ def _handle_arglist(func, arglist):
 
     return typed_arglist
 
-def _error_info(error, func):
+def _error_info(error: Exception, func: Callable) -> None:
+    '''
+    Used to handle error for cases
+
+    Error: E.g. ValueError
+
+    func: Function with docstring
+    '''
     print(strings.ERROR_INDICATOR)
     print(f'Selected case: "{_docstring_firstline(func)}"')
     print(error)
@@ -89,7 +99,7 @@ class CLI:
     '''
     def __init__(self, cases, title: str=strings.LOGO_TITLE, 
                  blank_proceedure: Union[str, Callable]='return', 
-                 decorator: Callable=None):
+                 decorator: Optional[Callable]=None):
         '''
         Input
         -----
@@ -138,7 +148,7 @@ class CLI:
     def __pass(self):
         pass
 
-    def _handle_case(self, casefunc, inputlist):
+    def _handle_case(self, casefunc: Callable, inputlist: List[str]):
         try:
             if inputlist:
                 # Raises TypeError if wrong number of arguments 
@@ -175,7 +185,7 @@ class CLI:
                     continue
 
                 # Tokenize input
-                inputlist = input_splitter(inputstring)
+                inputlist: List[str] = input_splitter(inputstring)
                 # Get case
                 case = inputlist.pop(0)
 
@@ -198,9 +208,9 @@ class CLI:
             # Ensures proper exit when Kbinterrupt
             exit_program()
     
-def menu(cases: Union[list, dict, ModuleType], title: str=' Title ', 
-                blank_proceedure: Union[str, Callable]='return', 
-                decorator: Callable=None, run: bool=True, main: bool=False):
+def menu(cases: Union[List[Callable], Dict[str, Callable], ModuleType], 
+         title: str=strings.DEFAULT_TITLE, blank_proceedure: Union[str, Callable]='return', 
+         decorator: Optional[Callable]=None, run: bool=True, main: bool=False):
     '''
     Factory function for the CLI class. This function initializes a menu. 
 

@@ -6,11 +6,11 @@ and the values are the cases (which are functions).
 '''
 
 from inspect import getmembers, isfunction, getmodule, unwrap
+import inspect
 from types import ModuleType
-from typing import Union, Callable
-from collections import Iterable
+from typing import Dict, Union, Callable, List, Optional, Tuple
 
-def _docstring_firstline(func: Callable):
+def _docstring_firstline(func: Callable) -> str:
     '''Get first line of docstring of func'''
     # Unwrap in case the function is wrapped
     func = unwrap(func)
@@ -18,7 +18,7 @@ def _docstring_firstline(func: Callable):
         raise NotImplementedError(f'Missing docstring in function {func}')
     return func.__doc__.strip().split('\n')[0]
 
-def print_funcmap(func_map: dict):
+def print_funcmap(func_map: Dict[str, Tuple[str, Callable]]) -> None:
     '''
     Prints a func_map dictionary
 
@@ -28,7 +28,7 @@ def print_funcmap(func_map: dict):
     for key, tup in func_map.items():
         print(key + '.', tup[0])  
 
-def __get_module_cases(module):
+def __get_module_cases(module: ModuleType) -> List[Callable]:
     # Get all functions defined in module
     f_ = lambda f: True if isfunction(f) and getmodule(f) == module else False
     funcs = getmembers(module, f_) 
@@ -39,8 +39,8 @@ def __get_module_cases(module):
     funcs = [f[1] for f in funcs]
     return funcs
 
-def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None, 
-                      decorator: Callable=None):
+def construct_funcmap(cases: Union[ModuleType, List[Callable]], other_cases: Optional[List]=None, 
+                      decorator: Optional[Callable]=None) -> Dict[str, Tuple[str, Callable]]:
     '''
     Parameters
     ------------
@@ -81,7 +81,7 @@ def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None,
     if other_cases is not None:
         funcs = funcs + other_cases
 
-    func_map = {}
+    func_map: Dict[str, Tuple[str, Callable]] = {}
 
     if decorator is not None:
         for i, func in enumerate(funcs, start=1):
@@ -91,3 +91,7 @@ def construct_funcmap(cases: Union[ModuleType, list], other_cases: list=None,
             func_map[str(i)] = (_docstring_firstline(func), func)
 
     return func_map
+
+
+if __name__ == '__main__':
+    print(__get_module_cases(inspect))

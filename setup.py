@@ -11,7 +11,7 @@ setuptools.setup(
     description="Simple and sexy console interface",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Laohachot/PyPat-Console",
+    url="https://github.com/Napam/PyPat-Console",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

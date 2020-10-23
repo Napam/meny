@@ -174,7 +174,8 @@ class CLI:
                 print()
 
                 # Empty string will evulate to False
-                if self.blank_hint: print(self.blank_hint)
+                if self.blank_hint: 
+                    print(self.blank_hint)
                 
                 inputstring = enter_prompt(strings.ENTER_PROMPT)
 
@@ -188,6 +189,13 @@ class CLI:
                 inputlist: List[str] = input_splitter(inputstring)
                 # Get case
                 case = inputlist.pop(0)
+
+                # If case starts with '-', indicates reverse choice (like np.ndarray[-1])
+                if case.startswith('-'):
+                    try:
+                        case = str(len(self.funcmap) + int(case) + 1)
+                    except ValueError:
+                        pass
 
                 if case in self.funcmap:
                     # Obtain case function from funcmap and 

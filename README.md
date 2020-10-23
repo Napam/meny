@@ -120,6 +120,8 @@ Entering ``q`` will exit the program (of course Ctrl+C works as well)
 
 Entering ``h`` will display this text that explains the special cases.
 
+Enter ``-1`` or any integer will "reverse" the choices, such that you take the last choice. This is motivated by Python lists where you can index like list[-1]
+
 ## Arguments
 The cases can take arguments as well! Simply implement them as functions with type hints (type hints are mandatory for the case functions):
 ````python

@@ -9,7 +9,7 @@ In same directory as setup.py, run:
 Install twine, a Python package used to communicate with PyPi index 
     python3 -m pip install --upgrade twine
 
-To upload package to PyPi index:
+To upload package to PyPi index (do this from parent dir of dist dir):
     twine upload dist/*
 
 More info:

@@ -321,14 +321,16 @@ def menu(
         # in __main__
         if main:
             cases_to_send = [c for c in cases_to_send if c.__module__ == "__main__"]
-            blank_proceedure = "pass"
-            on_kbinterrupt = "return"
 
     elif isinstance(cases, ModuleType):
         cases_to_send = cases
     else:
         raise TypeError("Invalid type")
 
+    if main:
+        blank_proceedure = "pass"
+        on_kbinterrupt = "return"
+        
     cli = CLI(
         cases=cases_to_send,
         title=title,

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pypatconsole", 
-    version="0.0.10",
+    version="0.0.11",
     author="Naphat Amundsen",
     author_email="naphat@live.com",
     description="Simple and sexy console interface",

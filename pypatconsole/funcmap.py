@@ -28,6 +28,8 @@ def print_funcmap(func_map: Dict[str, Tuple[str, Callable]]) -> None:
     for key, tup in func_map.items():
         print(key + '.', tup[0])  
 
+    # This is now in curses branch!
+
 def __get_module_cases(module: ModuleType) -> List[Callable]:
     # Get all functions defined in module
     f_ = lambda f: True if isfunction(f) and getmodule(f) == module else False

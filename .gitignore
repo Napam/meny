@@ -1,6 +1,7 @@
 # .__# csv 
 # *.csv
 # *.html
+nogit*
 
 #vsode settings
 .vscode

@@ -1,4 +1,4 @@
-'''
+"""
 How to implement:
 
 Each case should be a function.
@@ -25,110 +25,137 @@ or you can give a list functions:
 
 def case3():
     def subcase1():
-        \'''docstring1\'''
+        '''docstring1'''
         pass
 
     def subcase2():
-        \'''docstring\'''
+        '''docstring'''
         pass
 
     menu([subcase1, subcase2], title= ' Title here ')
-'''
+"""
 
 # To enable import from parent folder
 from time import sleep
-import consolecases_nested
-from pypatconsole import menu 
+import cases_nested
+from pypatconsole import menu
 
-def case1(n: int=20, waittime: float=0.1):
-    '''
+
+def case1(n: int = 20, waittime: float = 0.1):
+    """
     FizzBuzz!
 
-    When you get the urge to fizz your buzz 
+    When you get the urge to fizz your buzz
     if you know what I mean
-    '''
-    for i in range(n+1):
-        stringy = ''
+    """
+    for i in range(n + 1):
+        stringy = ""
 
-        fizz = i % 3 == 0 
-        buzz = i % 5 == 0 
-        
+        fizz = i % 3 == 0
+        buzz = i % 5 == 0
+
         if fizz:
-            stringy = stringy + 'Fizz'
+            stringy = stringy + "Fizz"
         if buzz:
-            stringy = stringy + 'Buzz'
+            stringy = stringy + "Buzz"
         if not (fizz or buzz):
             stringy = i
 
-        print(stringy) 
+        print(stringy)
         sleep(waittime)
 
+
 def case2(a: str, b: str):
-    '''
+    """
     Append two strings
-    '''
-    print(a+b)
+    """
+    print(a + b)
     sleep(0.5)
 
+
 def case3():
-    '''
-    A nested menu 
+    """
+    A nested menu
 
     This nested menu loads cases from a module
-    '''
-    menu(consolecases_nested, title=' Nested! ')
+    """
+    menu(cases_nested, title=" Nested! ")
+
 
 def case4():
-    '''
+    """
     Math menu
 
     This nested menu gets the cases from a user defined list.
-    '''
+    """
+
     def subcase1(x: float, y: float):
-        '''
+        """
         Multiply two floats
-        '''
-        print(x*y)
+        """
+        print(x * y)
         sleep(0.5)
 
     def subcase2(x: float, y: float):
-        '''
+        """
         Divide two floats
-        '''
+        """
         if y == 0:
             print("You can't divide by zero!!!")
             sleep(0.5)
-            return 
+            return
 
-        print(x/y)
+        print(x / y)
         sleep(0.5)
-    menu([subcase1, subcase2], title=' Quick maths ')
+
+    menu([subcase1, subcase2], title=" Quick maths ")
+
 
 def case5():
-    '''
+    """
     Even another nested menu
 
-    This menu obtains the nested case functions by 
+    This menu obtains the nested case functions by
     sending the return value of locals() into menu()
-    '''
+    """
+
     def subcase1():
-        '''
+        """
         Print triangle
-        '''
+        """
         for j in range(10):
-            print('*' * j)
+            print("*" * j)
 
         sleep(0.5)
 
     def subcase2():
-        '''
+        """
         Print rectangle
-        '''
+        """
         for i in range(10):
-            print('#' * 10)
+            print("#" * 10)
 
         sleep(0.5)
 
-    menu(locals(), title=' Shapes ')
+    def subcase3(a: list):
+        """
+        Print list
+        """
+        print(a)
+        sleep(0.5)
 
-menu(locals(), main=True, blank_proceedure='pass')
+    menu(locals(), title=" Shapes ")
+
+
+def case6(a, b, c, d):
+    """
+    Programmatic arguments
+    """
+    print(a, b, c, 4)
+    sleep(0.5)
+
+
+if __name__ == "__main__":
+    case_args = {case6: (1, 2)}
+    case_kwargs = {case6: {"d": 4, "c": 3}}
+    menu(locals(), main=True, blank_proceedure="pass", case_args=case_args, case_kwargs=case_kwargs)

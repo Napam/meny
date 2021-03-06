@@ -158,4 +158,4 @@ def case6(a, b, c, d):
 if __name__ == "__main__":
     case_args = {case6: (1, 2)}
     case_kwargs = {case6: {"d": 4, "c": 3}}
-    menu(locals(), main=True, blank_proceedure="pass", case_args=case_args, case_kwargs=case_kwargs)
+    menu(locals(), main=True, case_args=case_args, case_kwargs=case_kwargs)

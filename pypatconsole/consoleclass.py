@@ -3,13 +3,11 @@ Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
 
-import curses
 from time import sleep
 import pypatconsole.strings as strings
 import pypatconsole.config as cng
-from pypatconsole.funcmap import construct_funcmap, print_funcmap, _docstring_firstline
+from pypatconsole.funcmap import construct_funcmap, _docstring_firstline
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
-from pypatconsole import barebones_interface 
 from typing import List, Tuple, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
 from types import ModuleType
@@ -25,7 +23,7 @@ def raise_interrupt(*args, **kwargs) -> None:
 # Strategy method for special cases
 # Cases that are not special are e.g. int, since you can directly
 # use int() as a function
-__SPECIAL_ARG_CASES = {
+_SPECIAL_ARG_CASES = {
     str: lambda x: str(x.strip("\"'")),  # Removes outer " or ' characters
     tuple: literal_eval,
     list: literal_eval,
@@ -58,8 +56,8 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
     try:
 
         for arg, type_ in zip(arglist, argtypes.values()):
-            if type_ in __SPECIAL_ARG_CASES:
-                casted = __SPECIAL_ARG_CASES[type_](arg)
+            if type_ in _SPECIAL_ARG_CASES:
+                casted = _SPECIAL_ARG_CASES[type_](arg)
                 assert isinstance(casted, type_), "Argument evaluated into wrong type"
                 typed_arglist.append(casted)
 
@@ -98,7 +96,6 @@ class CLI:
     """
     Command Line Interface class
     """
-
     def __init__(
         self,
         cases,
@@ -142,20 +139,20 @@ class CLI:
 
         if blank_proceedure == "return":
             self.blank_hint = strings.INPUT_BLANK_HINT_RETURN
-            self.blank_proceedure = self.__return_to_parent
+            self.blank_proceedure = self._return_to_parent
         elif blank_proceedure == "pass":
             self.blank_hint = strings.INPUT_BLANK_HINT_PASS
-            self.blank_proceedure = self.__pass
+            self.blank_proceedure = self._pass
         else:
             self.blank_proceedure = blank_proceedure
 
         # Special options
-        self.special_cases = {"..": self.__return_to_parent, "q": raise_interrupt, "h": print_help}
+        self.special_cases = {"..": self._return_to_parent, "q": raise_interrupt, "h": print_help}
 
-    def __return_to_parent(self):
+    def _return_to_parent(self):
         self.active = False
 
-    def __pass(self):
+    def _pass(self):
         pass
 
     def _handle_case(self, casefunc: Callable, inputlist: List[str]):
@@ -181,31 +178,37 @@ class CLI:
             _error_info(e, casefunc)
 
 
-    def __menu_barebones(self) -> str:
-        return barebones_interface.interface(self)  
+    def _menu_simple(self) -> str:
+        # Import here to fix circular imports
+        from pypatconsole import simple_interface
+        return simple_interface.interface(self)  
 
-    def __menu_fancy(self) -> str:
-        curses.wrapper(self.__curses_menu)
+    def _menu_curses(self) -> str:
+        # Import here to fix circular imports
+        from pypatconsole import curses_interface
+        return curses_interface.interface(self)
 
-    def __menu_loop(self):
+    def _menu_loop(self):
         """
         Menu loop
         """
         while self.active:
-            inputstring = self.__menu_barebones()
+            # inputstring = self._menu_simple()
+            inputstring = self._menu_curses()
 
             clear_screen()
             # Empty string to signal "return"
             if not inputstring:
                 self.blank_proceedure()
                 continue
-
+            
             # Tokenize input
             inputlist: List[str] = input_splitter(inputstring)
             # Get case
             case = inputlist.pop(0)
 
             # If case starts with '-', indicates reverse choice (like np.ndarray[-1])
+            # Only possible by using the simple menu
             if case.startswith("-"):
                 try:
                     case = str(len(self.funcmap) + int(case) + 1)
@@ -233,10 +236,10 @@ class CLI:
         """
         self.active = True
         try:
-            self.__menu_loop()
+            self._menu_loop()
         except KeyboardInterrupt:
             if self.on_kbinterrupt == "raise":
-                self.__return_to_parent()
+                self._return_to_parent()
                 raise KeyboardInterrupt  # "Propagate exception"
             elif self.on_kbinterrupt == "return":
                 print()

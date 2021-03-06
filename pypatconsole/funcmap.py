@@ -18,17 +18,6 @@ def _docstring_firstline(func: Callable) -> str:
         raise NotImplementedError(f'Missing docstring in function {func}')
     return func.__doc__.strip().split('\n')[0]
 
-def print_funcmap(func_map: Dict[str, Tuple[str, Callable]]) -> None:
-    '''
-    Prints a func_map dictionary
-
-    Items should be tuples with first elements as descriptions
-    and second elements as function objects
-    '''
-    for key, tup in func_map.items():
-        print(key + '.', tup[0])  
-
-    # This is now in curses branch!
 
 def __get_module_cases(module: ModuleType) -> List[Callable]:
     # Get all functions defined in module

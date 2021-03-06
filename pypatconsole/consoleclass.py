@@ -3,32 +3,17 @@ Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
 
+import curses
 from time import sleep
 import pypatconsole.strings as strings
 import pypatconsole.config as cng
 from pypatconsole.funcmap import construct_funcmap, print_funcmap, _docstring_firstline
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
+from pypatconsole import barebones_interface 
 from typing import List, Tuple, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
 from types import ModuleType
 from ast import literal_eval
-
-
-def logo_title(title: str) -> None:
-    """Prints logo title"""
-    print("{:-^40s}".format(title))
-
-
-def show_cases(funcmap: dict, title=strings.LOGO_TITLE) -> None:
-    """Prints function map prettily with a given title"""
-    logo_title(title)
-    print_funcmap(funcmap)
-
-
-def enter_prompt(msg: str = strings.ENTER_PROMPT) -> str:
-    """Prints enter prompt message and than returns input()"""
-    print(msg, end=": ")
-    return input()
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -36,7 +21,6 @@ def raise_interrupt(*args, **kwargs) -> None:
     Raises keyboard interrupt
     """
     raise KeyboardInterrupt
-
 
 # Strategy method for special cases
 # Cases that are not special are e.g. int, since you can directly
@@ -196,24 +180,22 @@ class CLI:
         except TypeError as e:
             _error_info(e, casefunc)
 
+
+    def __menu_barebones(self) -> str:
+        return barebones_interface.interface(self)  
+
+    def __menu_fancy(self) -> str:
+        curses.wrapper(self.__curses_menu)
+
     def __menu_loop(self):
         """
         Menu loop
         """
         while self.active:
+            inputstring = self.__menu_barebones()
+
             clear_screen()
-            show_cases(self.funcmap, self.title)
-
-            print()
-
-            # Empty string will evulate to False
-            if self.blank_hint:
-                print(self.blank_hint)
-
-            inputstring = enter_prompt(strings.ENTER_PROMPT)
-
-            # Pressing enter without specifying enables if test
-            clear_screen()
+            # Empty string to signal "return"
             if not inputstring:
                 self.blank_proceedure()
                 continue

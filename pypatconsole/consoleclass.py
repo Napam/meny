@@ -194,7 +194,7 @@ class CLI:
         """
         while self.active:
             # inputstring = self._menu_simple()
-            inputstring = self._menu_curses()
+            inputstring: str = self._menu_curses()
 
             clear_screen()
             # Empty string to signal "return"

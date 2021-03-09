@@ -37,6 +37,9 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
     Handles list of strings that are the arguments
     The function turns the strings from the list into
     their designated types (found from function signature).
+
+    E.g. return is [1, "cat", 2.0, False]
+                   int  str   float  bool
     """
     # Unwrap in case the function is wrapped
     func = unwrap(func)
@@ -60,14 +63,13 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
                 casted = _SPECIAL_ARG_CASES[type_](arg)
                 assert isinstance(casted, type_), "Argument evaluated into wrong type"
                 typed_arglist.append(casted)
-
             else:  # For cases such as int and float, which naturally handles string inputs
                 typed_arglist.append(type_(arg))
 
-    except (ValueError, AssertionError) as e:
+    except (ValueError, AssertionError, SyntaxError) as e:
         raise TypeError(
             f'Could not cast argument "{arg}" into type "{type_}"\n'
-            f"got ValueError or AssertionError: {e}"
+            f'Got {type(e).__name__}:\n\t{e}'
         )
 
     return typed_arglist

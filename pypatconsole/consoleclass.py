@@ -12,6 +12,9 @@ from typing import List, Tuple, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
 from types import ModuleType
 from ast import literal_eval
+import platform
+
+_PLATFORM = platform.system()
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -107,6 +110,7 @@ class CLI:
         decorator: Optional[Callable] = None,
         case_args: Optional[Dict[Callable, tuple]] = None,
         case_kwargs: Optional[Dict[Callable, dict]] = None,
+        frontend: Optional[str] = "auto"
     ):
         """
         Input
@@ -150,6 +154,18 @@ class CLI:
 
         # Special options
         self.special_cases = {"..": self._return_to_parent, "q": raise_interrupt, "h": print_help}
+        
+        if frontend == "auto":
+            if _PLATFORM == "Windows":
+                self._frontend = self._menu_simple
+            elif _PLATFORM in ("Linux", "Darwin"):
+                self._frontend = self._menu_curses
+        elif frontend == "fancy":
+            self._frontend = self._menu_curses
+        elif frontend == "simple":
+            self._frontend = self._menu_simple
+        else:
+            raise ValueError(f"Got unexpected specification for frontend: {self._frontend}")
 
     def _return_to_parent(self):
         self.active = False
@@ -195,12 +211,11 @@ class CLI:
         Menu loop
         """
         while self.active:
-            # inputstring = self._menu_simple()
-            inputstring: str = self._menu_curses()
+            inputstring: str = self._frontend()
 
             clear_screen()
             # Empty string to signal "return"
-            if not inputstring:
+            if (not inputstring) or inputstring == "\n":
                 self.blank_proceedure()
                 continue
             
@@ -258,6 +273,7 @@ def menu(
     main: bool = False,
     case_args: Optional[Dict[Callable, tuple]] = None,
     case_kwargs: Optional[Dict[Callable, dict]] = None,
+    frontend: str = "auto"
 ):
     """
     Factory function for the CLI class. This function initializes a menu.
@@ -295,6 +311,12 @@ def menu(
     cases_kwargs: Optional[Dict[Callable, dict]], dictionary with function as key and dict of
                   keyword arguments as values
 
+    frontend: str, specify desired frontend:
+                    "auto": fancy frontend for Linux and Darwin, simple front end for Windows
+                    "fancy": Will try to use fancy front end (if on Windows, install 
+                             windows-curses first or Python will not be able to find the required
+                             "curses" package that the fancy frontend uses)
+                    "simple": Use the simple (but compatible with basically everything) frontend 
     Returns
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu.
@@ -326,6 +348,7 @@ def menu(
         decorator=decorator,
         case_args=case_args,
         case_kwargs=case_kwargs,
+        frontend=frontend
     )
     if run:
         cli.run()

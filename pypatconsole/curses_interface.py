@@ -112,7 +112,7 @@ class InputField(BaseWindow):
             if x > len(self.inp_message):
                 self._window.move(y, x - 1)
 
-        elif k in (curses.KEY_BACKSPACE, curses.ascii.BS, curses.ascii.DEL, 127):
+        elif k in (curses.KEY_BACKSPACE, curses.ascii.BS, curses.ascii.DEL):
             self.handle_backspace(y, x)
 
     def handle_str_input(self, k: str, y: int, x: int):
@@ -120,7 +120,7 @@ class InputField(BaseWindow):
             # Must capture newline explicitly, since insstr just treats it as space or something
             self.inp += "\n"
             self._window.clear()
-        elif k == "\b":
+        elif (k in ("\b", "\x7f")) or ord(k) == 127:
             # Some systems (erm, Windows at least) gives "\b" for backspace
             self.handle_backspace(y, x)
         else:

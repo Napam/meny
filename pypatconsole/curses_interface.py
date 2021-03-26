@@ -1,4 +1,5 @@
 import curses
+import curses.ascii
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 import pypatconsole
 import inspect
@@ -22,6 +23,7 @@ def recover_cursor(f):
 class BaseWindow:
     def __init__(self, window: "curses._CursesWindow"):
         self._window = window
+        self._window.keypad(True)
 
     def cprint(self, string: str, *args, newline: int = 1):
         """
@@ -71,6 +73,12 @@ class InputField(BaseWindow):
         self._window.clrtoeol()
         self._window.addstr(self.inp)
 
+    def handle_backspace(self, y: int, x:int):
+        if self.inp and x > self.begin_x:
+            self._window.move(y, x - 1)
+            self._window.delch()
+            self.inp = self.read_field()
+
     def handle_int_input(self, k: int, y: int, x: int):
         """
         k: key
@@ -104,22 +112,21 @@ class InputField(BaseWindow):
             if x > len(self.inp_message):
                 self._window.move(y, x - 1)
 
-        elif k == curses.KEY_BACKSPACE:
-            if self.inp and x > self.begin_x:
-                self._window.move(y, x - 1)
-                self._window.delch()
-                self.inp = self.read_field()
+        elif k in (curses.KEY_BACKSPACE, curses.ascii.BS, curses.ascii.DEL, 127):
+            self.handle_backspace(y, x)
 
-    def handle_str_input(self, k: int, y: int, x: int):
+    def handle_str_input(self, k: str, y: int, x: int):
         if k == "\n":
             # Must capture newline explicitly, since insstr just treats it as space or something
             self.inp += "\n"
             self._window.clear()
-            return
-
-        self._window.insstr(k)
-        self._window.move(y, x + 1)
-        self.inp = self.read_field()
+        elif k == "\b":
+            # Some systems (erm, Windows at least) gives "\b" for backspace
+            self.handle_backspace(y, x)
+        else:
+            self._window.insstr(k)
+            self._window.move(y, x + 1)
+            self.inp = self.read_field()
 
     def handle_input(self, k: Union[int, str], y: int, x: int):
         if isinstance(k, str):
@@ -217,7 +224,6 @@ class MainWindow(BaseWindow):
         curses.use_default_colors()
         curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_RED)
         curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        window.refresh()
         super().__init__(curses.newpad(2048, 2048))  # This will populate the self._window attribute
 
         def refresh_pad():
@@ -238,7 +244,7 @@ class MainWindow(BaseWindow):
         refresh_pad()
         while not inputfield._inp.endswith("\n"):
             # Get input using window instead of pad, using pad gives unexpected output
-            k = window.get_wch()
+            k = self._window.get_wch()
             y, x = self._window.getyx()
             inputfield.handle_input(k, y, x)
             self.highlight_funcmap(inputfield.first_token, maxstrlen)

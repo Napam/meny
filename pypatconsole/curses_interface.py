@@ -42,10 +42,14 @@ class BaseWindow:
         self.y = max(0, min(y, lines - 1))
         self.x = max(0, min(x, cols - 1))
 
-        if offset is None:
-            cursorwin.move(self.y, self.x)
-        else:
-            cursorwin.move(self.y + offset[0], self.x + offset[1])
+        y = self.y
+        x = self.x
+
+        if offset is not None:
+            y += offset[0]
+            x += offset[1]
+
+        cursorwin.move(y, x)
 
     def clear(self):
         self.y, self.x = 0, 0
@@ -94,15 +98,15 @@ class BaseSubWindow(BaseWindow):
 class TitleSubWindow(BaseSubWindow):
     def __init__(self, main: "MainWindow"):
         super().__init__(main)
-        self.window = main.window.derwin(1, 50, 0, 0)
+        main_rows, main_cols = self.main.window.getmaxyx()
+        self.window = main.window.derwin(0, 0)
         self.cprint(f"{self.main.title:^40}", curses.A_UNDERLINE, newline=False)
 
 
 class FuncmapSubWindow(BaseSubWindow):
-    def __init__(self, main: "MainWindow", context: 'Context'):
+    def __init__(self, main: "MainWindow"):
         super().__init__(main)
-        self.window: "curses._CursesWindow" = main.window.derwin(10, 100, 1, 0)
-        self.context: 'Context' = context
+        self.window: "curses._CursesWindow" = main.window.derwin(1, 0)
         self.print_funcmap()
 
     def print_funcmap(self, highlight=-1):
@@ -113,24 +117,31 @@ class FuncmapSubWindow(BaseSubWindow):
                 self.cprint(f"{f'{key}. {tup[0]}':<40}")
 
     def input_window_callback(self, inputwindow: 'InputSubWindow'):
-        if self.context.curr_key is None:
+        if inputwindow.curr_key is None:
             self.set_cursor(0, 0)
             self.print_funcmap(-1)
             self.window.refresh()
         else: 
-            index = self.main.key2index[self.context.curr_key]
+            index = self.main.key2index[inputwindow.curr_key]
             self.set_cursor(0, 0)
             self.print_funcmap(index)
             self.window.refresh()
 
 
 class InputSubWindow(BaseSubWindow):
-    def __init__(self, main: "MainWindow", context: 'Context'):
+    def __init__(self, main: "MainWindow"):
         super().__init__(main)
-        self.window: "curses._CursesWindow" = main.window.derwin(2, 100, 8, 0)
-        self.context: 'Context' = context
+        rows = len(self.main.funcmap)
+        main_rows, main_cols = self.main.window.getmaxyx()
 
-        self.cprint("Input: ", newline=False)
+        rows_ = min(rows+2, main_rows-1)
+        self.window: "curses._CursesWindow" = main.window.derwin(rows_, 0)
+        # self.context: 'Context' = context
+        self.curr_key: Optional[str] = None
+        self.curr_index: Optional[int] = None
+
+        self._input_string: str = "Input: "
+        self.cprint(self._input_string, newline=False)
         self.begin_input_yx = (self.y, self.x)
         self.inp: str = ""
         self.listeners: list = []
@@ -156,11 +167,11 @@ class InputSubWindow(BaseSubWindow):
         '''
         start_token = self.inp.split(" ")[0]
         if start_token in self.main.funcmap:
-            self.context.curr_key = start_token
-            self.context.curr_index = self.main.key2index[start_token]
+            self.curr_key = start_token
+            self.curr_index = self.main.key2index[start_token]
         else:
-            self.context.curr_index = None
-            self.context.curr_key = None
+            self.curr_index = None
+            self.curr_key = None
         self._broadcast_to_listeners()
 
     def handle_str_input(self, k: str) -> None:
@@ -171,35 +182,35 @@ class InputSubWindow(BaseSubWindow):
 
     def handle_int_input(self, k: int) -> None:
         if k == curses.KEY_BACKSPACE:
+            # Can only remove if something if input field 
             if self.inp:
                 self.inp = self.inp[:-1]
                 self.set_cursor(self.y, self.x - 1)
                 self.main.window.clrtoeol()  # Must call on main window
 
         elif k == curses.KEY_UP:
-            if self.context.curr_key:
-                self.context.curr_index = (self.context.curr_index - 1) % len(self.main.funcmap)
-                self.inp = self.main.index2key[self.context.curr_index]
+            if self.curr_key:
+                self.curr_index = (self.curr_index - 1) % len(self.main.funcmap)
+                self.inp = self.main.index2key[self.curr_index]
             else:
                 self.inp = self.main.index2key[-1]
             self._sync_input_field()
                 
         elif k == curses.KEY_DOWN:
-            if self.context.curr_key:
-                self.context.curr_index = (self.context.curr_index + 1) % len(self.main.funcmap)
-                self.inp = self.main.index2key[self.context.curr_index]
+            if self.curr_key:
+                self.curr_index = (self.curr_index + 1) % len(self.main.funcmap)
+                self.inp = self.main.index2key[self.curr_index]
             else:
                 self.inp = self.main.index2key[0]
             self._sync_input_field()
+
+        elif k == curses.KEY_LEFT:
+            self.set_cursor(self.y, max(self.x - 1, self.begin_input_yx[1]))
+        
+        elif k == curses.KEY_RIGHT:
+            self.set_cursor(self.y, max(self.x + 1, self.begin_input_yx[1]))
                 
         self._sync_context()
-
-
-class Context:
-    def __init__(self):
-        self.arrowmode: bool = False
-        self.curr_index: Optional[int] = None
-        self.curr_key: Optional[str] = None
 
 
 class MainWindow(BaseWindow):
@@ -223,22 +234,28 @@ class MainWindow(BaseWindow):
         if isinstance(k, int):
             for listener in self.int_listeners:
                 listener(k)
-        else:  # if k is string
+        elif isinstance(k, str):  
             for listener in self.str_listeners:
                 listener(k)
+        else:
+            raise TypeError(f"'k' is of unexpected type: {type(k)}")
 
     def run(self, window: "curses._CursesWindow"):
         self.window = window
+        self.window.keypad(True)
+        curses.use_default_colors()
+        curses.noecho()
+        self.window.refresh()
+
+        # self.window = curses.newpad(1000, 1000)
         self.clear()
 
         n = len(self.funcmap)
         keys = tuple(self.funcmap)  # Gets keys
 
-        context = Context()
-
         titlewin = TitleSubWindow(self)
-        funcwin = FuncmapSubWindow(self, context)
-        inputwin = InputSubWindow(self, context)
+        funcwin = FuncmapSubWindow(self)
+        inputwin = InputSubWindow(self)
 
         inputwin.listeners.append(funcwin.input_window_callback)
         self.str_listeners.append(inputwin.handle_str_input)

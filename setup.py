@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pypatconsole", 
-    version="0.0.12",
+    name="pypatconsole",
+    version="0.0.13",
     author="Naphat Amundsen",
     author_email="naphat@live.com",
     description="Simple and sexy console interface",
@@ -18,5 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
 )

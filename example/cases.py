@@ -41,7 +41,7 @@ import cases_nested
 from pypatconsole import menu
 
 
-def case1(n: int = 20, waittime: float = 0.1):
+def case1(n: int = 10, waittime: float = 0.1):
     """
     FizzBuzz!
 

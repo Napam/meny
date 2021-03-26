@@ -13,8 +13,10 @@ from inspect import getfullargspec, unwrap, signature
 from types import ModuleType
 from ast import literal_eval
 import platform
+import re
 
 _PLATFORM = platform.system()
+RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -22,6 +24,7 @@ def raise_interrupt(*args, **kwargs) -> None:
     Raises keyboard interrupt
     """
     raise KeyboardInterrupt
+
 
 # Strategy method for special cases
 # Cases that are not special are e.g. int, since you can directly
@@ -35,6 +38,10 @@ _SPECIAL_ARG_CASES = {
 }
 
 
+class ConsoleError(Exception):
+    """Custom exception for console related stuff"""
+
+
 def _handle_arglist(func: Callable, arglist: list) -> List:
     """
     Handles list of strings that are the arguments
@@ -45,6 +52,7 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
                    int  str   float  bool
     """
     # Unwrap in case the function is wrapped
+    # TODO: Update this to use inspect.signature
     func = unwrap(func)
     argsspec = getfullargspec(func)
     args = argsspec.args
@@ -54,13 +62,11 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
         raise NotImplementedError(f"Missing typehints in {func}")
 
     if len(arglist) > len(args):
-        # TypeError will be caught and handled
-        raise TypeError(f"Got too many arguments, should be {len(args)}, but got {len(arglist)}")
+        raise ConsoleError(f"Got too many arguments, should be {len(args)}, but got {len(arglist)}")
 
     # Special proceedures for special classes
     typed_arglist = []
     try:
-
         for arg, type_ in zip(arglist, argtypes.values()):
             if type_ in _SPECIAL_ARG_CASES:
                 casted = _SPECIAL_ARG_CASES[type_](arg)
@@ -70,15 +76,15 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
                 typed_arglist.append(type_(arg))
 
     except (ValueError, AssertionError, SyntaxError) as e:
-        raise TypeError(
+        raise ConsoleError(
             f'Could not cast argument "{arg}" into type "{type_}"\n'
-            f'Got {type(e).__name__}:\n\t{e}'
+            f"Got {type(e).__name__}:\n\t{e}"
         )
 
     return typed_arglist
 
 
-def _error_info(error: Exception, func: Callable) -> None:
+def _error_info_case(error: Exception, func: Callable) -> None:
     """
     Used to handle error for cases
 
@@ -86,12 +92,26 @@ def _error_info(error: Exception, func: Callable) -> None:
 
     func: Function with docstring
     """
-    print(strings.ERROR_INDICATOR)
-    print(f'Selected case: "{_docstring_firstline(func)}"')
-    print(f'{f" Error message ":=^40}')
+    selected_case_str = f'Selected case: "{strings.YELLOW+_docstring_firstline(func)+strings.END}"'
+    lenerror = max(map(len, str(error).split("\n")))
+    lenerror = max(lenerror, len(RE_ANSI.sub("", selected_case_str)))
+    print(strings.BOLD + strings.RED + f"{' ERROR ':#^{lenerror}}" + strings.END)
+    print(selected_case_str)
+    print(f'{f" Error message ":=^{lenerror}}')
     print(error)
-    print(f'{f"":=^40}')
+    print(f'{f"":=^{lenerror}}')
     print(f"Function signature: {signature(func)}")
+    print()
+    print(strings.INPUT_WAIT_PROMPT_MSG)
+    input()
+
+
+def _error_info_parse(error: Exception):
+    lenerror = max(map(len, str(error).split("\n")))
+    print(strings.BOLD + strings.RED + f"{' PARSE ERROR ':#^{lenerror}}" + strings.END)
+    print(f'{f" Error message ":=^{lenerror}}')
+    print(error)
+    print(f'{f"":=^{lenerror}}')
     print()
     print(strings.INPUT_WAIT_PROMPT_MSG)
     input()
@@ -101,6 +121,7 @@ class CLI:
     """
     Command Line Interface class
     """
+
     def __init__(
         self,
         cases,
@@ -110,7 +131,7 @@ class CLI:
         decorator: Optional[Callable] = None,
         case_args: Optional[Dict[Callable, tuple]] = None,
         case_kwargs: Optional[Dict[Callable, dict]] = None,
-        frontend: Optional[str] = "auto"
+        frontend: Optional[str] = "auto",
     ):
         """
         Input
@@ -154,7 +175,7 @@ class CLI:
 
         # Special options
         self.special_cases = {"..": self._return_to_parent, "q": raise_interrupt, "h": print_help}
-        
+
         if frontend == "auto":
             if _PLATFORM == "Windows":
                 self._frontend = self._menu_simple
@@ -192,18 +213,19 @@ class CLI:
                 # Will raise TypeError if casefunc() actually
                 # requires arguments
                 casefunc()
-        except TypeError as e:
-            _error_info(e, casefunc)
-
+        except (TypeError, ConsoleError) as e:
+            _error_info_case(e, casefunc)
 
     def _menu_simple(self) -> str:
         # Import here to fix circular imports
         from pypatconsole import simple_interface
-        return simple_interface.interface(self)  
+
+        return simple_interface.interface(self)
 
     def _menu_curses(self) -> str:
         # Import here to fix circular imports
         from pypatconsole import curses_interface
+
         return curses_interface.interface(self)
 
     def _menu_loop(self):
@@ -218,14 +240,18 @@ class CLI:
             if (not inputstring) or inputstring == "\n":
                 self.blank_proceedure()
                 continue
-            
+
             # Tokenize input
-            inputlist: List[str] = input_splitter(inputstring)
+            try:
+                inputlist: List[str] = input_splitter(inputstring)
+            except ValueError as e:  # Missing closing quotation or something
+                _error_info_parse(e)
+                continue
+
             # Get case
             case = inputlist.pop(0)
 
             # If case starts with '-', indicates reverse choice (like np.ndarray[-1])
-            # Only possible by using the simple menu
             if case.startswith("-"):
                 try:
                     case = str(len(self.funcmap) + int(case) + 1)
@@ -273,7 +299,7 @@ def menu(
     main: bool = False,
     case_args: Optional[Dict[Callable, tuple]] = None,
     case_kwargs: Optional[Dict[Callable, dict]] = None,
-    frontend: str = "auto"
+    frontend: str = "auto",
 ):
     """
     Factory function for the CLI class. This function initializes a menu.
@@ -313,10 +339,10 @@ def menu(
 
     frontend: str, specify desired frontend:
                     "auto": fancy frontend for Linux and Darwin, simple front end for Windows
-                    "fancy": Will try to use fancy front end (if on Windows, install 
+                    "fancy": Will try to use fancy front end (if on Windows, install
                              windows-curses first or Python will not be able to find the required
                              "curses" package that the fancy frontend uses)
-                    "simple": Use the simple (but compatible with basically everything) frontend 
+                    "simple": Use the simple (but compatible with basically everything) frontend
     Returns
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu.
@@ -339,7 +365,7 @@ def menu(
     if main:
         blank_proceedure = "pass"
         on_kbinterrupt = "return"
-        
+
     cli = CLI(
         cases=cases_to_send,
         title=title,
@@ -348,7 +374,7 @@ def menu(
         decorator=decorator,
         case_args=case_args,
         case_kwargs=case_kwargs,
-        frontend=frontend
+        frontend=frontend,
     )
     if run:
         cli.run()

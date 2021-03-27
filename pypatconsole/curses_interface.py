@@ -123,7 +123,11 @@ class InputField(BaseWindow):
         elif (k in ("\b", "\x7f")) or ord(k) == 127:
             # Some systems (erm, Windows at least) gives "\b" for backspace
             self.handle_backspace(y, x)
+        elif (k == "\x00") or (ord(k) == 0):
+            # Windows key or some weird ass key, idk what to do about it, just return
+            return
         else:
+            # Sometimes crash on funny keys, e.g. windows key
             self._window.insstr(k)
             self._window.move(y, x + 1)
             self.inp = self.read_field()

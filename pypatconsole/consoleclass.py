@@ -17,6 +17,7 @@ import re
 
 _PLATFORM = platform.system()
 RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
+default_frontend = "auto"
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -299,7 +300,7 @@ def menu(
     main: bool = False,
     case_args: Optional[Dict[Callable, tuple]] = None,
     case_kwargs: Optional[Dict[Callable, dict]] = None,
-    frontend: str = "auto",
+    frontend: Optional[str] = None,
 ):
     """
     Factory function for the CLI class. This function initializes a menu.
@@ -365,6 +366,9 @@ def menu(
     if main:
         blank_proceedure = "pass"
         on_kbinterrupt = "return"
+
+    if frontend is None:
+        frontend = cng.default_frontend
 
     cli = CLI(
         cases=cases_to_send,

@@ -38,8 +38,9 @@ def case3():
 # To enable import from parent folder
 from time import sleep
 import cases_nested
+import pypatconsole as ppc
 from pypatconsole import menu
-
+ppc.config.default_frontend = "auto" # Set default frontend here
 
 def case1(n: int = 10, waittime: float = 0.1):
     """

@@ -120,7 +120,7 @@ class InputField(BaseWindow):
             # Must capture newline explicitly, since insstr just treats it as space or something
             self.inp += "\n"
             self._window.clear()
-        elif (k in ("\b", "\x7f")) or ord(k) == 127:
+        elif (k in ("\b", "\x7f")):
             # Some systems (erm, Windows at least) gives "\b" for backspace
             self.handle_backspace(y, x)
         elif (k == "\x00") or (ord(k) == 0):
@@ -128,6 +128,8 @@ class InputField(BaseWindow):
             return
         else:
             # Sometimes crash on funny keys, e.g. windows key
+            # use insstr since want to be able to insert new text in the middle 
+            # of existing text
             self._window.insstr(k)
             self._window.move(y, x + 1)
             self.inp = self.read_field()
@@ -201,8 +203,9 @@ class MainWindow(BaseWindow):
             return
 
         self._window.move(prev_y + 1, prev_x)  # Under input field
-        # TODO: Use better parser, this does not look at quotation marks, results in wrong highlight
-        inp_list = inp.split(" ")
+        # TODO: Use better parser, .split does not look at quotation marks, results in wrong 
+        #       highlight
+        inp_list = inp.split()
         n_tokens = len(inp_list)
 
         self._window.addstr("(")

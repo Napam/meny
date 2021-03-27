@@ -17,8 +17,6 @@ import re
 
 _PLATFORM = platform.system()
 RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
-default_frontend = "auto"
-
 
 def raise_interrupt(*args, **kwargs) -> None:
     """

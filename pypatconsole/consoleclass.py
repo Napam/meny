@@ -232,7 +232,7 @@ class CLI:
             from pypatconsole import curses_interface
         except ImportError as e:
             raise ImportError(
-                f"Got error :\n\t{e}"
+                f"Got error :\n\t{e}\n"
                 "This is probably caused by inability to import the 'curses' module.\n"
                 "The curses module should be a built-in for Unix installations.\n"
                 "Windows does not have 'curses' by default, suggested fix:\n\t"

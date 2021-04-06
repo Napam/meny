@@ -147,6 +147,7 @@ class MainWindow(BaseWindow):
     def __init__(self, cli: pypatconsole.consoleclass.CLI):
         self.funcmap = cli.funcmap
         self.title = cli.title
+        self.funcs_w_programmatic_args: set = cli.case_args.keys() | cli.case_kwargs.keys()
 
         self.key2index = {key: index for index, key in enumerate(self.funcmap)}
         self.index2key = tuple(self.funcmap)
@@ -199,7 +200,7 @@ class MainWindow(BaseWindow):
         signature = inspect.signature(func)
         paramiter = signature.parameters.items()
         iterlen = len(paramiter)
-        if iterlen == 0:
+        if (iterlen == 0) or (func in self.funcs_w_programmatic_args):
             return
 
         self._window.move(prev_y + 1, prev_x)  # Under input field
@@ -218,6 +219,7 @@ class MainWindow(BaseWindow):
                 self._window.addstr(", ")
         self._window.addstr(")")
 
+        # Highlight with red if given too many arguments
         if n_tokens > iterlen + 1:
             self._window.chgat(prev_y + 1, prev_x, len(str(signature)), curses.color_pair(1))
 

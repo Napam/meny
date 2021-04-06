@@ -8,14 +8,12 @@ import pypatconsole.strings as strings
 import pypatconsole.config as cng
 from pypatconsole.funcmap import construct_funcmap, _docstring_firstline
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
-from typing import List, Tuple, Union, Callable, Dict, Optional
+from typing import List, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
 from types import ModuleType
 from ast import literal_eval
-import platform
 import re
 
-_PLATFORM = platform.system()
 RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -38,7 +36,10 @@ _SPECIAL_ARG_CASES = {
 
 
 class ConsoleError(Exception):
-    """Custom exception for console related stuff"""
+    """
+    Custom exception for console related stuff since I dont want to catch too many exceptions
+    from Python.
+    """
 
 
 def _handle_arglist(func: Callable, arglist: list) -> List:
@@ -176,10 +177,13 @@ class CLI:
         self.special_cases = {"..": self._return_to_parent, "q": raise_interrupt, "h": print_help}
 
         if frontend == "auto":
-            if _PLATFORM == "Windows":
-                self._frontend = self._menu_simple
-            elif _PLATFORM in ("Linux", "Darwin"):
+            self._frontend = self._menu_simple
+            try:
+                import curses
                 self._frontend = self._menu_curses
+            except ImportError:
+                pass
+                
         elif frontend == "fancy":
             self._frontend = self._menu_curses
         elif frontend == "simple":
@@ -200,7 +204,7 @@ class CLI:
         try:
             if args or kwargs:  # If programmatic arguments
                 if inputlist:
-                    raise TypeError(
+                    raise ConsoleError(
                         "This function takes arguments progammatically"
                         " and should not be given any arguments"
                     )
@@ -212,6 +216,7 @@ class CLI:
                 # Will raise TypeError if casefunc() actually
                 # requires arguments
                 casefunc()
+        # TODO: Should I catch TypeError? What if actual TypeError occurs? Contemplate!
         except (TypeError, ConsoleError) as e:
             _error_info_case(e, casefunc)
 
@@ -223,7 +228,17 @@ class CLI:
 
     def _menu_curses(self) -> str:
         # Import here to fix circular imports
-        from pypatconsole import curses_interface
+        try:
+            from pypatconsole import curses_interface
+        except ImportError as e:
+            raise ImportError(
+                f"Got error :\n\t{e}"
+                "This is probably caused by inability to import the 'curses' module.\n"
+                "The curses module should be a built-in for Unix installations.\n"
+                "Windows does not have 'curses' by default, suggested fix:\n\t"
+                    f"pip install windows-curses\n"
+                "windows-curses adds support for the standard Python curses module on Windows."
+            )
 
         return curses_interface.interface(self)
 
@@ -337,8 +352,9 @@ def menu(
                   keyword arguments as values
 
     frontend: str, specify desired frontend:
-                    "auto": fancy frontend for Linux and Darwin, simple front end for Windows
-                    "fancy": Will try to use fancy front end (if on Windows, install
+                    "auto": Will try to use fancy frontend if curses module is available, else 
+                            use simple frontend
+                    "fancy": Use fancy front end (if on Windows, install
                              windows-curses first or Python will not be able to find the required
                              "curses" package that the fancy frontend uses)
                     "simple": Use the simple (but compatible with basically everything) frontend

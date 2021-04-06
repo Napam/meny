@@ -25,10 +25,19 @@ The order of the cases is alphabetically sorted by the function name.
 
 The function signature of ``menu`` along with its docstring is as follows:
 ```python
-def menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
-                blank_proceedure: Union[str, Callable]='return',
-                decorator: Callable=None, run: bool=True, main: bool=False):
-    '''
+def menu(
+    cases: Union[List[Callable], Dict[str, Callable], ModuleType],
+    title: str = strings.DEFAULT_TITLE,
+    blank_proceedure: Union[str, Callable] = "return",
+    on_kbinterrupt: str = "raise",
+    decorator: Optional[Callable] = None,
+    run: bool = True,
+    main: bool = False,
+    case_args: Optional[Dict[Callable, tuple]] = None,
+    case_kwargs: Optional[Dict[Callable, dict]] = None,
+    frontend: Optional[str] = None,
+):
+    """
     Factory function for the CLI class. This function initializes a menu.
 
     Parameters
@@ -45,22 +54,35 @@ def menu(cases: Union[list, dict, ModuleType], title: str=' Title ',
                       function, or it can be a string. Available string options
                       are:
 
-                      'return', will return to parent menu, if you are at main
-                      menu, this will exit the program
+                      'return', will return to parent menu
 
                       'pass', does nothing. This should only be used for the
                       main menu
 
-                      'exit', exits the program
+    decorator: Decorator for case functions
 
-    decorator: Whether to decorate functions
+    run: To invoke .run() method on CLI object or not.
 
-    run: To run menu instantly or not
+    main: Tells the function whether or not the menu is the main menu (i.e. the
+          first ("outermost") menu) or not. This is very import to specify when you give a
+          dictionary (e.g. the return value of locals()).
 
+    cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
+                positional arguments as values
+
+    cases_kwargs: Optional[Dict[Callable, dict]], dictionary with function as key and dict of
+                  keyword arguments as values
+
+    frontend: str, specify desired frontend:
+                    "auto": fancy frontend for Linux and Darwin, simple front end for Windows
+                    "fancy": Will try to use fancy front end (if on Windows, install
+                             windows-curses first or Python will not be able to find the required
+                             "curses" package that the fancy frontend uses)
+                    "simple": Use the simple (but compatible with basically everything) frontend
     Returns
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu.
-    '''
+    """
 ```
 
 ### Examples
@@ -122,6 +144,16 @@ Entering ``h`` will display this text that explains the special cases.
 
 Enter ``-1`` or any integer will "reverse" the choices, such that you take the last choice. This is motivated by Python lists where you can index like list[-1]
 
+## Frontend and usage
+There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are 
+- `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module 
+          is available, else use simple frontend.
+- `simple`: Use simple frontend, should work on all systems since it is completely based on the 
+            build in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter. 
+- `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy
+           frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds
+           the the ability to traverse the options using the arrow keys.
+
 ## Arguments
 The cases can take arguments as well! Simply implement them as functions with type hints (type hints are mandatory for the case functions):
 ````python
@@ -180,6 +212,25 @@ The program will read the desired types from the function signature, then it wil
 - set
 - dict
 
+## Programmatic Arguments
+You can supply arguments programmtically to your case functions:
+```python
+from pypatconsole import menu
+def case6(a, b, c, d):
+    """
+    Programmatic arguments
+    """
+    print(a, b, c, 4)
+    sleep(0.5)
+
+case_args = {case6: (1, 2)}
+case_kwargs = {case6: {"d": 4, "c": 3}}
+menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
+```
+Case functions that takes arguments programmatically are not required to have type hints unlike case functions that are supposed take arguments through the cli. 
+
+Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. 
+
 ## Nested cases
 If you want to implement nested cases, then you can simply reuse the menu function in the function scope. When doing nested cases, you should not give the keyword ``main=True`` to the ``menu`` function.
 
@@ -227,6 +278,7 @@ def parentcase1():
     menu([subcase2, subcase1], title= ' Title here ')
 menu(locals(), title=' Main menu ')
 ```
+
 ## What if want to define functions without having them displayed in the menu?
 Of what I can think of: you can either define your functions in another python file and import that, or you can create a class (in the same file as the case functions) that consists of your functions as static methods.
 

@@ -41,7 +41,7 @@ def input_splitter(argstring: str) -> List[str]:
 def print_help(*args, **kwargs) -> None:
     print(
         """
-        To exit console: Enter q or press Ctrl+c
+        To exit or return from console: Enter q
 
         To return to parent menu: Enter blank (press enter without giving input)
                                   or enter '..'. If you are in main menu, this 

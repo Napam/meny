@@ -153,7 +153,10 @@ class CLI:
         blank_proceedure: What to do when given blank input (defaults to
                           stopping current view (without exiting)). See
                           docstring for menu() for more info.
+
+        See menu function for more info
         """
+        assert on_kbinterrupt in ("raise", "return"), "Invalid choice for on_kbinterrupt"
         self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
         self.on_kbinterrupt = on_kbinterrupt
@@ -166,13 +169,11 @@ class CLI:
             self.case_kwargs = {}
 
         if blank_proceedure == "return":
-            self.blank_hint = strings.INPUT_BLANK_HINT_RETURN
             self.blank_proceedure = self._return_to_parent
         elif blank_proceedure == "pass":
-            self.blank_hint = strings.INPUT_BLANK_HINT_PASS
             self.blank_proceedure = self._pass
         else:
-            self.blank_proceedure = blank_proceedure
+            raise ValueError("Invalid choice of black_proceedure")
 
         # Special options
         self.special_cases = {"..": self.blank_proceedure, "q": raise_interrupt, "h": print_help}
@@ -308,7 +309,7 @@ class CLI:
 def menu(
     cases: Union[List[Callable], Dict[str, Callable], ModuleType],
     title: str = strings.DEFAULT_TITLE,
-    blank_proceedure: Union[str, Callable] = "return",
+    blank_proceedure: str = "return",
     on_kbinterrupt: str = "raise",
     decorator: Optional[Callable] = None,
     run: bool = True,
@@ -330,14 +331,17 @@ def menu(
 
     title: title of menu
 
-    blank_proceedure: What to do the when given blank input. Can be user defined
-                      function, or it can be a string. Available string options
+    blank_proceedure: str, What to do the when given blank input. Available options
                       are:
 
                       'return', will return to parent menu
 
                       'pass', does nothing. This should only be used for the
                       main menu
+
+    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running. 
+                    If "raise", then will raise KeyboardInterrupt, if "return" the menu exits, and
+                    returns. 
 
     decorator: Decorator for case functions
 

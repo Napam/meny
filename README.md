@@ -142,7 +142,7 @@ Input:
 ## Special cases
 Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program.
 
-Entering ``q`` will exit the program (of course Ctrl+C works as well)
+Entering ``q`` will raise a keyboard interrupt, menus can either return or raise KeyboardInterrupt in this case. See the docstring for `menu`. 
 
 Entering ``h`` will display this text that explains the special cases.
 

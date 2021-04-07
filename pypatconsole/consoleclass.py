@@ -175,7 +175,7 @@ class CLI:
             self.blank_proceedure = blank_proceedure
 
         # Special options
-        self.special_cases = {"..": self._return_to_parent, "q": raise_interrupt, "h": print_help}
+        self.special_cases = {"..": self.blank_proceedure, "q": raise_interrupt, "h": print_help}
 
         if frontend == "auto":
             self._frontend = self._menu_simple

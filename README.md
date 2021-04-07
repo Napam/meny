@@ -1,6 +1,8 @@
 # PyPat-Console
 A simple and sexy way to make an console interface
 
+![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
+
 # How to setup
 First install the package with the command (make sure you have Python 3.6 or higher)
 ```

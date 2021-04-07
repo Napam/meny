@@ -78,8 +78,8 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
     except (ValueError, AssertionError, SyntaxError) as e:
         raise ConsoleError(
             f'Could not cast argument "{arg}" into type "{type_}"\n'
-            f"Got {type(e).__name__}:\n\t{e}"
-        )
+            f"Got {type(e).__name__}:\n  {e}"
+        ) from e
 
     return typed_arglist
 
@@ -107,6 +107,7 @@ def _error_info_case(error: Exception, func: Callable) -> None:
 
 
 def _error_info_parse(error: Exception):
+    # Didn't bother refactoring, so a lot of copy paste code here hehe
     lenerror = max(map(len, str(error).split("\n")))
     print(strings.BOLD + strings.RED + f"{' PARSE ERROR ':#^{lenerror}}" + strings.END)
     print(f'{f" Error message ":=^{lenerror}}')
@@ -216,7 +217,8 @@ class CLI:
                 # Will raise TypeError if casefunc() actually
                 # requires arguments
                 casefunc()
-        # TODO: Should I catch TypeError? What if actual TypeError occurs? Contemplate!
+        # TODO: Should I catch TypeError? What if actual TypeError occurs? 
+        #       Maybe should catch everything and just display it in big red text? Contemplate!
         except (TypeError, ConsoleError) as e:
             _error_info_case(e, casefunc)
 
@@ -238,7 +240,7 @@ class CLI:
                 "Windows does not have 'curses' by default, suggested fix:\n\t"
                     f"pip install windows-curses\n"
                 "windows-curses adds support for the standard Python curses module on Windows."
-            )
+            ) from e
 
         return curses_interface.interface(self)
 
@@ -297,7 +299,7 @@ class CLI:
         except KeyboardInterrupt:
             if self.on_kbinterrupt == "raise":
                 self._return_to_parent()
-                raise KeyboardInterrupt  # "Propagate exception"
+                raise KeyboardInterrupt # "Propagate exception"
             elif self.on_kbinterrupt == "return":
                 print()
                 return
@@ -342,8 +344,9 @@ def menu(
     run: To invoke .run() method on CLI object or not.
 
     main: Tells the function whether or not the menu is the main menu (i.e. the
-          first ("outermost") menu) or not. This is very import to specify when you give a
-          dictionary (e.g. the return value of locals()).
+          first ("outermost") menu) or not. This basically sets the behavior on how the menu 
+          should behave. It is equivalent to give the argumnts on_kbinterrupt="return" and 
+          blank_proceedure="pass"
 
     cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
                 positional arguments as values

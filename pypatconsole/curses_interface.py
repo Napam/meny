@@ -1,5 +1,6 @@
 import curses
 import curses.ascii
+from pypatconsole.utils import input_splitter
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 import pypatconsole
 import inspect
@@ -38,9 +39,9 @@ class BaseWindow:
 class InputField(BaseWindow):
     def __init__(self, main: "MainWindow") -> None:
         super().__init__(window=main._window)
-        self.main = main
-        self._inp = ""
-        self.inp_message = "Input: "
+        self.main: "MainWindow" = main
+        self._inp: str = ""
+        self.inp_message: str = "Input: "
         self.cprint(self.inp_message, newline=0)
         self.begin_y, self.begin_x = self._window.getyx()
         self.first_token: str = ""
@@ -105,7 +106,7 @@ class InputField(BaseWindow):
 
         elif k == curses.KEY_RIGHT:
             _, max_x = self._window.getmaxyx()
-            if x < max_x:
+            if (x < max_x) and (x < len(self.inp_message + self._inp)):
                 self._window.move(y, x + 1)
 
         elif k == curses.KEY_LEFT:
@@ -120,7 +121,7 @@ class InputField(BaseWindow):
             # Must capture newline explicitly, since insstr just treats it as space or something
             self.inp += "\n"
             self._window.clear()
-        elif (k in ("\b", "\x7f")):
+        elif k in ("\b", "\x7f"):
             # Some systems (erm, Windows at least) gives "\b" for backspace
             self.handle_backspace(y, x)
         elif (k == "\x00") or (ord(k) == 0):
@@ -193,6 +194,7 @@ class MainWindow(BaseWindow):
         # Clear line under input field
         self._window.move(prev_y + 1, 0)
         self._window.clrtoeol()
+        # highlight_funcmap function sets self.curr_index
         if self.curr_index is None:
             return
 
@@ -200,15 +202,30 @@ class MainWindow(BaseWindow):
         signature = inspect.signature(func)
         paramiter = signature.parameters.items()
         iterlen = len(paramiter)
+        # Dont show arghints for functions with programmatic arguments, and return if function
+        # does not take any parameters
         if (iterlen == 0) or (func in self.funcs_w_programmatic_args):
             return
 
         self._window.move(prev_y + 1, prev_x)  # Under input field
-        # TODO: Use better parser, .split does not look at quotation marks, results in wrong 
-        #       highlight
-        inp_list = inp.split()
+
+        # Needs to split smartly to handle for quotations for string arguments
+        input_split_error_flag: bool = False
+        try:
+            # Raises ValueError for malformed input caused by missing closing quotations
+            inp_list = pypatconsole.input_splitter(inp)
+        except ValueError as e:
+            assert e.args[0] == "No closing quotation", (
+                "shlex internals has changed, expected ValueError with args[0] == "
+                f"\"No closing quotation\", but got \"{type(e)}\" with args: {e.args}\n"
+                "Problem needs to be inspected by maintainer(s) of this package!"
+            )
+            inp_list = inp.split()
+            input_split_error_flag = True
+        
         n_tokens = len(inp_list)
 
+        # Print argument hints, underline the current argument
         self._window.addstr("(")
         for i, p in enumerate(paramiter):
             if i == n_tokens - 2:
@@ -219,8 +236,8 @@ class MainWindow(BaseWindow):
                 self._window.addstr(", ")
         self._window.addstr(")")
 
-        # Highlight with red if given too many arguments
-        if n_tokens > iterlen + 1:
+        # Highlight with red if given too many arguments or if input parser complained
+        if (n_tokens > (iterlen + 1)) or input_split_error_flag:
             self._window.chgat(prev_y + 1, prev_x, len(str(signature)), curses.color_pair(1))
 
     def run(self, window: "curses._CursesWindow"):

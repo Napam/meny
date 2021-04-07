@@ -64,8 +64,9 @@ def menu(
     run: To invoke .run() method on CLI object or not.
 
     main: Tells the function whether or not the menu is the main menu (i.e. the
-          first ("outermost") menu) or not. This is very import to specify when you give a
-          dictionary (e.g. the return value of locals()).
+          first ("outermost") menu) or not. This basically sets the behavior on how the menu 
+          should behave. It is equivalent to give the argumnts on_kbinterrupt="return" and 
+          blank_proceedure="pass"
 
     cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
                 positional arguments as values
@@ -74,8 +75,9 @@ def menu(
                   keyword arguments as values
 
     frontend: str, specify desired frontend:
-                    "auto": fancy frontend for Linux and Darwin, simple front end for Windows
-                    "fancy": Will try to use fancy front end (if on Windows, install
+                    "auto": Will try to use fancy frontend if curses module is available, else 
+                            use simple frontend
+                    "fancy": Use fancy front end (if on Windows, install
                              windows-curses first or Python will not be able to find the required
                              "curses" package that the fancy frontend uses)
                     "simple": Use the simple (but compatible with basically everything) frontend
@@ -154,6 +156,13 @@ There are two frontends implemented; the simple frontend and the fancy frontend.
            frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds
            the the ability to traverse the options using the arrow keys.
 
+It possible to override the default frontend throughout the Python program by doing
+```python
+import pypatconsole as ppc
+ppc.config.default_frontend = "auto" # auto, fancy, or simple
+```
+as opposed to specifying the choice of frontend for every `menu(..., frontend="...")` call. 
+
 ## Arguments
 The cases can take arguments as well! Simply implement them as functions with type hints (type hints are mandatory for the case functions):
 ````python
@@ -211,6 +220,9 @@ The program will read the desired types from the function signature, then it wil
 - list
 - set
 - dict
+
+However, if you need proper handling of argument types, I suggest you specify your inputs to be strings then manually handle them yourself to ensure expected behavior, as the process of turning the case inputs to 
+their designated types is done using `eval` with som string sanitation. 
 
 ## Programmatic Arguments
 You can supply arguments programmtically to your case functions:
@@ -287,10 +299,12 @@ To enforce a common behavior when entering and leaving a case within a menu, you
 
 ```python
 import sleep
+from functools import wraps
 
 def case_decorator(func):
     '''Decorator to enforce commmon behavior for cases'''
-
+    @wraps(func) # VERY IMPORTANT TO WRAP FUNCTIONS TO ENSURE THAT 
+                 # case_wrapper.__wrapped__ is set properly
     def case_wrapper(*args, **kwargs):
         '''Verbosity wrapper'''
         print('Yeah! Going in!')
@@ -299,8 +313,6 @@ def case_decorator(func):
         print('Woah! Going out!')
         sleep(1)
         return retobj
-    # This is necessary in order to unwrap using inspect module
-    case_wrapper.__wrapped__ = func
     return case_wrapper
 ```
 Since the decorator is a function, you cannot have it in the same namespace as the case functions, so you can for example implement it in another file. To use it you do as following:

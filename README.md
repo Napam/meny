@@ -10,6 +10,16 @@ pip install pypatconsole
 ```
 Then you can import ``pypatconsole`` in Python. The package lets you import three functions: ``menu``, ``list_local_cases`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``list_local_cases`` takes the output from ``locals()`` and lists all the functions in the local scope. ``clear_screen`` clears your screen, hence the name.
 
+This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.6, 3.7, and 3.8
+
+## Note for Windows users
+An original goal for this was to rely on built in Python packages only, which it does, for unix systems. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. Pypatconsole will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
+
+A way to get `curses` for Windows is to install `windows-curses`:
+`pip install windows-curses`
+
+I use Windows personally and `windows-curses` has worked fine so far. The `windows-curses` source code is availabe on github and [can be found here](https://github.com/zephyrproject-rtos/windows-curses). 
+
 # How to implement
 Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the ``menu`` function at the bottom
 ```python

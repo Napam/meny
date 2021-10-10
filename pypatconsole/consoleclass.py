@@ -6,7 +6,7 @@ menu()
 from time import sleep
 import pypatconsole.strings as strings
 import pypatconsole.config as cng
-from pypatconsole.funcmap import construct_funcmap, _docstring_firstline
+from pypatconsole.funcmap import construct_funcmap, _get_case_name
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
 from typing import List, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
@@ -92,7 +92,7 @@ def _error_info_case(error: Exception, func: Callable) -> None:
 
     func: Function with docstring
     """
-    selected_case_str = f'Selected case: "{strings.YELLOW+_docstring_firstline(func)+strings.END}"'
+    selected_case_str = f'Selected case: "{strings.YELLOW+_get_case_name(func)+strings.END}"'
     lenerror = max(map(len, str(error).split("\n")))
     lenerror = max(lenerror, len(RE_ANSI.sub("", selected_case_str)))
     print(strings.BOLD + strings.RED + f"{' ERROR ':#^{lenerror}}" + strings.END)

@@ -9,19 +9,33 @@ from inspect import getmembers, isfunction, getmodule, unwrap
 import inspect
 from types import ModuleType
 from typing import Dict, Union, Callable, List, Optional, Tuple
+import re 
 
-def _docstring_firstline(func: Callable) -> str:
-    '''Get first line of docstring of func'''
+def _get_case_name(func: Callable) -> str:
+    '''
+    TODO: Update docstring
+    '''
     # Unwrap in case the function is wrapped
     func = unwrap(func)
     if func.__doc__ is None:
-        raise NotImplementedError(f'Missing docstring in function {func}')
-    return func.__doc__.strip().split('\n')[0]
+        return func.__name__
+    
+    case_name_list: list = re.findall(":\((.*)\):", func.__doc__)
+
+    if len(case_name_list) == 0:
+        return func.name
+    elif len(case_name_list) == 1:
+        return case_name_list[0]
+    else:
+        raise SyntaxError(
+            f"There should only be one unique case name defined in the docstring "
+            f"of {func}, but got multiple: {case_name_list}"
+        )
 
 
 def __get_module_cases(module: ModuleType) -> List[Callable]:
     # Get all functions defined in module
-    f_ = lambda f: True if isfunction(f) and getmodule(f) == module else False
+    f_ = lambda f: isfunction(f) and (getmodule(f) == module)
     funcs = getmembers(module, f_) 
     # getmembers returns a tuple with the func names as first element 
     # and function object as second
@@ -30,11 +44,13 @@ def __get_module_cases(module: ModuleType) -> List[Callable]:
     funcs = [f[1] for f in funcs]
     return funcs
 
-def construct_funcmap(cases: Union[ModuleType, List[Callable]], other_cases: Optional[List]=None, 
+def construct_funcmap(cases_or_module: Union[ModuleType, List[Callable]], other_cases: Optional[List]=None, 
                       decorator: Optional[Callable]=None) -> Dict[str, Tuple[str, Callable]]:
     '''
     Parameters
     ------------
+    TODO: Update docstring
+    
     cases: if given a module: module containing functions that serves as 
            cases a user can pick from terminal interface. the module should
            not implement any other functions. 
@@ -61,12 +77,12 @@ def construct_funcmap(cases: Union[ModuleType, List[Callable]], other_cases: Opt
     second element is the function itself:
     ('Scrape OSEBX', function object)
     '''
-    if type(cases) == ModuleType:
-        funcs = __get_module_cases(cases)
-    elif type(cases) == list:
-        funcs = cases
+    if isinstance(cases_or_module, ModuleType):
+        funcs = __get_module_cases(cases_or_module)
+    elif isinstance(cases_or_module, (list, tuple)): # Maybe check for iterable instead?
+        funcs = cases_or_module
     else:
-        raise TypeError('Unsupported type for cases container')
+        raise TypeError(f'Unsupported type for cases container: got {type(cases_or_module)}')
 
     # Append other functions if specified
     if other_cases is not None:
@@ -76,10 +92,10 @@ def construct_funcmap(cases: Union[ModuleType, List[Callable]], other_cases: Opt
 
     if decorator is not None:
         for i, func in enumerate(funcs, start=1):
-            func_map[str(i)] = (_docstring_firstline(func), decorator(func))
+            func_map[str(i)] = (_get_case_name(func), decorator(func))
     else:
         for i, func in enumerate(funcs, start=1):
-            func_map[str(i)] = (_docstring_firstline(func), func)
+            func_map[str(i)] = (_get_case_name(func), func)
 
     return func_map
 

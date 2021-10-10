@@ -44,7 +44,7 @@ ppc.config.default_frontend = "auto" # Set default frontend here
 
 def case1(n: int = 10, waittime: float = 0.1):
     """
-    FizzBuzz!
+    :(FizzBuzz!):
 
     When you get the urge to fizz your buzz
     if you know what I mean
@@ -68,7 +68,7 @@ def case1(n: int = 10, waittime: float = 0.1):
 
 def case2(a: str, b: str):
     """
-    Append two strings
+    :(Append two strings):
     """
     print(a + b)
     sleep(0.5)
@@ -76,7 +76,7 @@ def case2(a: str, b: str):
 
 def case3():
     """
-    A nested menu
+    :(A nested menu):
 
     This nested menu loads cases from a module
     """
@@ -85,21 +85,21 @@ def case3():
 
 def case4():
     """
-    Math menu
+    :(Math menu):
 
     This nested menu gets the cases from a user defined list.
     """
 
     def subcase1(x: float, y: float):
         """
-        Multiply two floats
+        :(Multiply two floats):
         """
         print(x * y)
         sleep(0.5)
 
     def subcase2(x: float, y: float):
         """
-        Divide two floats
+        :(Divide two floats):
         """
         if y == 0:
             print("You can't divide by zero!!!")
@@ -114,7 +114,7 @@ def case4():
 
 def case5():
     """
-    Even another nested menu
+    :(Even another nested menu):
 
     This menu obtains the nested case functions by
     sending the return value of locals() into menu()
@@ -122,7 +122,7 @@ def case5():
 
     def subcase1():
         """
-        Print triangle
+        :(Print triangle):
         """
         for j in range(10):
             print("*" * j)
@@ -131,7 +131,7 @@ def case5():
 
     def subcase2():
         """
-        Print rectangle
+        :(Print rectangle):
         """
         for i in range(10):
             print("#" * 10)
@@ -140,7 +140,7 @@ def case5():
 
     def subcase3(a: list):
         """
-        Print list
+        :(Print list):
         """
         print(a)
         sleep(0.5)
@@ -150,8 +150,12 @@ def case5():
 
 def case6(a, b, c, d):
     """
-    Programmatic arguments
+    :(Programmatic arguments):
     """
+    print(a, b, c, 4)
+    sleep(0.5)
+
+def case7(a, b, c, d):
     print(a, b, c, 4)
     sleep(0.5)
 

@@ -5,33 +5,25 @@ the console cases. The dictionary keys consists of a range of integers
 and the values are the cases (which are functions). 
 '''
 
-from inspect import getmembers, isfunction, getmodule, unwrap
+from inspect import isfunction, getmodule, unwrap
 import inspect
-from types import ModuleType
+from types import FunctionType, ModuleType
 from typing import Dict, Union, Callable, List, Optional, Tuple
-import re 
+import re
+from .decorator import _CASE_TITLE
+from .utils import getmembers
 
-def _get_case_name(func: Callable) -> str:
+def _get_case_name(func: FunctionType) -> str:
     '''
     TODO: Update docstring
     '''
     # Unwrap in case the function is wrapped
     func = unwrap(func)
-    if func.__doc__ is None:
-        return func.__name__
     
-    case_name_list: list = re.findall(":\((.*)\):", func.__doc__)
-
-    if len(case_name_list) == 0:
-        return func.name
-    elif len(case_name_list) == 1:
-        return case_name_list[0]
+    if _CASE_TITLE in func.__dict__:
+        return func.__dict__[_CASE_TITLE]
     else:
-        raise SyntaxError(
-            f"There should only be one unique case name defined in the docstring "
-            f"of {func}, but got multiple: {case_name_list}"
-        )
-
+        return func.__name__
 
 def __get_module_cases(module: ModuleType) -> List[Callable]:
     # Get all functions defined in module

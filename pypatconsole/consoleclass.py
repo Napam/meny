@@ -10,7 +10,7 @@ from pypatconsole.funcmap import construct_funcmap, _get_case_name
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
 from typing import List, Union, Callable, Dict, Optional
 from inspect import getfullargspec, unwrap, signature
-from types import ModuleType
+from types import ModuleType, FunctionType
 from ast import literal_eval
 import re
 
@@ -116,7 +116,6 @@ def _error_info_parse(error: Exception):
     print()
     print(strings.INPUT_WAIT_PROMPT_MSG)
     input()
-
 
 class CLI:
     """
@@ -307,7 +306,7 @@ class CLI:
 
 
 def menu(
-    cases: Union[List[Callable], Dict[str, Callable], ModuleType],
+    cases: Union[Callable, List[Callable], Dict[str, Callable], ModuleType],
     title: str = strings.DEFAULT_TITLE,
     blank_proceedure: str = "return",
     on_kbinterrupt: str = "raise",
@@ -316,9 +315,11 @@ def menu(
     main: bool = False,
     case_args: Optional[Dict[Callable, tuple]] = None,
     case_kwargs: Optional[Dict[Callable, dict]] = None,
-    frontend: Optional[str] = None,
+    frontend: Optional[str] = None
 ):
-    """
+    """¨
+    TODO: Update docstring for newapi branch
+
     Factory function for the CLI class. This function initializes a menu.
 
     Parameters

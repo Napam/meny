@@ -42,10 +42,9 @@ import pypatconsole as ppc
 from pypatconsole import menu
 ppc.config.default_frontend = "auto" # Set default frontend here
 
+@ppc.case("FizzBuzz!")
 def case1(n: int = 10, waittime: float = 0.1):
     """
-    :(FizzBuzz!):
-
     When you get the urge to fizz your buzz
     if you know what I mean
     """
@@ -65,28 +64,23 @@ def case1(n: int = 10, waittime: float = 0.1):
         print(stringy)
         sleep(waittime)
 
-
+@ppc.case("Append two strings")
 def case2(a: str, b: str):
-    """
-    :(Append two strings):
-    """
     print(a + b)
     sleep(0.5)
 
 
+@ppc.case("A nested module menu")
 def case3():
     """
-    :(A nested menu):
-
     This nested menu loads cases from a module
     """
     menu(cases_nested, title=" Nested! ")
 
 
+@ppc.case("Math menu")
 def case4():
     """
-    :(Math menu):
-
     This nested menu gets the cases from a user defined list.
     """
 
@@ -112,53 +106,45 @@ def case4():
     menu([subcase1, subcase2], title=" Quick maths ")
 
 
+@ppc.case("Even another nested menu")
 def case5():
     """
-    :(Even another nested menu):
-
     This menu obtains the nested case functions by
     sending the return value of locals() into menu()
     """
 
+    @ppc.case("Print triangle")
     def subcase1():
-        """
-        :(Print triangle):
-        """
         for j in range(10):
             print("*" * j)
 
         sleep(0.5)
 
+    @ppc.case("Print rectangle")
     def subcase2():
-        """
-        :(Print rectangle):
-        """
         for i in range(10):
             print("#" * 10)
 
         sleep(0.5)
 
+    @ppc.case("Print list")
     def subcase3(a: list):
-        """
-        :(Print list):
-        """
         print(a)
         sleep(0.5)
 
     menu(locals(), title=" Shapes ")
 
 
+@ppc.case("Programmatic arguments")
 def case6(a, b, c, d):
-    """
-    :(Programmatic arguments):
-    """
     print(a, b, c, 4)
     sleep(0.5)
 
-def case7(a, b, c, d):
-    print(a, b, c, 4)
-    sleep(0.5)
-
+def just_function_name(arg: str = "Hello World"):
+    print("This function does not just ppc.case decorator and therefore the menu only shows the name")
+    print(f"Also, here is the input: \"{arg}\"")
+    print("Press enter to return")
+    input()
 
 if __name__ == "__main__":
     case_args = {case6: (1, 2)}

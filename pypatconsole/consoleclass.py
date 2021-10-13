@@ -9,7 +9,7 @@ import pypatconsole.config as cng
 from pypatconsole.funcmap import construct_funcmap, _get_case_name
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
 from typing import List, Union, Callable, Dict, Optional
-from inspect import getfullargspec, unwrap, signature
+from inspect import getfullargspec, getmembers, getmodule, isfunction, unwrap, signature
 from types import ModuleType, FunctionType
 from ast import literal_eval
 import re
@@ -305,6 +305,18 @@ class CLI:
                 return
 
 
+def __get_module_cases(module: ModuleType) -> List[Callable]:
+    # Get all functions defined in module
+    f_ = lambda f: isfunction(f) and (getmodule(f) == module)
+    funcs = getmembers(module, f_) 
+    # getmembers returns a tuple with the func names as first element 
+    # and function object as second
+
+    # unpack dat shit yo
+    funcs = [f[1] for f in funcs]
+    return funcs
+
+
 def menu(
     cases: Union[Callable, List[Callable], Dict[str, Callable], ModuleType],
     title: str = strings.DEFAULT_TITLE,
@@ -372,6 +384,8 @@ def menu(
     """
     if isinstance(cases, list):
         cases_to_send = cases
+    elif isinstance(cases, ModuleType):
+        cases_to_send = __get_module_cases(cases)
     elif isinstance(cases, dict):
         cases_to_send = list_local_cases(cases)
         # If this menu is the first menu initialized, and is given the locally

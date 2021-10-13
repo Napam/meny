@@ -83,18 +83,13 @@ def case4():
     """
     This nested menu gets the cases from a user defined list.
     """
-
+    @ppc.case("Multiply two floats")
     def subcase1(x: float, y: float):
-        """
-        :(Multiply two floats):
-        """
         print(x * y)
         sleep(0.5)
 
+    @ppc.case("Divide two floats")
     def subcase2(x: float, y: float):
-        """
-        :(Divide two floats):
-        """
         if y == 0:
             print("You can't divide by zero!!!")
             sleep(0.5)
@@ -103,7 +98,7 @@ def case4():
         print(x / y)
         sleep(0.5)
 
-    menu([subcase1, subcase2], title=" Quick maths ")
+    menu(locals(), title=" Quick maths ")
 
 
 @ppc.case("Even another nested menu")
@@ -141,7 +136,7 @@ def case6(a, b, c, d):
     sleep(0.5)
 
 def just_function_name(arg: str = "Hello World"):
-    print("This function does not just ppc.case decorator and therefore the menu only shows the name")
+    print("This function does not use ppc.case decorator and therefore the menu only shows the name")
     print(f"Also, here is the input: \"{arg}\"")
     print("Press enter to return")
     input()

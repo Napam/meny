@@ -5,13 +5,11 @@ the console cases. The dictionary keys consists of a range of integers
 and the values are the cases (which are functions). 
 '''
 
-from inspect import isfunction, getmodule, unwrap
-import inspect
+from inspect import isfunction, getmodule, unwrap, getmembers
 from types import FunctionType, ModuleType
 from typing import Dict, Union, Callable, List, Optional, Tuple
 import re
-from .decorator import _CASE_TITLE
-from .utils import getmembers
+from .decorator import _CASE_TITLE, _DEFINITION_ORDER
 
 def _get_case_name(func: FunctionType) -> str:
     '''
@@ -25,23 +23,13 @@ def _get_case_name(func: FunctionType) -> str:
     else:
         return func.__name__
 
-def __get_module_cases(module: ModuleType) -> List[Callable]:
-    # Get all functions defined in module
-    f_ = lambda f: isfunction(f) and (getmodule(f) == module)
-    funcs = getmembers(module, f_) 
-    # getmembers returns a tuple with the func names as first element 
-    # and function object as second
 
-    # unpack dat shit yo
-    funcs = [f[1] for f in funcs]
-    return funcs
-
-def construct_funcmap(cases_or_module: Union[ModuleType, List[Callable]], other_cases: Optional[List]=None, 
-                      decorator: Optional[Callable]=None) -> Dict[str, Tuple[str, Callable]]:
+def construct_funcmap(funcs: List[Callable], decorator: Optional[Callable]=None) -> Dict[str, Tuple[str, Callable]]:
     '''
     Parameters
     ------------
     TODO: Update docstring
+    TODO: Refactor module function extraction out of funcmap module
     
     cases: if given a module: module containing functions that serves as 
            cases a user can pick from terminal interface. the module should
@@ -69,17 +57,9 @@ def construct_funcmap(cases_or_module: Union[ModuleType, List[Callable]], other_
     second element is the function itself:
     ('Scrape OSEBX', function object)
     '''
-    if isinstance(cases_or_module, ModuleType):
-        funcs = __get_module_cases(cases_or_module)
-    elif isinstance(cases_or_module, (list, tuple)): # Maybe check for iterable instead?
-        funcs = cases_or_module
-    else:
-        raise TypeError(f'Unsupported type for cases container: got {type(cases_or_module)}')
-
-    # Append other functions if specified
-    if other_cases is not None:
-        funcs = funcs + other_cases
-
+    if not isinstance(funcs, (list, tuple)): # Maybe check for iterable instead?
+        raise TypeError(f'Unsupported type for cases container: got {type(funcs)}')
+    
     func_map: Dict[str, Tuple[str, Callable]] = {}
 
     if decorator is not None:
@@ -93,4 +73,4 @@ def construct_funcmap(cases_or_module: Union[ModuleType, List[Callable]], other_
 
 
 if __name__ == '__main__':
-    print(__get_module_cases(inspect))
+    pass

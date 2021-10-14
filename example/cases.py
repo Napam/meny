@@ -40,7 +40,9 @@ from time import sleep
 import cases_nested
 import pypatconsole as ppc
 from pypatconsole import menu
-ppc.config.default_frontend = "auto" # Set default frontend here
+
+ppc.config.default_frontend = "auto"  # Set default frontend here
+
 
 @ppc.case("FizzBuzz!")
 def case1(n: int = 10, waittime: float = 0.1):
@@ -64,6 +66,7 @@ def case1(n: int = 10, waittime: float = 0.1):
         print(stringy)
         sleep(waittime)
 
+
 @ppc.case("Append two strings")
 def case2(a: str, b: str):
     print(a + b)
@@ -83,6 +86,7 @@ def case4():
     """
     This nested menu gets the cases from a user defined list.
     """
+
     @ppc.case("Multiply two floats")
     def subcase1(x: float, y: float):
         print(x * y)
@@ -135,11 +139,13 @@ def case6(a, b, c, d):
     print(a, b, c, 4)
     sleep(0.5)
 
+
 def just_function_name(arg: str = "Hello World"):
     print("This function does not use ppc.case decorator and therefore the menu only shows the name")
-    print(f"Also, here is the input: \"{arg}\"")
+    print(f'Also, here is the input: "{arg}"')
     print("Press enter to return")
     input()
+
 
 if __name__ == "__main__":
     case_args = {case6: (1, 2)}

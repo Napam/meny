@@ -8,13 +8,15 @@ import pypatconsole.strings as strings
 import pypatconsole.config as cng
 from pypatconsole.funcmap import construct_funcmap, _get_case_name
 from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
-from typing import List, Union, Callable, Dict, Optional
+from pypatconsole.config import _CASE_IGNORE
+from typing import Iterable, List, Union, Callable, Dict, Optional
 from inspect import getfullargspec, getmembers, getmodule, isfunction, unwrap, signature
 from types import ModuleType, FunctionType
 from ast import literal_eval
 import re
 
 RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
+
 
 def raise_interrupt(*args, **kwargs) -> None:
     """
@@ -117,6 +119,7 @@ def _error_info_parse(error: Exception):
     print(strings.INPUT_WAIT_PROMPT_MSG)
     input()
 
+
 class CLI:
     """
     Command Line Interface class
@@ -124,7 +127,7 @@ class CLI:
 
     def __init__(
         self,
-        cases,
+        cases: Iterable[FunctionType],
         title: str = strings.LOGO_TITLE,
         blank_proceedure: Union[str, Callable] = "return",
         on_kbinterrupt: str = "raise",
@@ -181,10 +184,11 @@ class CLI:
             self._frontend = self._menu_simple
             try:
                 import curses
+
                 self._frontend = self._menu_curses
             except ImportError:
                 pass
-                
+
         elif frontend == "fancy":
             self._frontend = self._menu_curses
         elif frontend == "simple":
@@ -217,7 +221,7 @@ class CLI:
                 # Will raise TypeError if casefunc() actually
                 # requires arguments
                 casefunc()
-        # TODO: Should I catch TypeError? What if actual TypeError occurs? 
+        # TODO: Should I catch TypeError? What if actual TypeError occurs?
         #       Maybe should catch everything and just display it in big red text? Contemplate!
         except (TypeError, ConsoleError) as e:
             _error_info_case(e, casefunc)
@@ -238,7 +242,7 @@ class CLI:
                 "This is probably caused by inability to import the 'curses' module.\n"
                 "The curses module should be a built-in for Unix installations.\n"
                 "Windows does not have 'curses' by default, suggested fix:\n\t"
-                    f"pip install windows-curses\n"
+                f"pip install windows-curses\n"
                 "windows-curses adds support for the standard Python curses module on Windows."
             ) from e
 
@@ -299,22 +303,16 @@ class CLI:
         except KeyboardInterrupt:
             if self.on_kbinterrupt == "raise":
                 self._return_to_parent()
-                raise KeyboardInterrupt # "Propagate exception"
+                raise KeyboardInterrupt  # "Propagate exception"
             elif self.on_kbinterrupt == "return":
                 print()
                 return
 
 
 def __get_module_cases(module: ModuleType) -> List[Callable]:
-    # Get all functions defined in module
-    f_ = lambda f: isfunction(f) and (getmodule(f) == module)
-    funcs = getmembers(module, f_) 
-    # getmembers returns a tuple with the func names as first element 
-    # and function object as second
-
-    # unpack dat shit yo
-    funcs = [f[1] for f in funcs]
-    return funcs
+    """Get all functions defined in module"""
+    inModule = lambda f: isfunction(f) and (getmodule(f) == module)
+    return [func for func in vars(module).values() if inModule(func)]
 
 
 def menu(
@@ -327,7 +325,7 @@ def menu(
     main: bool = False,
     case_args: Optional[Dict[Callable, tuple]] = None,
     case_kwargs: Optional[Dict[Callable, dict]] = None,
-    frontend: Optional[str] = None
+    frontend: Optional[str] = None,
 ):
     """¨
     TODO: Update docstring for newapi branch
@@ -352,17 +350,17 @@ def menu(
                       'pass', does nothing. This should only be used for the
                       main menu
 
-    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running. 
+    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
                     If "raise", then will raise KeyboardInterrupt, if "return" the menu exits, and
-                    returns. 
+                    returns.
 
     decorator: Decorator for case functions
 
     run: To invoke .run() method on CLI object or not.
 
     main: Tells the function whether or not the menu is the main menu (i.e. the
-          first ("outermost") menu) or not. This basically sets the behavior on how the menu 
-          should behave. It is equivalent to give the argumnts on_kbinterrupt="return" and 
+          first ("outermost") menu) or not. This basically sets the behavior on how the menu
+          should behave. It is equivalent to give the argumnts on_kbinterrupt="return" and
           blank_proceedure="pass"
 
     cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
@@ -372,7 +370,7 @@ def menu(
                   keyword arguments as values
 
     frontend: str, specify desired frontend:
-                    "auto": Will try to use fancy frontend if curses module is available, else 
+                    "auto": Will try to use fancy frontend if curses module is available, else
                             use simple frontend
                     "fancy": Use fancy front end (if on Windows, install
                              windows-curses first or Python will not be able to find the required
@@ -392,12 +390,11 @@ def menu(
         # defined functions, then must filter the functions that are defined
         # in __main__
         if main:
-            cases_to_send = [c for c in cases_to_send if c.__module__ == "__main__"]
-
-    elif isinstance(cases, ModuleType):
-        cases_to_send = cases
+            cases_to_send = [case for case in cases_to_send if case.__module__ == "__main__"]
     else:
-        raise TypeError("Invalid type")
+        raise TypeError(f"Invalid type for cases, got: {type(cases)}")
+
+    cases_to_send = filter(lambda case: _CASE_IGNORE not in vars(case), cases_to_send)
 
     if main:
         blank_proceedure = "pass"

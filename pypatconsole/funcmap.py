@@ -1,15 +1,15 @@
 '''
 This module primarily conatins a the construct_funcmap
-function. The function constructs the dictionary that contains 
+function. The function constructs the dictionary that contains
 the console cases. The dictionary keys consists of a range of integers
-and the values are the cases (which are functions). 
+and the values are the cases (which are functions).
 '''
 
 from inspect import isfunction, getmodule, unwrap, getmembers
-from types import FunctionType, ModuleType
-from typing import Dict, Union, Callable, List, Optional, Tuple
+from types import FunctionType, ModuleType, GeneratorType
+from typing import Dict, Iterable, Union, Callable, List, Optional, Tuple
 import re
-from .decorator import _CASE_TITLE, _DEFINITION_ORDER
+from pypatconsole.config import _CASE_TITLE, _DEFINITION_ORDER
 
 def _get_case_name(func: FunctionType) -> str:
     '''
@@ -24,28 +24,11 @@ def _get_case_name(func: FunctionType) -> str:
         return func.__name__
 
 
-def construct_funcmap(funcs: List[Callable], decorator: Optional[Callable]=None) -> Dict[str, Tuple[str, Callable]]:
+def construct_funcmap(funcs: Iterable[FunctionType], decorator: Optional[FunctionType]=None) -> Dict[str, Tuple[str, Callable]]:
     '''
     Parameters
     ------------
-    TODO: Update docstring
-    TODO: Refactor module function extraction out of funcmap module
-    
-    cases: if given a module: module containing functions that serves as 
-           cases a user can pick from terminal interface. the module should
-           not implement any other functions. 
-    
-           if given a list: will simply use function in list as cases.
-
-           First line of docstring becomes case description
-           ALL CASES MUST CONTAIN DOCSTRINGS
-
-    other_cases: optional, list of other additional cases (functions).
-                 These functions will simply be appended to the end of 
-                 an already existing list. 
-
-                 IMPORTANT: All case functions must have docstrings 
-
+    funcs: Iterable[FunctionType]
     decorator: optional, a decorator to decorate all case functions 
 
     Returns
@@ -57,10 +40,10 @@ def construct_funcmap(funcs: List[Callable], decorator: Optional[Callable]=None)
     second element is the function itself:
     ('Scrape OSEBX', function object)
     '''
-    if not isinstance(funcs, (list, tuple)): # Maybe check for iterable instead?
-        raise TypeError(f'Unsupported type for cases container: got {type(funcs)}')
+    if not isinstance(funcs, Iterable): 
+        raise TypeError(f'Unsupported type for functions: got {type(funcs)}')
     
-    func_map: Dict[str, Tuple[str, Callable]] = {}
+    func_map: Dict[str, Tuple[str, FunctionType]] = {}
 
     if decorator is not None:
         for i, func in enumerate(funcs, start=1):

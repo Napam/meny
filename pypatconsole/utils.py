@@ -2,16 +2,15 @@
 Common stuff for console stuff
 """
 import os
-from inspect import isfunction, isclass, getmro
-from types import FunctionType, DynamicClassAttribute
+from inspect import isfunction
+from types import FunctionType
 from typing import Callable, List, Dict, Union
 from shlex import shlex
-from functools import wraps
-from .decorator import _DEFINITION_ORDER
-from math import inf
+from pypatconsole.config import _DEFINITION_ORDER
 
 # *Nix uses clear, windows uses cls
 __CLEAR_COMMAND = "cls" if os.name == "nt" else "clear"
+
 
 def clear_screen() -> None:
     """Obvious"""
@@ -24,11 +23,15 @@ def list_local_cases(locals_: Dict[str, Callable], main: bool = False) -> List[C
     -------------
     locals_: return value of locals()
 
-    Returns a list of functions sorted alphabetically by function names.
+    Returns a list of functions. Orders are whatever is from locals() or globals(). Python parses
+    top down, and inserts the functions in a dictionary. CPython's dict implementation in Python 3.6
+    iterates through dict items in insertion order. As of Python 3.7 said behavior become a
+    standard for Python.
+
+    See:
+    https://softwaremaniacs.org/blog/2020/02/05/dicts-ordered/
     """
-    functions = [pairs[1] for pairs in list(locals_.items()) if isfunction(pairs[1])]
-    functions.sort(key=lambda f: f.__dict__.get(_DEFINITION_ORDER, inf))
-    return functions
+    return [pairs[1] for pairs in list(locals_.items()) if isfunction(pairs[1])]
 
 
 def input_splitter(argstring: str) -> List[str]:
@@ -55,6 +58,7 @@ def print_help(*args, **kwargs) -> None:
         """
     )
     input()
+
 
 if __name__ == "__main__":
     pass

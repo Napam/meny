@@ -380,9 +380,7 @@ def menu(
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu.
     """
-    if isinstance(cases, list):
-        cases_to_send = cases
-    elif isinstance(cases, ModuleType):
+    if isinstance(cases, ModuleType):
         cases_to_send = __get_module_cases(cases)
     elif isinstance(cases, dict):
         cases_to_send = list_local_cases(cases)
@@ -390,7 +388,9 @@ def menu(
         # defined functions, then must filter the functions that are defined
         # in __main__
         if main:
-            cases_to_send = [case for case in cases_to_send if case.__module__ == "__main__"]
+            cases_to_send = [case for case in cases_to_send if getmodule(case) == "__main__"]
+    elif isinstance(cases, Iterable):
+        cases_to_send = cases
     else:
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
 

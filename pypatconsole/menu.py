@@ -3,19 +3,23 @@ Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
 
-from time import sleep
-import pypatconsole.strings as strings
-import pypatconsole.config as cng
-from pypatconsole.funcmap import construct_funcmap, _get_case_name
-from pypatconsole.utils import clear_screen, input_splitter, list_local_cases, print_help
-from pypatconsole.config import _CASE_IGNORE
-from typing import Iterable, List, Union, Callable, Dict, Optional
-from inspect import getfullargspec, getmembers, getmodule, isfunction, unwrap, signature
-from types import ModuleType, FunctionType
 from ast import literal_eval
-import re
+from inspect import getfullargspec, getmembers, getmodule, isfunction, signature, unwrap
+from time import sleep
+from types import FunctionType, ModuleType
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
-RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
+import pypatconsole.config as cng
+import pypatconsole.strings as strings
+from pypatconsole.config import _CASE_IGNORE
+from pypatconsole.funcmap import _get_case_name, construct_funcmap
+from pypatconsole.utils import (
+    RE_ANSI,
+    clear_screen,
+    input_splitter,
+    list_local_cases,
+    print_help,
+)
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -37,10 +41,16 @@ _SPECIAL_ARG_CASES = {
 }
 
 
-class ConsoleError(Exception):
+class MenuError(Exception):
     """
     Custom exception for console related stuff since I dont want to catch too many exceptions
     from Python.
+    """
+
+
+class MenuQuitException(Exception):
+    """
+    For exiting all console instances
     """
 
 
@@ -64,7 +74,9 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
         raise NotImplementedError(f"Missing typehints in {func}")
 
     if len(arglist) > len(args):
-        raise ConsoleError(f"Got too many arguments, should be {len(args)}, but got {len(arglist)}")
+        raise MenuError(
+            f"Got too many arguments, should be {len(args)}, but got {len(arglist)}"
+        )
 
     # Special proceedures for special classes
     typed_arglist = []
@@ -78,7 +90,7 @@ def _handle_arglist(func: Callable, arglist: list) -> List:
                 typed_arglist.append(type_(arg))
 
     except (ValueError, AssertionError, SyntaxError) as e:
-        raise ConsoleError(
+        raise MenuError(
             f'Could not cast argument "{arg}" into type "{type_}"\n'
             f"Got {type(e).__name__}:\n  {e}"
         ) from e
@@ -94,7 +106,9 @@ def _error_info_case(error: Exception, func: Callable) -> None:
 
     func: Function with docstring
     """
-    selected_case_str = f'Selected case: "{strings.YELLOW+_get_case_name(func)+strings.END}"'
+    selected_case_str = (
+        f'Selected case: "{strings.YELLOW+_get_case_name(func)+strings.END}"'
+    )
     lenerror = max(map(len, str(error).split("\n")))
     lenerror = max(lenerror, len(RE_ANSI.sub("", selected_case_str)))
     print(strings.BOLD + strings.RED + f"{' ERROR ':#^{lenerror}}" + strings.END)
@@ -109,7 +123,6 @@ def _error_info_case(error: Exception, func: Callable) -> None:
 
 
 def _error_info_parse(error: Exception):
-    # Didn't bother refactoring, so a lot of copy paste code here hehe
     lenerror = max(map(len, str(error).split("\n")))
     print(strings.BOLD + strings.RED + f"{' PARSE ERROR ':#^{lenerror}}" + strings.END)
     print(f'{f" Error message ":=^{lenerror}}')
@@ -120,16 +133,20 @@ def _error_info_parse(error: Exception):
     input()
 
 
-class CLI:
+class Menu:
     """
     Command Line Interface class
     """
+
+    # Menu depth counter to keep track of how many nested menus are running. This will work across
+    # modules since Python modules doubles as singletons.
+    _depth: int = 0
 
     def __init__(
         self,
         cases: Iterable[FunctionType],
         title: str = strings.LOGO_TITLE,
-        blank_proceedure: Union[str, Callable] = "return",
+        on_blank: Union[str, Callable] = "return",
         on_kbinterrupt: str = "raise",
         decorator: Optional[Callable] = None,
         case_args: Optional[Dict[Callable, tuple]] = None,
@@ -152,13 +169,16 @@ class CLI:
 
         title: String to print over alternatives
 
-        blank_proceedure: What to do when given blank input (defaults to
+        on_blank: What to do when given blank input (defaults to
                           stopping current view (without exiting)). See
                           docstring for menu() for more info.
 
         See menu function for more info
         """
-        assert on_kbinterrupt in ("raise", "return"), "Invalid choice for on_kbinterrupt"
+        assert on_kbinterrupt in (
+            "raise",
+            "return",
+        ), "Invalid choice for on_kbinterrupt"
         self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
         self.on_kbinterrupt = on_kbinterrupt
@@ -170,15 +190,19 @@ class CLI:
         if self.case_kwargs is None:
             self.case_kwargs = {}
 
-        if blank_proceedure == "return":
-            self.blank_proceedure = self._return_to_parent
-        elif blank_proceedure == "pass":
-            self.blank_proceedure = self._pass
+        if on_blank == "return":
+            self.on_blank = self._return_to_parent
+        elif on_blank == "pass":
+            self.on_blank = self._pass
         else:
             raise ValueError("Invalid choice of black_proceedure")
 
         # Special options
-        self.special_cases = {"..": self.blank_proceedure, "q": raise_interrupt, "h": print_help}
+        self.special_cases = {
+            "..": self.on_blank,
+            "q": self._quit,
+            "h": print_help,
+        }
 
         if frontend == "auto":
             self._frontend = self._menu_simple
@@ -194,10 +218,15 @@ class CLI:
         elif frontend == "simple":
             self._frontend = self._menu_simple
         else:
-            raise ValueError(f"Got unexpected specification for frontend: {self._frontend}")
+            raise ValueError(
+                f"Got unexpected specification for frontend: {self._frontend}"
+            )
 
     def _return_to_parent(self):
         self.active = False
+
+    def _quit(self):
+        raise MenuQuitException
 
     def _pass(self):
         pass
@@ -209,7 +238,7 @@ class CLI:
         try:
             if args or kwargs:  # If programmatic arguments
                 if inputlist:
-                    raise ConsoleError(
+                    raise MenuError(
                         "This function takes arguments progammatically"
                         " and should not be given any arguments"
                     )
@@ -223,7 +252,7 @@ class CLI:
                 casefunc()
         # TODO: Should I catch TypeError? What if actual TypeError occurs?
         #       Maybe should catch everything and just display it in big red text? Contemplate!
-        except (TypeError, ConsoleError) as e:
+        except (TypeError, MenuError) as e:
             _error_info_case(e, casefunc)
 
     def _menu_simple(self) -> str:
@@ -258,7 +287,7 @@ class CLI:
             clear_screen()
             # Empty string to signal "return"
             if (not inputstring) or inputstring == "\n":
-                self.blank_proceedure()
+                self.on_blank()
                 continue
 
             # Tokenize input
@@ -298,6 +327,7 @@ class CLI:
         Runs menu loop within try except KeyboardInterrupt
         """
         self.active = True
+        Menu._depth += 1
         try:
             self._menu_loop()
         except KeyboardInterrupt:
@@ -307,6 +337,11 @@ class CLI:
             elif self.on_kbinterrupt == "return":
                 print()
                 return
+        except MenuQuitException:
+            if Menu._depth > 1:
+                raise
+        finally:
+            Menu._depth -= 1
 
 
 def __get_module_cases(module: ModuleType) -> List[Callable]:
@@ -318,8 +353,9 @@ def __get_module_cases(module: ModuleType) -> List[Callable]:
 def menu(
     cases: Union[Callable, List[Callable], Dict[str, Callable], ModuleType],
     title: str = strings.DEFAULT_TITLE,
-    blank_proceedure: str = "return",
+    on_blank: str = "return",
     on_kbinterrupt: str = "raise",
+    on_quit: str = "raise",
     decorator: Optional[Callable] = None,
     run: bool = True,
     main: bool = False,
@@ -342,17 +378,16 @@ def menu(
 
     title: title of menu
 
-    blank_proceedure: str, What to do the when given blank input. Available options
-                      are:
+    on_blank: What to do the when given blank input. Available options are:
+             'return', will return to parent menu
 
-                      'return', will return to parent menu
-
-                      'pass', does nothing. This should only be used for the
-                      main menu
+             'pass', does nothing. This should only be used for the main menu.
 
     on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
                     If "raise", then will raise KeyboardInterrupt, if "return" the menu exits, and
                     returns.
+
+    on_quit: Behavior when encountering ConsoleQuitException. If ""
 
     decorator: Decorator for case functions
 
@@ -360,8 +395,8 @@ def menu(
 
     main: Tells the function whether or not the menu is the main menu (i.e. the
           first ("outermost") menu) or not. This basically sets the behavior on how the menu
-          should behave. It is equivalent to give the argumnts on_kbinterrupt="return" and
-          blank_proceedure="pass"
+          should behave. It is equivalent to give the arguments on_kbinterrupt="return" and
+          on_blank="pass"
 
     cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
                 positional arguments as values
@@ -387,8 +422,13 @@ def menu(
         # If this menu is the first menu initialized, and is given the locally
         # defined functions, then must filter the functions that are defined
         # in __main__
-        if main:
-            cases_to_send = [case for case in cases_to_send if getmodule(case) == "__main__"]
+
+        moduleName: Union[str, None] = cases.get("__name__", None)
+        if moduleName == "__main__":
+            cases_to_send = [
+                case for case in cases_to_send if case.__module__ == "__main__"
+            ]
+
     elif isinstance(cases, Iterable):
         cases_to_send = cases
     else:
@@ -397,16 +437,16 @@ def menu(
     cases_to_send = filter(lambda case: _CASE_IGNORE not in vars(case), cases_to_send)
 
     if main:
-        blank_proceedure = "pass"
+        on_blank = "pass"
         on_kbinterrupt = "return"
 
     if frontend is None:
         frontend = cng.default_frontend
 
-    cli = CLI(
+    cli = Menu(
         cases=cases_to_send,
         title=title,
-        blank_proceedure=blank_proceedure,
+        on_blank=on_blank,
         on_kbinterrupt=on_kbinterrupt,
         decorator=decorator,
         case_args=case_args,

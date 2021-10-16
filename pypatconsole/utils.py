@@ -2,14 +2,18 @@
 Common stuff for console stuff
 """
 import os
+import re
 from inspect import isfunction
-from types import FunctionType
-from typing import Callable, List, Dict, Union
 from shlex import shlex
-from pypatconsole.config import _DEFINITION_ORDER
+from types import FunctionType
+from typing import Callable, Dict, List, Union
 
 # *Nix uses clear, windows uses cls
 __CLEAR_COMMAND = "cls" if os.name == "nt" else "clear"
+
+RE_ANSI = re.compile(
+    r"\x1b\[[;\d]*[A-Za-z]"
+)  # Taken from tqdm source code, matches escape codes
 
 
 def clear_screen() -> None:
@@ -17,7 +21,7 @@ def clear_screen() -> None:
     os.system(__CLEAR_COMMAND)
 
 
-def list_local_cases(locals_: Dict[str, Callable], main: bool = False) -> List[Callable]:
+def list_local_cases(locals_: Dict[str, Callable]) -> List[Callable]:
     """
     Parameters
     -------------

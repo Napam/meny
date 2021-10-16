@@ -37,11 +37,13 @@ def case3():
 
 # To enable import from parent folder
 from time import sleep
-import cases_nested
+
 import pypatconsole as ppc
 from pypatconsole import menu
 
-ppc.config.default_frontend = "auto"  # Set default frontend here
+import cases_nested
+
+ppc.config.default_frontend = "fancy"  # Set default frontend here
 
 
 @ppc.case("FizzBuzz!")
@@ -57,9 +59,9 @@ def case1(n: int = 10, waittime: float = 0.1):
         buzz = i % 5 == 0
 
         if fizz:
-            stringy = stringy + "Fizz"
+            stringy += "Fizz"
         if buzz:
-            stringy = stringy + "Buzz"
+            stringy += "Buzz"
         if not (fizz or buzz):
             stringy = i
 
@@ -150,4 +152,4 @@ def just_function_name(arg: str = "Hello World"):
 if __name__ == "__main__":
     case_args = {case6: (1, 2)}
     case_kwargs = {case6: {"d": 4, "c": 3}}
-    menu(locals(), main=True, case_args=case_args, case_kwargs=case_kwargs)
+    menu(locals(), case_args=case_args, case_kwargs=case_kwargs)

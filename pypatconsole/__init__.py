@@ -1,3 +1,4 @@
-from .consoleclass import menu, cng as config
-from .utils import clear_screen, list_local_cases, input_splitter
+from .menu import cng as config
+from .menu import menu, Menu
 from .decorators import case, case_ignore
+from .utils import clear_screen, input_splitter, list_local_cases

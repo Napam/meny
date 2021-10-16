@@ -324,7 +324,7 @@ class Menu:
 
     def run(self):
         """
-        Runs menu loop within try except KeyboardInterrupt
+        Initialized menu loop
         """
         self.active = True
         Menu._depth += 1
@@ -333,7 +333,7 @@ class Menu:
         except KeyboardInterrupt:
             if self.on_kbinterrupt == "raise":
                 self._return_to_parent()
-                raise KeyboardInterrupt  # "Propagate exception"
+                raise  # "Propagate exception"
             elif self.on_kbinterrupt == "return":
                 print()
                 return
@@ -351,14 +351,12 @@ def __get_module_cases(module: ModuleType) -> List[Callable]:
 
 
 def menu(
-    cases: Union[Callable, List[Callable], Dict[str, Callable], ModuleType],
+    cases: Union[Callable, Iterable[Callable], Dict[str, Callable], ModuleType],
     title: str = strings.DEFAULT_TITLE,
     on_blank: str = "return",
     on_kbinterrupt: str = "raise",
-    on_quit: str = "raise",
     decorator: Optional[Callable] = None,
     run: bool = True,
-    main: bool = False,
     case_args: Optional[Dict[Callable, tuple]] = None,
     case_kwargs: Optional[Dict[Callable, dict]] = None,
     frontend: Optional[str] = None,
@@ -370,9 +368,9 @@ def menu(
 
     Parameters
     ------------
-    cases: Can be output of locals() (a dictionary) from the scope of the cases
+    cases: Can be output of locals() (a dict) from the scope of the cases
 
-           Or a list functions
+           Or an iterable functions
 
            Or a module containing the case functions
 
@@ -387,16 +385,9 @@ def menu(
                     If "raise", then will raise KeyboardInterrupt, if "return" the menu exits, and
                     returns.
 
-    on_quit: Behavior when encountering ConsoleQuitException. If ""
-
     decorator: Decorator for case functions
 
     run: To invoke .run() method on CLI object or not.
-
-    main: Tells the function whether or not the menu is the main menu (i.e. the
-          first ("outermost") menu) or not. This basically sets the behavior on how the menu
-          should behave. It is equivalent to give the arguments on_kbinterrupt="return" and
-          on_blank="pass"
 
     cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
                 positional arguments as values
@@ -435,10 +426,6 @@ def menu(
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
 
     cases_to_send = filter(lambda case: _CASE_IGNORE not in vars(case), cases_to_send)
-
-    if main:
-        on_blank = "pass"
-        on_kbinterrupt = "return"
 
     if frontend is None:
         frontend = cng.default_frontend

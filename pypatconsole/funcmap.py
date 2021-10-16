@@ -39,7 +39,7 @@ def construct_funcmap(
     Returns dictionary to be used in console interface
 
     Keys of dictionary are enumeration 1, 2, 3 ... for interface.
-    Each item is a tuple with first element as description of case,
+    Each item is a tuple with first element as name of case,
     second element is the function itself:
     ('Scrape OSEBX', function object)
     """

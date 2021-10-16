@@ -4,6 +4,10 @@ from pypatconsole.config import _CASE_IGNORE, _CASE_TITLE
 
 
 def case(title: str):
+    """
+    Sets case title
+    """
+
     def _title_appender(func: FunctionType):
         vars(func)[_CASE_TITLE] = title
         return func
@@ -14,7 +18,10 @@ def case(title: str):
         raise ValueError(f"Got unsupported type: {type(title)}")
 
 
-def case_ignore(func: FunctionType):
+def ignore(func: FunctionType):
+    """
+    Will flag case to be filtered out from menu creation
+    """
     vars(func)[_CASE_IGNORE] = None  # Will only check for membership
     return func
 

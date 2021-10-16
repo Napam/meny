@@ -35,7 +35,7 @@ def case3():
     menu([subcase1, subcase2], title= ' Title here ')
 """
 
-# To enable import from parent folder
+from functools import wraps
 from time import sleep
 
 import pypatconsole as ppc
@@ -47,7 +47,7 @@ ppc.config.default_frontend = "fancy"  # Set default frontend here
 
 
 @ppc.case("FizzBuzz!")
-def case1(n: int = 10, waittime: float = 0.1):
+def fizzbuzz(n: int = 10, waittime: float = 0.1):
     """
     When you get the urge to fizz your buzz
     if you know what I mean
@@ -70,13 +70,12 @@ def case1(n: int = 10, waittime: float = 0.1):
 
 
 @ppc.case("Append two strings")
-def case2(a: str, b: str):
+def appendstrings(a: str, b: str):
     print(a + b)
-    sleep(0.5)
 
 
 @ppc.case("A nested module menu")
-def case3():
+def nestedmodulemenu():
     """
     This nested menu loads cases from a module
     """
@@ -84,62 +83,54 @@ def case3():
 
 
 @ppc.case("Math menu")
-def case4():
+def mathmenu():
     """
     This nested menu gets the cases from a user defined list.
     """
 
     @ppc.case("Multiply two floats")
-    def subcase1(x: float, y: float):
+    def multiply(x: float, y: float):
         print(x * y)
-        sleep(0.5)
 
     @ppc.case("Divide two floats")
-    def subcase2(x: float, y: float):
+    def divide(x: float, y: float):
         if y == 0:
             print("You can't divide by zero!!!")
-            sleep(0.5)
             return
 
         print(x / y)
-        sleep(0.5)
 
     menu(locals(), title=" Quick maths ")
 
 
 @ppc.case("Even another nested menu")
-def case5():
+def anothernested():
     """
     This menu obtains the nested case functions by
     sending the return value of locals() into menu()
     """
 
     @ppc.case("Print triangle")
-    def subcase1():
+    def triangle():
         for j in range(10):
             print("*" * j)
 
-        sleep(0.5)
 
     @ppc.case("Print rectangle")
-    def subcase2():
+    def rectangle():
         for i in range(10):
             print("#" * 10)
 
-        sleep(0.5)
 
     @ppc.case("Print list")
-    def subcase3(a: list):
+    def printlist(a: list):
         print(a)
-        sleep(0.5)
 
     menu(locals(), title=" Shapes ")
 
-
 @ppc.case("Programmatic arguments")
-def case6(a, b, c, d):
+def programmatic(a, b, c, d):
     print(a, b, c, 4)
-    sleep(0.5)
 
 
 def just_function_name(arg: str = "Hello World"):
@@ -148,8 +139,18 @@ def just_function_name(arg: str = "Hello World"):
     print("Press enter to return")
     input()
 
+import time 
+@ppc.ignore
+def wait(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        time.sleep(0.5)
+    return wrapper
+
 
 if __name__ == "__main__":
-    case_args = {case6: (1, 2)}
-    case_kwargs = {case6: {"d": 4, "c": 3}}
-    menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
+    case_args = {programmatic: (1, 2)}
+    case_kwargs = {programmatic: {"d": 4, "c": 3}}
+    # menu(locals(), case_args=case_args, case_kwargs=case_kwargs, decorator=wait)
+    menu(locals(), case_args=case_args, case_kwargs=case_kwargs, decorator=wait)

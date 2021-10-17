@@ -1,88 +1,64 @@
-'''
+"""
 This module primarily conatins a the construct_funcmap
-function. The function constructs the dictionary that contains 
+function. The function constructs the dictionary that contains
 the console cases. The dictionary keys consists of a range of integers
-and the values are the cases (which are functions). 
-'''
+and the values are the cases (which are functions).
+"""
 
-from inspect import getmembers, isfunction, getmodule, unwrap
-import inspect
-from types import ModuleType
-from typing import Dict, Union, Callable, List, Optional, Tuple
+from inspect import unwrap
+from types import FunctionType
+from typing import Callable, Dict, Iterable, Optional, Tuple
 
-def _docstring_firstline(func: Callable) -> str:
-    '''Get first line of docstring of func'''
+from pypatconsole.config import _CASE_TITLE
+
+
+def _get_case_name(func: FunctionType) -> str:
+    """
+    First unwraps function (if wrapped in decorators). Assumes that wrapped functions has the 
+    __wrapped__ attribute (which will be handled by using functools.wraps). Then returns case
+    title if set, else just function name
+    """
     # Unwrap in case the function is wrapped
     func = unwrap(func)
-    if func.__doc__ is None:
-        raise NotImplementedError(f'Missing docstring in function {func}')
-    return func.__doc__.strip().split('\n')[0]
+
+    if _CASE_TITLE in func.__dict__:
+        return func.__dict__[_CASE_TITLE]
+    else:
+        return func.__name__
 
 
-def __get_module_cases(module: ModuleType) -> List[Callable]:
-    # Get all functions defined in module
-    f_ = lambda f: True if isfunction(f) and getmodule(f) == module else False
-    funcs = getmembers(module, f_) 
-    # getmembers returns a tuple with the func names as first element 
-    # and function object as second
-
-    # unpack dat shit yo
-    funcs = [f[1] for f in funcs]
-    return funcs
-
-def construct_funcmap(cases: Union[ModuleType, List[Callable]], other_cases: Optional[List]=None, 
-                      decorator: Optional[Callable]=None) -> Dict[str, Tuple[str, Callable]]:
-    '''
+def construct_funcmap(
+    funcs: Iterable[FunctionType], decorator: Optional[FunctionType] = None
+) -> Dict[str, Tuple[str, Callable]]:
+    """
     Parameters
     ------------
-    cases: if given a module: module containing functions that serves as 
-           cases a user can pick from terminal interface. the module should
-           not implement any other functions. 
-    
-           if given a list: will simply use function in list as cases.
-
-           First line of docstring becomes case description
-           ALL CASES MUST CONTAIN DOCSTRINGS
-
-    other_cases: optional, list of other additional cases (functions).
-                 These functions will simply be appended to the end of 
-                 an already existing list. 
-
-                 IMPORTANT: All case functions must have docstrings 
-
-    decorator: optional, a decorator to decorate all case functions 
+    funcs: Iterable[FunctionType]
+    decorator: optional, a decorator to decorate all case functions
 
     Returns
     --------
     Returns dictionary to be used in console interface
 
     Keys of dictionary are enumeration 1, 2, 3 ... for interface.
-    Each item is a tuple with first element as description of case, 
+    Each item is a tuple with first element as name of case,
     second element is the function itself:
     ('Scrape OSEBX', function object)
-    '''
-    if type(cases) == ModuleType:
-        funcs = __get_module_cases(cases)
-    elif type(cases) == list:
-        funcs = cases
-    else:
-        raise TypeError('Unsupported type for cases container')
-
-    # Append other functions if specified
-    if other_cases is not None:
-        funcs = funcs + other_cases
-
-    func_map: Dict[str, Tuple[str, Callable]] = {}
+    """
+    if not isinstance(funcs, Iterable):
+        raise TypeError(f"Unsupported type for functions: got {type(funcs)}")
 
     if decorator is not None:
-        for i, func in enumerate(funcs, start=1):
-            func_map[str(i)] = (_docstring_firstline(func), decorator(func))
+        return {
+            str(i): (_get_case_name(func), decorator(func))
+            for i, func in enumerate(funcs, start=1)
+        }
     else:
-        for i, func in enumerate(funcs, start=1):
-            func_map[str(i)] = (_docstring_firstline(func), func)
+        return {
+            str(i): (_get_case_name(func), func)
+            for i, func in enumerate(funcs, start=1)
+        }
 
-    return func_map
 
-
-if __name__ == '__main__':
-    print(__get_module_cases(inspect))
+if __name__ == "__main__":
+    pass

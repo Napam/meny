@@ -30,7 +30,4 @@ def interface(cli):
     clear_screen()
     show_cases(cli.funcmap, cli.title)
     print()
-    # Empty string will evulate to False
-    if cli.blank_hint:
-        print(cli.blank_hint)
     return input(f"{strings.ENTER_PROMPT}: ")

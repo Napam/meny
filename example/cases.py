@@ -35,17 +35,20 @@ def case3():
     menu([subcase1, subcase2], title= ' Title here ')
 """
 
-# To enable import from parent folder
+from functools import wraps
 from time import sleep
-import cases_nested
+
 import pypatconsole as ppc
 from pypatconsole import menu
-ppc.config.default_frontend = "auto" # Set default frontend here
 
-def case1(n: int = 10, waittime: float = 0.1):
+import cases_nested
+
+ppc.config.default_frontend = "fancy"  # Set default frontend here
+
+
+@ppc.case("FizzBuzz!")
+def fizzbuzz(n: int = 10, waittime: float = 0.1):
     """
-    FizzBuzz!
-
     When you get the urge to fizz your buzz
     if you know what I mean
     """
@@ -56,9 +59,9 @@ def case1(n: int = 10, waittime: float = 0.1):
         buzz = i % 5 == 0
 
         if fizz:
-            stringy = stringy + "Fizz"
+            stringy += "Fizz"
         if buzz:
-            stringy = stringy + "Buzz"
+            stringy += "Buzz"
         if not (fizz or buzz):
             stringy = i
 
@@ -66,97 +69,91 @@ def case1(n: int = 10, waittime: float = 0.1):
         sleep(waittime)
 
 
-def case2(a: str, b: str):
-    """
-    Append two strings
-    """
+@ppc.case("Append two strings")
+def appendstrings(a: str, b: str):
     print(a + b)
-    sleep(0.5)
 
 
-def case3():
+@ppc.case("A nested module menu")
+def nestedmodulemenu():
     """
-    A nested menu
-
     This nested menu loads cases from a module
     """
     menu(cases_nested, title=" Nested! ")
 
 
-def case4():
+@ppc.case("Math menu")
+def mathmenu():
     """
-    Math menu
-
     This nested menu gets the cases from a user defined list.
     """
 
-    def subcase1(x: float, y: float):
-        """
-        Multiply two floats
-        """
+    @ppc.case("Multiply two floats")
+    def multiply(x: float, y: float):
         print(x * y)
-        sleep(0.5)
 
-    def subcase2(x: float, y: float):
-        """
-        Divide two floats
-        """
+    @ppc.case("Divide two floats")
+    def divide(x: float, y: float):
         if y == 0:
             print("You can't divide by zero!!!")
-            sleep(0.5)
             return
 
         print(x / y)
-        sleep(0.5)
 
-    menu([subcase1, subcase2], title=" Quick maths ")
+    menu(locals(), title=" Quick maths ")
 
 
-def case5():
+@ppc.case("Even another nested menu")
+def anothernested():
     """
-    Even another nested menu
-
     This menu obtains the nested case functions by
     sending the return value of locals() into menu()
     """
 
-    def subcase1():
-        """
-        Print triangle
-        """
+    @ppc.case("Print triangle")
+    def triangle():
         for j in range(10):
             print("*" * j)
 
-        sleep(0.5)
 
-    def subcase2():
-        """
-        Print rectangle
-        """
+    @ppc.case("Print rectangle")
+    def rectangle():
         for i in range(10):
             print("#" * 10)
 
-        sleep(0.5)
 
-    def subcase3(a: list):
-        """
-        Print list
-        """
+    @ppc.case("Print list")
+    def printlist(a: list):
         print(a)
-        sleep(0.5)
 
     menu(locals(), title=" Shapes ")
 
-
-def case6(a, b, c, d):
-    """
-    Programmatic arguments
-    """
+@ppc.case("Programmatic arguments")
+def programmatic(a, b, c, d):
     print(a, b, c, 4)
-    sleep(0.5)
+
+
+def just_function_name(arg: str = "Hello World"):
+    print("This function does not use ppc.case decorator and therefore the menu only shows the name")
+    print(f'Also, here is the input: "{arg}"')
+    print("Press enter to return")
+    input()
+
+import time 
+@ppc.ignore
+def wait(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        time.sleep(0.5)
+    return wrapper
+
+def lolfunc(a=1, b: str="2", c=3.0):
+    print(a, b, c)
 
 
 if __name__ == "__main__":
-    case_args = {case6: (1, 2)}
-    case_kwargs = {case6: {"d": 4, "c": 3}}
-    menu(locals(), main=True, case_args=case_args, case_kwargs=case_kwargs)
+    case_args = {programmatic: (1, 2)}
+    case_kwargs = {programmatic: {"d": 4, "c": 3}}
+    menu(locals(), case_args=case_args, case_kwargs=case_kwargs, decorator=wait)
+    # menu([lolfunc], case_args=case_args, case_kwargs=case_kwargs, decorator=wait)

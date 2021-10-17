@@ -3,39 +3,37 @@ How to implement:
 
 Each case should be a function.
 The ordering of the cases in the console interface
-will be by the function names. So a() will be 
-first then b() etc.
+will be by the function definition orders.
 
-Name of cases in console interface will be first line of 
-docstring
+Name of cases in menu interface will be the function names by default. One can specify alternative
+titles by using the meny.case decorator
 
 Feel free to import whatever
 
-If you want to implement nested cases, then simply import 
-reuse the main function
+If you want to implement nested cases, then simply reuse the main function
 
+Example
+--------
 from meny import menu
 
-then you can either create another module with the nested 
-cases:
+# Then you can either create another module with the nested cases:
 
-menu(consolecases_nested, title= ' Title here ').
+import cases_nested
+
+menu(cases_nested, title= ' Title here ').
 
 or you can give a list functions:
 
 def case3():
     def subcase1():
-        '''docstring1'''
         pass
 
     def subcase2():
-        '''docstring'''
         pass
 
-    menu([subcase1, subcase2], title= ' Title here ')
+    meny.menu([subcase1, subcase2], title= ' Title here ')
 """
 
-from functools import wraps
 from time import sleep
 
 import meny
@@ -44,17 +42,8 @@ import cases_nested
 
 meny.set_default_frontend("fancy")
 
-import time 
-@meny.ignore
-def wait(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        func(*args, **kwargs)
-        time.sleep(0.5)
-    return wrapper
 
-@wait
-@meny.case("FizzBuzz!")
+@meny.title("FizzBuzz!")
 def fizzbuzz(n: int = 10, waittime: float = 0.1):
     """
     When you get the urge to fizz your buzz
@@ -75,78 +64,77 @@ def fizzbuzz(n: int = 10, waittime: float = 0.1):
 
         print(stringy)
         sleep(waittime)
+    sleep(1)
 
 
-@wait
-@meny.case("Append two strings")
+@meny.title("Append two strings")
 def appendstrings(a: str, b: str):
     print(a + b)
+    sleep(1)
 
 
-@meny.case("A nested module menu")
+@meny.title("A nested module menu")
 def nestedmodulemenu():
     """
     This nested menu loads cases from a module
     """
-    menu(cases_nested, title=" Nested! ")
+    meny.menu(cases_nested, title=" Nested! ")
 
 
-@meny.case("Math menu")
+@meny.title("Math menu")
 def mathmenu():
     """
     This nested menu gets the cases from a user defined list.
     """
 
-    @wait
-    @meny.case("Multiply two floats")
+    @meny.title("Multiply two floats")
     def multiply(x: float, y: float):
         print(x * y)
+        sleep(1)
 
-    @wait
-    @meny.case("Divide two floats")
+    @meny.title("Divide two floats")
     def divide(x: float, y: float):
         if y == 0:
             print("You can't divide by zero!!!")
             return
 
         print(x / y)
+        sleep(1)
 
-    menu(locals(), title=" Quick maths ")
+    meny.menu(locals(), title=" Quick maths ")
 
 
-@wait
-@meny.case("Even another nested menu")
+@meny.title("Even another nested menu")
 def anothernested():
     """
     This menu obtains the nested case functions by
-    sending the return value of locals() into menu()
+    sending the return value of locals() into meny.menu()
     """
 
-    @wait
-    @meny.case("Print triangle")
+    @meny.title("Print triangle")
     def triangle():
         for j in range(10):
             print("*" * j)
+        sleep(1)
 
-
-    @wait
-    @meny.case("Print rectangle")
+    @meny.title("Print rectangle")
     def rectangle():
         for i in range(10):
             print("#" * 10)
+        sleep(1)
 
 
-    @wait
-    @meny.case("Print list")
+    @meny.title("Print list")
     def printlist(a: list):
         print(a)
+        sleep(1)
 
-    menu(locals(), title=" Shapes ")
+    meny.menu(locals(), title=" Shapes ")
 
-@wait
-@meny.case("Programmatic arguments")
+@meny.title("Programmatic arguments")
 def programmatic(a, b, c, d):
     print(a, b, c, 4)
+    sleep(1)
 
 
 def just_function_name(arg: str = "Hello World"):
@@ -155,9 +143,10 @@ def just_function_name(arg: str = "Hello World"):
     print("Press enter to return")
     input()
 
-@wait
+
 def simple_func(a=1, b: str="2", c=3.0):
     print(a, b, c)
+    sleep(1)
 
 
 if __name__ == "__main__":

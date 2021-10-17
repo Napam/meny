@@ -9,7 +9,7 @@ from inspect import unwrap
 from types import FunctionType
 from typing import Callable, Dict, Iterable, Optional, Tuple
 
-from meny.config import _CASE_TITLE
+from meny.config import _CASE_TITLE, _DICT_KEY
 
 
 def _get_case_name(func: FunctionType) -> str:
@@ -18,13 +18,12 @@ def _get_case_name(func: FunctionType) -> str:
     __wrapped__ attribute (which will be handled by using functools.wraps). Then returns case
     title if set, else just function name
     """
-    # Unwrap in case the function is wrapped
-    func = unwrap(func)
-
-    if _CASE_TITLE in func.__dict__:
-        return func.__dict__[_CASE_TITLE]
-    else:
-        return func.__name__
+    funcvars = vars(unwrap(func))
+    return (
+        funcvars.get(_CASE_TITLE, False)
+        or funcvars.get(_DICT_KEY, False)
+        or func.__name__
+    )
 
 
 def construct_funcmap(
@@ -61,4 +60,6 @@ def construct_funcmap(
 
 
 if __name__ == "__main__":
-    pass
+    import subprocess
+
+    subprocess.call(["python3", "example/cases.py"])

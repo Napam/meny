@@ -1,5 +1,3 @@
-# MUST UPDATE DOCS!!!!!!!
-
 # Meny
 A simple and sexy way to make an console interface
 
@@ -10,7 +8,7 @@ First install the package with the command (make sure you have Python 3.6 or hig
 ```
 pip install meny
 ```
-Then you can import ``meny`` in Python. The package lets you import three functions: ``menu``, ``list_local_cases`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``list_local_cases`` takes the output from ``locals()`` and lists all the functions in the local scope. ``clear_screen`` clears your screen, hence the name.
+Then you can import ``meny`` in Python. The most central functions in this package are `meny.menu` and `meny.title`, which will be covered below.
 
 This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.6, 3.7, and 3.8
 
@@ -31,66 +29,57 @@ from meny import menu
             .
             .
 
-menu(locals(), title=' Main menu title here ', main=True)
+menu(locals(), title=' Main menu title here ')
 ```
-You can import whatever modules, classes and functions you want in the file without them interfering with the functions defined your file. You will need to implement docstrings to every case. The first line of text in the docstring will be used as the description in the console interface.
-
-The order of the cases is alphabetically sorted by the function name.
+The `locals()` function is a Python built-in function which returns a dictionary with variable names as keys and the corresponding objects as values from the local scope. You can import whatever modules, classes and functions you want in the file without them interfering with the functions defined your file. The order of the cases is by definition order.
 
 The function signature of ``menu`` along with its docstring is as follows:
 ```python
 def menu(
-    cases: Union[List[Callable], Dict[str, Callable], ModuleType],
-    title: str = strings.DEFAULT_TITLE,
-    blank_proceedure: Union[str, Callable] = "return",
-    on_kbinterrupt: str = "raise",
-    decorator: Optional[Callable] = None,
+    cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
+    title: Optional[str] = None,
+    on_blank: Optional[str] = None,
+    on_kbinterrupt: Optional[str] = None,
+    decorator: Optional[FunctionType] = None,
     run: bool = True,
-    main: bool = False,
-    case_args: Optional[Dict[Callable, tuple]] = None,
-    case_kwargs: Optional[Dict[Callable, dict]] = None,
+    case_args: Optional[Dict[FunctionType, tuple]] = None,
+    case_kwargs: Optional[Dict[FunctionType, dict]] = None,
     frontend: Optional[str] = None,
 ):
-    """
+    """¨
     Factory function for the CLI class. This function initializes a menu.
 
     Parameters
     ------------
-    cases: Can be output of locals() (a dictionary) from the scope of the cases
+    cases: a dictionary where keys are functions names and values are functions
 
-           Or a list functions
+           Or an iterable of functions
 
-           Or a module containing the case functions
+           Or a module containing functions
 
     title: title of menu
 
-    blank_proceedure: What to do the when given blank input. Can be user defined
-                      function, or it can be a string. Available string options
-                      are:
+    on_blank: What to do the when given blank input. Available options are:
+             'return', will return to parent menu
 
-                      'return', will return to parent menu
+             'pass', does nothing. This should only be used for the main menu.
 
-                      'pass', does nothing. This should only be used for the
-                      main menu
+    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
+                    If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
 
-    decorator: Decorator for case functions
+    decorator: Decorator to applied for all case functions.
 
     run: To invoke .run() method on CLI object or not.
 
-    main: Tells the function whether or not the menu is the main menu (i.e. the
-          first ("outermost") menu) or not. This basically sets the behavior on how the menu 
-          should behave. It is equivalent to give the argumnts on_kbinterrupt="return" and 
-          blank_proceedure="pass"
-
-    cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
+    cases_args: Optional[Dict[FunctionType, tuple]], dictionary with function as key and tuple of
                 positional arguments as values
 
-    cases_kwargs: Optional[Dict[Callable, dict]], dictionary with function as key and dict of
+    cases_kwargs: Optional[Dict[FunctionType, dict]], dictionary with function as key and dict of
                   keyword arguments as values
 
     frontend: str, specify desired frontend:
-                    "auto": Will try to use fancy frontend if curses module is available, else 
-                            use simple frontend
+                    "auto": Will try to use fancy frontend if curses module is available, else
+                            use simple frontend (default)
                     "fancy": Use fancy front end (if on Windows, install
                              windows-curses first or Python will not be able to find the required
                              "curses" package that the fancy frontend uses)
@@ -101,21 +90,15 @@ def menu(
     """
 ```
 
-### Examples
+## Simple examples
 
 Say we are editing console.py
 ```python
 from random import randint
 from time import sleep
-from meny import menu
+import meny
 
-def case1():
-    '''
-    FizzBuzz!
-
-    When you get the urge to fizz your buzz
-    if you know what I mean
-    '''
+def fizzbuzz():
     for i in range(21):
         stringy = ''
 
@@ -132,33 +115,75 @@ def case1():
         print(stringy)
         sleep(0.1)
 
-def case2():
-    '''
-    Print a small random integer
-    '''
+def random_integer():
     print(randint(0,9))
-    sleep(0.5)
+    sleep(1)
 
-menu(locals(), title=' Main menu ', main=True, blank_proceedure='pass')
+meny.menu(locals(), title=' Main menu ')
 ```
 
 will result with this when running: ```python console.py```:
 
 ```
 -------------- Main menu ---------------
-1. FizzBuzz!
-2. Print a small random integer
+1. fizzbuzz
+2. random_integer
 
 Input:
 ```
-## Special cases
-Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program.
+You then specify which case you want to run by entering the input number as the first token. The tokens after (delimited by space) will be passed to the case function as positional arguments. The argument tokens will be evaluated as Python literals. 
 
-Entering ``q`` will raise a keyboard interrupt, menus can either return or raise KeyboardInterrupt in this case. See the docstring for `menu`. 
+## Case names
+By default it will use the function names as the case names. However you can use the `meny.title` decorator to apply a title that will be used instead:
+```python
+from random import randint
+from time import sleep
+import meny
+
+@meny.title("FizzBuzz!")
+def fizzbuzz():
+    for i in range(21):
+        stringy = ''
+
+        fizz = i % 3 == 0
+        buzz = i % 5 == 0
+
+        if fizz:
+            stringy = stringy + 'Fizz'
+        if buzz:
+            stringy = stringy + 'Buzz'
+        if not (fizz or buzz):
+            stringy = i
+
+        print(stringy)
+        sleep(0.1)
+
+@meny.title("Get random integer")
+def random_integer():
+    print(randint(0,9))
+    sleep(1)
+
+meny.menu(locals(), title=' Main menu ')
+```
+Which will produce:
+```
+-------------- Main menu ---------------
+1. FizzBuzz!
+2. Get random integer
+
+Input:
+```
+
+
+
+## Special cases
+Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program. This has the same effect as just pressing enter when there is nothing in the input field.
+
+Entering ``q`` will exit the menu interface.  
 
 Entering ``h`` will display this text that explains the special cases.
 
-Enter ``-1`` or any integer will "reverse" the choices, such that you take the last choice. This is motivated by Python lists where you can index like list[-1]
+Enter ``-1`` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like list[-1]
 
 ## Frontend and usage
 There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are 
@@ -173,36 +198,38 @@ There are two frontends implemented; the simple frontend and the fancy frontend.
 It possible to override the default frontend throughout the Python program by doing
 ```python
 import meny
-meny.config.default_frontend = "auto" # auto, fancy, or simple
+meny.set_default_frontend("auto") # auto, fancy, or simple
 ```
-as opposed to specifying the choice of frontend for every `menu(..., frontend="...")` call. 
+as opposed to specifying the choice of frontend for every `meny.menu(..., frontend="...")` call. 
 
 ## Arguments
-The cases can take arguments as well! Simply implement them as functions with type hints (type hints are mandatory for the case functions):
+The cases can take arguments as well!
 ````python
-from meny import menu
+import meny
+from time import sleep
 
-def case1(a: int, b: int):
-    '''Add two integers'''
+def addints(a, b):
     print(a+b)
+    sleep(1)
 
-def case1(a: str, b: str):
-    '''Append two strings'''
+def appendstrings(a, b):
     print(a+b)
+    sleep(1)
 
-def case3(a: list):
-    '''Print elements in list and their types'''
-    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem
-                                                        in enumerate(a)]
+# Type hints won't interfere with meny, and will actually be displayed when using the fancy frontend
+@meny.title("Print elements and their types")
+def displaylist(a: list): 
+    [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem in enumerate(a)]
+    sleep(1)
 
-menu(locals(), title=' Main menu ', main=True)
+meny.menu(locals(), title=' Main menu ')
 ````
 Then simply give the arguments along with the choice:
 ````
 -------------- Main menu ---------------
-1. Add two integers
-2. Append two strings
-3. Print elements in list and their types
+1. addints
+2. appendstrings
+3. Print elements and their types
 
 
 Input: 1 60 9
@@ -213,68 +240,45 @@ Input: 1 60 9
 Input: 2 "cat and dog" mathemathics
 
 cat and dogmathemathics
-
-Note: Single token strings don't even need quotes
 ````
 ````
-Input: 3 ['cat',69,420.0]
+Input: 3 ['cat', 69, 420.0]
 
 Element 0: cat, type: <class 'str'>
 Element 1: 69, type: <class 'int'>
 Element 2: 420.0, type: <class 'float'>
-
-Note: You cannot have any spaces when giving lists, tuples, dicts and such as the input parser will break them.
 ````
-
-The program will read the desired types from the function signature, then it will convert the input into the appropriate types. The only supported types are the built in Python types:
-- str
-- int
-- float
-- tuple
-- list
-- set
-- dict
-
-However, if you need proper handling of argument types, I suggest you specify your inputs to be strings then manually handle them yourself to ensure expected behavior, as the process of turning the case inputs to 
-their designated types is done using `eval` with som string sanitation. 
 
 ## Programmatic Arguments
 You can supply arguments programmtically to your case functions:
 ```python
-from meny import menu
-def case6(a, b, c, d):
-    """
-    Programmatic arguments
-    """
-    print(a, b, c, 4)
-    sleep(0.5)
+import meny
 
-case_args = {case6: (1, 2)}
-case_kwargs = {case6: {"d": 4, "c": 3}}
-menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
+def programmatic_args(a, b, c, d):
+    print(a, b, c, d)
+    sleep(1)
+
+case_args = {programmatic_args: (1, 2)}
+case_kwargs = {programmatic_args: {"d": 4, "c": 3}}
+meny.menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
 ```
-Case functions that takes arguments programmatically are not required to have type hints unlike case functions that are supposed take arguments through the cli. 
-
 Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. 
 
 ## Nested cases
-If you want to implement nested cases, then you can simply reuse the menu function in the function scope. When doing nested cases, you should not give the keyword ``main=True`` to the ``menu`` function.
+If you want to implement nested cases, then you can simply reuse the menu function in the function scope.
 
 ```python
 from meny import menu
 
-def parentcase1():
-    '''Fizz'''
-    def subcase1():
-        '''docstring1'''
+def parent():
+    def child1():
         pass
 
-    def subcase2():
-        '''docstring2'''
+    def child2():
         pass
 
     menu(locals(), title= ' Title here ')
-menu(locals(), title=' Main menu ', main=True)
+menu(locals(), title=' Main menu ')
 ```
 You can create another module for the other cases and pass them as well:
 ```python
@@ -289,24 +293,27 @@ menu(other_cases, title= ' Main menu ', main=True)
 
 or you can give a list of functions, which will enable you to force the ordering of the cases as well:
 ```python
-from meny import menu
+import meny
 
-def parentcase1():
-    '''Fizz'''
-    def subcase1():
-        '''docstring1'''
+def parent2():
+    def child1():
         pass
 
-    def subcase2():
-        '''docstring2'''
+    def child2():
         pass
 
-    menu([subcase2, subcase1], title= ' Title here ')
-menu(locals(), title=' Main menu ')
+    meny.menu([subcase2, subcase1], title= ' Title here ')
+meny.menu(locals(), title=' Main menu ')
 ```
 
-## What if want to define functions without having them displayed in the menu?
-Of what I can think of: you can either define your functions in another python file and import that, or you can create a class (in the same file as the case functions) that consists of your functions as static methods.
+## What if I want to define functions without having them displayed in the menu?
+Easy! Simply apply the `meny.ignore` decorator on functions to make `meny` ignore them. You can also create a class of static methods to hide functions within a class since classes will be ignored by `meny` anyways. This problem is also naturally avoided if just specifies the functions manually either using a `dict` or `list`. 
+```python
+import meny
+@meny.ignore
+def ignored():
+    pass
+```
 
 ## Optional: Decorator
 To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the ``menu`` function. However, it is important that the decorator  implements the ``__wrapped__`` attribute (this is to handle docstrings of wrappers as arguments for wrapped functions). Generally, it should look like this
@@ -329,7 +336,7 @@ def case_decorator(func):
         return retobj
     return case_wrapper
 ```
-Since the decorator is a function, you cannot have it in the same namespace as the case functions, so you can for example implement it in another file. To use it you do as following:
+It can then easily be applied to all functions like so:
 ```python
 from meny import menu
 from case_decorator import case_decorator

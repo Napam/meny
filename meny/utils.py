@@ -6,7 +6,7 @@ import re
 from meny import config as cng
 from inspect import isfunction
 from types import FunctionType
-from typing import Any, Callable, Container, Dict, List
+from typing import Any, Container, Dict, List
 from meny import strings
 
 # *Nix uses clear, windows uses cls
@@ -16,7 +16,7 @@ RE_ANSI = re.compile(
     r"\x1b\[[;\d]*[A-Za-z]"
 )  # Taken from tqdm source code, matches escape codes
 
-RE_INPUT = re.compile("\w+|\[.*?\]|\{.*?\}|\(.*?\)|\".*?\"|'.*?'")
+RE_INPUT = re.compile("[\w.-]+|\[.*?\]|\{.*?\}|\(.*?\)|\".*?\"|'.*?'")
 
 
 def _assert_supported(arg: Any, paramname: str, supported: Container):
@@ -29,15 +29,24 @@ def _assert_supported(arg: Any, paramname: str, supported: Container):
     AssertionError: Got unsupported argument for parameter "animal". Available options are: ('dog', 'rabbit')
     """
     assert arg in supported, (
-        'Got unsupported argument for parameter "'
+        f'Got unsupported argument "'
+        + strings.YELLOW
+        + str(arg)
+        + strings.END
+        + '" for parameter "'
         + strings.YELLOW
         + paramname
         + strings.END
-        + f'". Available options are: {supported}'
+        + f'".\nAvailable options are: {supported}'
     )
 
 
+def _get_default_if_none(val: Any, default: Any) -> Any:
+    return default if val is None else val
+
+
 def set_default_frontend(frontend: str):
+    """Options: (simple, fancy, auto)"""
     _assert_supported(frontend, "frontend", ("simple", "fancy", "auto"))
     cng.DEFAULT_FRONTEND = frontend
 
@@ -47,21 +56,30 @@ def clear_screen() -> None:
     os.system(__CLEAR_COMMAND)
 
 
-def list_local_cases(locals_: Dict[str, Callable]) -> List[FunctionType]:
+def _extract_and_preprocess_functions(
+    dict_: Dict[str, FunctionType]
+) -> List[FunctionType]:
     """
     Parameters
     -------------
-    locals_: return value of locals()
+    dict_: Dict[str, FunctionType])
 
-    Returns a list of functions. Orders are whatever is from locals() or globals(). Python parses
-    top down, and inserts the functions in a dictionary. CPython's dict implementation in Python 3.6
-    iterates through dict items in insertion order. As of Python 3.7 said behavior become a
-    standard for Python. Thus the functions should come ib definition order.
+    Extract functions from dictionary. Will also add the dictionary key to the function vars
+    (i.e. the __dict__ attribute)
+
+    Python parses top down, and inserts the functions in a dictionary. CPython's dict implementation
+    in Python 3.6 iterates through dict items in insertion order. As of Python 3.7 said behavior
+    become a standard for Python. Thus the functions should come in definition order.
 
     See:
     https://softwaremaniacs.org/blog/2020/02/05/dicts-ordered/
     """
-    return [pairs[1] for pairs in list(locals_.items()) if isfunction(pairs[1])]
+    funcs = []
+    for key, val in dict_.items():
+        if isfunction(val):
+            vars(val)[cng._DICT_KEY] = key
+            funcs.append(val)
+    return funcs
 
 
 def input_splitter(argstring: str) -> List[str]:
@@ -74,11 +92,11 @@ def input_splitter(argstring: str) -> List[str]:
 def print_help(*args, **kwargs) -> None:
     print(
         """
-        To exit or return from console: Enter q
+        To exit or return from menu interface (even if you are in a nested menu): Enter q
 
         To return to parent menu: Enter blank (press enter without giving input)
                                   or enter '..'. If you are in main menu, this 
-                                  will exit the program as well. 
+                                  will exit the menu as well. 
 
         Press enter to exit help screen
         """
@@ -87,4 +105,6 @@ def print_help(*args, **kwargs) -> None:
 
 
 if __name__ == "__main__":
-    pass
+    import subprocess
+
+    subprocess.call(["python3", "example/cases.py"])

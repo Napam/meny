@@ -3,7 +3,7 @@ from types import FunctionType
 from meny.config import _CASE_IGNORE, _CASE_TITLE
 
 
-def case(title: str):
+def title(title: str):
     """
     Sets case title
     """
@@ -28,11 +28,11 @@ def ignore(func: FunctionType):
 
 if __name__ == "__main__":
 
-    @case("Catdog")
+    @title("Catdog")
     def testFunc1() -> str:
         pass
 
-    @case("Catdog1")
+    @title("Catdog1")
     def testFunc2() -> str:
         pass
 

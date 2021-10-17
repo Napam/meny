@@ -16,7 +16,7 @@ class TestUtils(unittest.TestCase):
         def cubic(x: int):
             return x*x*x
 
-        cases = meny.list_local_cases(locals())
+        cases = meny._list_local_cases(locals())
         self.assertEqual(len(cases), 3)
         self.assertIs(cases[0], linear)
         self.assertIs(cases[1], quadratic)
@@ -24,12 +24,12 @@ class TestUtils(unittest.TestCase):
 
     def test_input_splitter(self):
         """input_splitter parses input correctly"""
-        inputlist = ["12", "abcd", '("1, 2", 3)', '["1, 2", 3]', 
+        inputlist = ["..", "12", "abcd", '("1, 2", 3)', '["1, 2", 3]', 
                      '{"hello": "world", 666:"number of the beast"}', '{"set", "of", "strings"}',
-                     "'apostrophe string'"]
+                     "'apostrophe string'", '"quote string"', "-123"]
 
         args = meny.input_splitter(" ".join(inputlist))
-        self.assertEqual(inputlist, args)
+        self.assertSetEqual(set(inputlist), set(args))
 
     def test_RE_ANSI(self):
         """RE_ANSI manages to match ANSI escape characters"""
@@ -38,7 +38,6 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(output, "Red Green Blue \nTo be erased")
 
     def test__assert_supported(self):
-        """Test _assert_supported"""
         with self.assertRaises(AssertionError):
             meny.utils._assert_supported("cat", "animal", ("dog", "rabbit"))
         

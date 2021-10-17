@@ -6,7 +6,7 @@ from ast import literal_eval
 from inspect import getfullargspec, getmodule, isfunction, signature, unwrap
 from time import sleep
 from types import FunctionType, ModuleType
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from meny import strings as strings
 from meny import config as cng
@@ -15,9 +15,10 @@ from meny.utils import (
     RE_ANSI,
     clear_screen,
     input_splitter,
-    list_local_cases,
+    _extract_and_preprocess_functions,
     print_help,
     _assert_supported,
+    _get_default_if_none,
 )
 
 
@@ -125,13 +126,13 @@ class Menu:
     def __init__(
         self,
         cases: Iterable[FunctionType],
-        title: str = strings.LOGO_TITLE,
-        on_blank: str = cng.DEFAULT_ON_BLANK,
-        on_kbinterrupt: str = cng.DEFAULT_ON_INTERRUPT,
+        title: str,
+        on_blank: str,
+        on_kbinterrupt: str,
+        frontend: str,
         decorator: Optional[FunctionType] = None,
         case_args: Optional[Dict[FunctionType, tuple]] = None,
         case_kwargs: Optional[Dict[FunctionType, dict]] = None,
-        frontend: Optional[str] = "auto",
     ):
         """
         Input
@@ -140,9 +141,7 @@ class Menu:
 
         title: String to print on top
 
-        on_blank: What to do when given blank input (defaults to return). Options:
-                  pass (do nothing)
-                  return
+        on_blank: what to do on empty string (press enter without any input)
 
         See docstring of menu function for more info
         """
@@ -314,7 +313,7 @@ class Menu:
             Menu._depth -= 1
 
 
-def __get_module_cases(module: ModuleType) -> List[FunctionType]:
+def _get_module_cases(module: ModuleType) -> List[FunctionType]:
     """Get all functions defined in module"""
     inModule = lambda f: isfunction(f) and (getmodule(f) == module)
     return [func for func in vars(module).values() if inModule(func)]
@@ -322,25 +321,25 @@ def __get_module_cases(module: ModuleType) -> List[FunctionType]:
 
 def menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
-    title: str = strings.DEFAULT_TITLE,
-    on_blank: str = cng.DEFAULT_ON_BLANK,
-    on_kbinterrupt: str = cng.DEFAULT_ON_INTERRUPT,
+    title: Optional[str] = None,
+    on_blank: Optional[str] = None,
+    on_kbinterrupt: Optional[str] = None,
     decorator: Optional[FunctionType] = None,
     run: bool = True,
     case_args: Optional[Dict[FunctionType, tuple]] = None,
     case_kwargs: Optional[Dict[FunctionType, dict]] = None,
-    frontend: str = cng.DEFAULT_FRONTEND,
+    frontend: Optional[str] = None,
 ):
     """¨
     Factory function for the CLI class. This function initializes a menu.
 
     Parameters
     ------------
-    cases: Can be output of locals() (a dict) from the scope of the cases
+    cases: a dictionary where keys are functions names and values are functions
 
-           Or an iterable functions
+           Or an iterable of functions
 
-           Or a module containing the case functions
+           Or a module containing functions
 
     title: title of menu
 
@@ -373,10 +372,16 @@ def menu(
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu.
     """
+
+    title = _get_default_if_none(title, strings.DEFAULT_TITLE)
+    on_blank = _get_default_if_none(on_blank, cng.DEFAULT_ON_BLANK)
+    on_kbinterrupt = _get_default_if_none(on_kbinterrupt, cng.DEFAULT_ON_INTERRUPT)
+    frontend = _get_default_if_none(frontend, cng.DEFAULT_FRONTEND)
+
     if isinstance(cases, ModuleType):
-        cases_to_send = __get_module_cases(cases)
+        cases_to_send = _get_module_cases(cases)
     elif isinstance(cases, dict):
-        cases_to_send = list_local_cases(cases)
+        cases_to_send = _extract_and_preprocess_functions(cases)
         # If this menu is the first menu initialized, and is given the locally
         # defined functions, then must filter the functions that are defined
         # in __main__
@@ -388,9 +393,12 @@ def menu(
             ]
 
     elif isinstance(cases, Iterable):
-        cases_to_send = cases
+        # Looks kinda stupid, but it reuses the code, which is nice
+        cases_to_send = _extract_and_preprocess_functions({case.__name__:case for case in cases})
     else:
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
+
+    cases_to_send: Iterable[FunctionType]
 
     cases_to_send = filter(
         lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send

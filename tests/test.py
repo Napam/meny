@@ -31,5 +31,11 @@ class TestUtils(unittest.TestCase):
         args = ppc.input_splitter(" ".join(inputlist))
         self.assertEqual(inputlist, args)
 
+    def test_RE_ANSI(self):
+        """RE_ANSI manages to remove ANSI escape characters"""
+        string= "\x1b[31mRed\x1b[0m \033[32mGreen\033[0m \x1b[36mBlue\033[0m \nTo be erased\x1b[2K"
+        output = ppc.utils.RE_ANSI.sub("", string)
+        self.assertEqual(output, "Red Green Blue \nTo be erased")
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

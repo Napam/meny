@@ -27,18 +27,6 @@ def raise_interrupt(*args, **kwargs) -> None:
     raise KeyboardInterrupt
 
 
-# Strategy method for special cases
-# Cases that are not special are e.g. int, since you can directly
-# use int() as a function
-_SPECIAL_ARG_CASES = {
-    str: lambda x: str(x.strip("\"'")),  # Removes outer " or ' characters
-    tuple: literal_eval,
-    list: literal_eval,
-    dict: literal_eval,
-    set: literal_eval,
-}
-
-
 class MenuError(Exception):
     """
     Custom exception for console related stuff since I dont want to catch too many exceptions
@@ -46,7 +34,7 @@ class MenuError(Exception):
     """
 
 
-class MenuQuitException(Exception):
+class MenuQuit(Exception):
     """
     For exiting all console instances
     """
@@ -209,7 +197,7 @@ class Menu:
         self.active = False
 
     def _quit(self):
-        raise MenuQuitException
+        raise MenuQuit
 
     def _pass(self):
         pass
@@ -319,7 +307,7 @@ class Menu:
             elif self.on_kbinterrupt == "return":
                 print()
                 return
-        except MenuQuitException:
+        except MenuQuit:
             if Menu._depth > 1:
                 raise
         finally:

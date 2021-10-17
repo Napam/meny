@@ -37,5 +37,17 @@ class TestUtils(unittest.TestCase):
         output = meny.utils.RE_ANSI.sub("", string)
         self.assertEqual(output, "Red Green Blue \nTo be erased")
 
+    def test__assert_supported(self):
+        """Test _assert_supported"""
+        with self.assertRaises(AssertionError):
+            meny.utils._assert_supported("cat", "animal", ("dog", "rabbit"))
+        
+        gotException = False
+        try:
+            meny.utils._assert_supported("dog", "animal", ("dog", "rabbit")) # Shuold be no error
+        except AssertionError:
+            gotException = True 
+        self.assertFalse(gotException)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

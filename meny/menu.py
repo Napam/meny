@@ -3,18 +3,22 @@ Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
 from ast import literal_eval
-from inspect import (getfullargspec, getmodule, isfunction,
-                     signature, unwrap)
+from inspect import getfullargspec, getmodule, isfunction, signature, unwrap
 from time import sleep
 from types import FunctionType, ModuleType
-from typing import Callable, Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
-import meny.config as cng
-import meny.strings as strings
-from meny.config import _CASE_IGNORE
+from meny import strings as strings
+from meny import config as cng
 from meny.funcmap import _get_case_name, construct_funcmap
-from meny.utils import (RE_ANSI, clear_screen, input_splitter,
-                                list_local_cases, print_help)
+from meny.utils import (
+    RE_ANSI,
+    clear_screen,
+    input_splitter,
+    list_local_cases,
+    print_help,
+    _assert_supported,
+)
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -37,15 +41,14 @@ class MenuQuit(Exception):
     """
 
 
-def _handle_args(func: Callable, args: Iterable) -> List:
+def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
     """
-    Handles list of strings that are the arguments using ast.literal_eval. 
+    Handles list of strings that are the arguments using ast.literal_eval.
 
     E.g. return is [1, "cat", 2.0, False]
                    int  str   float  bool
     """
     # Unwrap in case the function is wrapped
-    # TODO: Update this to use inspect.signature
     func = unwrap(func)
     argsspec = getfullargspec(func)
     params = argsspec.args
@@ -60,12 +63,14 @@ def _handle_args(func: Callable, args: Iterable) -> List:
         for i, arg in enumerate(args):
             typed_arglist[i] = literal_eval(arg)
     except (ValueError, SyntaxError) as e:
-        raise MenuError(f"Got arguments: {args}\n"
-                        f"But could not evaluate argument at position {i}:\n\t {arg}") from e
+        raise MenuError(
+            f"Got arguments: {args}\n"
+            f"But could not evaluate argument at position {i}:\n\t {arg}"
+        ) from e
     return typed_arglist
 
 
-def _error_info_case(error: Exception, func: Callable) -> None:
+def _error_info_case(error: Exception, func: FunctionType) -> None:
     """
     Used to handle error for cases
 
@@ -79,7 +84,9 @@ def _error_info_case(error: Exception, func: Callable) -> None:
         f"Function signature: {signature(func)}"
     )
     lenerror = max(map(len, str(error).split("\n")))
-    lenerror = max(lenerror, max(map(len, RE_ANSI.sub("", selected_case_str).split("\n"))))
+    lenerror = max(
+        lenerror, max(map(len, RE_ANSI.sub("", selected_case_str).split("\n")))
+    )
     print(strings.BOLD + strings.RED + f"{' ERROR ':#^{lenerror}}" + strings.END)
     print(selected_case_str)
     print(f'{f" Error message ":=^{lenerror}}')
@@ -92,7 +99,12 @@ def _error_info_case(error: Exception, func: Callable) -> None:
 
 def _error_info_parse(error: Exception):
     lenerror = max(map(len, str(error).split("\n")))
-    print(strings.BOLD + strings.RED + f"{' ARGUMENT PARSE ERROR ':#^{lenerror}}" + strings.END)
+    print(
+        strings.BOLD
+        + strings.RED
+        + f"{' ARGUMENT PARSE ERROR ':#^{lenerror}}"
+        + strings.END
+    )
     print(f'{f" Error message ":=^{lenerror}}')
     print(error)
     print(f'{f"":=^{lenerror}}')
@@ -114,39 +126,30 @@ class Menu:
         self,
         cases: Iterable[FunctionType],
         title: str = strings.LOGO_TITLE,
-        on_blank: Union[str, Callable] = "return",
-        on_kbinterrupt: str = "raise",
-        decorator: Optional[Callable] = None,
-        case_args: Optional[Dict[Callable, tuple]] = None,
-        case_kwargs: Optional[Dict[Callable, dict]] = None,
+        on_blank: str = cng.DEFAULT_ON_BLANK,
+        on_kbinterrupt: str = cng.DEFAULT_ON_INTERRUPT,
+        decorator: Optional[FunctionType] = None,
+        case_args: Optional[Dict[FunctionType, tuple]] = None,
+        case_kwargs: Optional[Dict[FunctionType, dict]] = None,
         frontend: Optional[str] = "auto",
     ):
         """
         Input
         -----
-        cases:
+        cases: Iterable of case functions
 
-        if given a module: module containing functions that serves as cases a
-        user can pick from terminal interface. the module should not implement
-        any other functions.
+        title: String to print on top
 
-        if given a list: will simply use function in list as cases.
+        on_blank: What to do when given blank input (defaults to return). Options:
+                  pass (do nothing)
+                  return
 
-        First line of docstring becomes case description
-        ALL CASES MUST CONTAIN DOCSTRINGS
-
-        title: String to print over alternatives
-
-        on_blank: What to do when given blank input (defaults to
-                          stopping current view (without exiting)). See
-                          docstring for menu() for more info.
-
-        See menu function for more info
+        See docstring of menu function for more info
         """
-        assert on_kbinterrupt in (
-            "raise",
-            "return",
-        ), "Invalid choice for on_kbinterrupt"
+        _assert_supported(on_kbinterrupt, "on_kbinterrupt", ("raise", "return"))
+        _assert_supported(on_blank, "on_blank", ("return", "pass"))
+        _assert_supported(frontend, "frontend", ("simple", "fancy", "auto"))
+
         self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
         self.on_kbinterrupt = on_kbinterrupt
@@ -199,10 +202,10 @@ class Menu:
     def _pass(self):
         pass
 
-    def _handle_case(self, casefunc: Callable, args: List[str]):
-        programmatic_args = self.case_args.get(casefunc, ()) 
-        programmatic_kwargs = self.case_kwargs.get(casefunc, {}) 
-    
+    def _handle_case(self, casefunc: FunctionType, args: List[str]):
+        programmatic_args = self.case_args.get(casefunc, ())
+        programmatic_kwargs = self.case_kwargs.get(casefunc, {})
+
         try:
             if programmatic_args or programmatic_kwargs:  # If programmatic arguments
                 if args:
@@ -311,26 +314,24 @@ class Menu:
             Menu._depth -= 1
 
 
-def __get_module_cases(module: ModuleType) -> List[Callable]:
+def __get_module_cases(module: ModuleType) -> List[FunctionType]:
     """Get all functions defined in module"""
     inModule = lambda f: isfunction(f) and (getmodule(f) == module)
     return [func for func in vars(module).values() if inModule(func)]
 
 
 def menu(
-    cases: Union[Callable, Iterable[Callable], Dict[str, Callable], ModuleType],
+    cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
     title: str = strings.DEFAULT_TITLE,
-    on_blank: str = "return",
-    on_kbinterrupt: str = "raise",
-    decorator: Optional[Callable] = None,
+    on_blank: str = cng.DEFAULT_ON_BLANK,
+    on_kbinterrupt: str = cng.DEFAULT_ON_INTERRUPT,
+    decorator: Optional[FunctionType] = None,
     run: bool = True,
-    case_args: Optional[Dict[Callable, tuple]] = None,
-    case_kwargs: Optional[Dict[Callable, dict]] = None,
-    frontend: Optional[str] = None,
+    case_args: Optional[Dict[FunctionType, tuple]] = None,
+    case_kwargs: Optional[Dict[FunctionType, dict]] = None,
+    frontend: str = cng.DEFAULT_FRONTEND,
 ):
     """¨
-    TODO: Update docstring for newapi branch
-
     Factory function for the CLI class. This function initializes a menu.
 
     Parameters
@@ -349,22 +350,21 @@ def menu(
              'pass', does nothing. This should only be used for the main menu.
 
     on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
-                    If "raise", then will raise KeyboardInterrupt, if "return" the menu exits, and
-                    returns.
+                    If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
 
-    decorator: Decorator for case functions
+    decorator: Decorator to applied for all case functions.
 
     run: To invoke .run() method on CLI object or not.
 
-    cases_args: Optional[Dict[Callable, tuple]], dictionary with function as key and tuple of
+    cases_args: Optional[Dict[FunctionType, tuple]], dictionary with function as key and tuple of
                 positional arguments as values
 
-    cases_kwargs: Optional[Dict[Callable, dict]], dictionary with function as key and dict of
+    cases_kwargs: Optional[Dict[FunctionType, dict]], dictionary with function as key and dict of
                   keyword arguments as values
 
     frontend: str, specify desired frontend:
                     "auto": Will try to use fancy frontend if curses module is available, else
-                            use simple frontend
+                            use simple frontend (default)
                     "fancy": Use fancy front end (if on Windows, install
                              windows-curses first or Python will not be able to find the required
                              "curses" package that the fancy frontend uses)
@@ -392,10 +392,9 @@ def menu(
     else:
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
 
-    cases_to_send = filter(lambda case: _CASE_IGNORE not in vars(case), cases_to_send)
-
-    if frontend is None:
-        frontend = cng.default_frontend
+    cases_to_send = filter(
+        lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send
+    )
 
     cli = Menu(
         cases=cases_to_send,
@@ -411,3 +410,9 @@ def menu(
         cli.run()
 
     return cli
+
+
+if __name__ == "__main__":
+    import subprocess
+
+    subprocess.call(["python3", "example/cases.py"])

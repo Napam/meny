@@ -14,7 +14,7 @@ from meny.config import _CASE_TITLE
 
 def _get_case_name(func: FunctionType) -> str:
     """
-    First unwraps function (if wrapped in decorators). Assumes that wrapped functions has the 
+    First unwraps function (if wrapped in decorators). Assumes that wrapped functions has the
     __wrapped__ attribute (which will be handled by using functools.wraps). Then returns case
     title if set, else just function name
     """

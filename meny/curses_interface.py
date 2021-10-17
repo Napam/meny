@@ -1,10 +1,10 @@
 import curses
 import curses.ascii
-from meny.utils import input_splitter
-from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
-import meny
 import inspect
 from functools import wraps
+from typing import Optional, Union
+
+import meny
 
 
 def recover_cursor(f):

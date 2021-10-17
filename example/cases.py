@@ -39,11 +39,10 @@ from functools import wraps
 from time import sleep
 
 import meny
-from meny import menu
 
 import cases_nested
 
-meny.config.default_frontend = "fancy"  # Set default frontend here
+meny.set_default_frontend("fancy")
 
 import time 
 @meny.ignore
@@ -164,4 +163,4 @@ def simple_func(a=1, b: str="2", c=3.0):
 if __name__ == "__main__":
     case_args = {programmatic: (1, 2)}
     case_kwargs = {programmatic: {"d": 4, "c": 3}}
-    menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
+    meny.menu(locals(), case_args=case_args, case_kwargs=case_kwargs)

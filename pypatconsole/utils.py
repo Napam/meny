@@ -15,6 +15,7 @@ RE_ANSI = re.compile(
     r"\x1b\[[;\d]*[A-Za-z]"
 )  # Taken from tqdm source code, matches escape codes
 
+RE_INPUT = re.compile('\w+|\[.*?\]|\{.*?\}|\(.*?\)|".*?"|\'.*?\'')
 
 def clear_screen() -> None:
     """Obvious"""
@@ -44,9 +45,7 @@ def input_splitter(argstring: str) -> List[str]:
     """
     # Doing it this way instead of using shlex.split will
     # not remove quote symbols in dicts and lists and whatever
-    shlexysmexy = shlex(argstring)
-    shlexysmexy.whitespace_split = True
-    return [token for token in shlexysmexy]
+    return RE_INPUT.findall(argstring)
 
 
 def print_help(*args, **kwargs) -> None:

@@ -148,9 +148,12 @@ def wait(func):
         time.sleep(0.5)
     return wrapper
 
+def lolfunc(a=1, b: str="2", c=3.0):
+    print(a, b, c)
+
 
 if __name__ == "__main__":
     case_args = {programmatic: (1, 2)}
     case_kwargs = {programmatic: {"d": 4, "c": 3}}
-    # menu(locals(), case_args=case_args, case_kwargs=case_kwargs, decorator=wait)
     menu(locals(), case_args=case_args, case_kwargs=case_kwargs, decorator=wait)
+    # menu([lolfunc], case_args=case_args, case_kwargs=case_kwargs, decorator=wait)

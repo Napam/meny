@@ -45,7 +45,16 @@ import cases_nested
 
 meny.config.default_frontend = "fancy"  # Set default frontend here
 
+import time 
+@meny.ignore
+def wait(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        time.sleep(0.5)
+    return wrapper
 
+@wait
 @meny.case("FizzBuzz!")
 def fizzbuzz(n: int = 10, waittime: float = 0.1):
     """
@@ -69,6 +78,7 @@ def fizzbuzz(n: int = 10, waittime: float = 0.1):
         sleep(waittime)
 
 
+@wait
 @meny.case("Append two strings")
 def appendstrings(a: str, b: str):
     print(a + b)
@@ -88,10 +98,12 @@ def mathmenu():
     This nested menu gets the cases from a user defined list.
     """
 
+    @wait
     @meny.case("Multiply two floats")
     def multiply(x: float, y: float):
         print(x * y)
 
+    @wait
     @meny.case("Divide two floats")
     def divide(x: float, y: float):
         if y == 0:
@@ -103,6 +115,7 @@ def mathmenu():
     menu(locals(), title=" Quick maths ")
 
 
+@wait
 @meny.case("Even another nested menu")
 def anothernested():
     """
@@ -110,24 +123,28 @@ def anothernested():
     sending the return value of locals() into menu()
     """
 
+    @wait
     @meny.case("Print triangle")
     def triangle():
         for j in range(10):
             print("*" * j)
 
 
+    @wait
     @meny.case("Print rectangle")
     def rectangle():
         for i in range(10):
             print("#" * 10)
 
 
+    @wait
     @meny.case("Print list")
     def printlist(a: list):
         print(a)
 
     menu(locals(), title=" Shapes ")
 
+@wait
 @meny.case("Programmatic arguments")
 def programmatic(a, b, c, d):
     print(a, b, c, 4)
@@ -139,21 +156,12 @@ def just_function_name(arg: str = "Hello World"):
     print("Press enter to return")
     input()
 
-import time 
-@meny.ignore
-def wait(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        func(*args, **kwargs)
-        time.sleep(0.5)
-    return wrapper
-
-def lolfunc(a=1, b: str="2", c=3.0):
+@wait
+def simple_func(a=1, b: str="2", c=3.0):
     print(a, b, c)
 
 
 if __name__ == "__main__":
     case_args = {programmatic: (1, 2)}
     case_kwargs = {programmatic: {"d": 4, "c": 3}}
-    menu(locals(), case_args=case_args, case_kwargs=case_kwargs, decorator=wait)
-    # menu([lolfunc], case_args=case_args, case_kwargs=case_kwargs, decorator=wait)
+    menu(locals(), case_args=case_args, case_kwargs=case_kwargs)

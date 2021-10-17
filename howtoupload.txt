@@ -12,5 +12,8 @@ Install twine, a Python package used to communicate with PyPi index
 To upload package to PyPi index (do this from parent dir of dist dir):
     twine upload dist/*
 
+If you want to upload to TestPyPi then do 
+    twine upload --repository testpypi dist/*
+
 More info:
     https://packaging.python.org/tutorials/packaging-projects/ 

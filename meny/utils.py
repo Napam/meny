@@ -43,8 +43,6 @@ def input_splitter(argstring: str) -> List[str]:
     """
     Split string
     """
-    # Doing it this way instead of using shlex.split will
-    # not remove quote symbols in dicts and lists and whatever
     return RE_INPUT.findall(argstring)
 
 

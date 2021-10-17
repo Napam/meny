@@ -2,11 +2,8 @@
 Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
-
-import enum
-import re
 from ast import literal_eval
-from inspect import (getfullargspec, getmembers, getmodule, isfunction,
+from inspect import (getfullargspec, getmodule, isfunction,
                      signature, unwrap)
 from time import sleep
 from types import FunctionType, ModuleType
@@ -203,17 +200,17 @@ class Menu:
         pass
 
     def _handle_case(self, casefunc: Callable, args: List[str]):
-        args = self.case_args.get(casefunc, ()) # Programmatic args
-        kwargs = self.case_kwargs.get(casefunc, {}) # Programmatic kwargs
-
+        programmatic_args = self.case_args.get(casefunc, ()) 
+        programmatic_kwargs = self.case_kwargs.get(casefunc, {}) 
+    
         try:
-            if args or kwargs:  # If programmatic arguments
+            if programmatic_args or programmatic_kwargs:  # If programmatic arguments
                 if args:
                     raise MenuError(
                         "This function takes arguments progammatically"
                         " and should not be given any arguments"
                     )
-                casefunc(*args, **kwargs)
+                casefunc(*programmatic_args, **programmatic_kwargs)
             elif args:  # If user arguments
                 # Raises TypeError if wrong number of arguments
                 casefunc(*_handle_args(casefunc, args))

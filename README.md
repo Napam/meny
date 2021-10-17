@@ -1,4 +1,4 @@
-# UPDATE DOCS!!!!!!!
+# MUST UPDATE DOCS!!!!!!!
 
 # Meny
 A simple and sexy way to make an console interface

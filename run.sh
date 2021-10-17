@@ -2,6 +2,6 @@
 docker run \
 --rm \
 -it \
---name pypatconsole-container \
---volume $(pwd):/project/pypatconsole \
-pypatconsole-image sh -c "pip install -e pypatconsole && sh"
+--name meny-container \
+--volume $(pwd):/project/meny \
+meny-image sh -c "pip install -e meny && sh"

@@ -3,7 +3,7 @@ Example module for nested cases
 """
 from time import sleep
 
-import pypatconsole as ppc
+import meny
 
 
 def print_elements_and_types(a: list):
@@ -15,4 +15,4 @@ def nested_module_menu():
     def abacus():
         print("ABACUS!")
         sleep(1)
-    ppc.menu(locals())
+    meny.menu(locals())

@@ -14,7 +14,7 @@ Feel free to import whatever
 If you want to implement nested cases, then simply import 
 reuse the main function
 
-from pypatconsole import menu
+from meny import menu
 
 then you can either create another module with the nested 
 cases:
@@ -38,15 +38,15 @@ def case3():
 from functools import wraps
 from time import sleep
 
-import pypatconsole as ppc
-from pypatconsole import menu
+import meny
+from meny import menu
 
 import cases_nested
 
-ppc.config.default_frontend = "fancy"  # Set default frontend here
+meny.config.default_frontend = "fancy"  # Set default frontend here
 
 
-@ppc.case("FizzBuzz!")
+@meny.case("FizzBuzz!")
 def fizzbuzz(n: int = 10, waittime: float = 0.1):
     """
     When you get the urge to fizz your buzz
@@ -69,12 +69,12 @@ def fizzbuzz(n: int = 10, waittime: float = 0.1):
         sleep(waittime)
 
 
-@ppc.case("Append two strings")
+@meny.case("Append two strings")
 def appendstrings(a: str, b: str):
     print(a + b)
 
 
-@ppc.case("A nested module menu")
+@meny.case("A nested module menu")
 def nestedmodulemenu():
     """
     This nested menu loads cases from a module
@@ -82,17 +82,17 @@ def nestedmodulemenu():
     menu(cases_nested, title=" Nested! ")
 
 
-@ppc.case("Math menu")
+@meny.case("Math menu")
 def mathmenu():
     """
     This nested menu gets the cases from a user defined list.
     """
 
-    @ppc.case("Multiply two floats")
+    @meny.case("Multiply two floats")
     def multiply(x: float, y: float):
         print(x * y)
 
-    @ppc.case("Divide two floats")
+    @meny.case("Divide two floats")
     def divide(x: float, y: float):
         if y == 0:
             print("You can't divide by zero!!!")
@@ -103,32 +103,32 @@ def mathmenu():
     menu(locals(), title=" Quick maths ")
 
 
-@ppc.case("Even another nested menu")
+@meny.case("Even another nested menu")
 def anothernested():
     """
     This menu obtains the nested case functions by
     sending the return value of locals() into menu()
     """
 
-    @ppc.case("Print triangle")
+    @meny.case("Print triangle")
     def triangle():
         for j in range(10):
             print("*" * j)
 
 
-    @ppc.case("Print rectangle")
+    @meny.case("Print rectangle")
     def rectangle():
         for i in range(10):
             print("#" * 10)
 
 
-    @ppc.case("Print list")
+    @meny.case("Print list")
     def printlist(a: list):
         print(a)
 
     menu(locals(), title=" Shapes ")
 
-@ppc.case("Programmatic arguments")
+@meny.case("Programmatic arguments")
 def programmatic(a, b, c, d):
     print(a, b, c, 4)
 
@@ -140,7 +140,7 @@ def just_function_name(arg: str = "Hello World"):
     input()
 
 import time 
-@ppc.ignore
+@meny.ignore
 def wait(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

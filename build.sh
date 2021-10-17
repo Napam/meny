@@ -1,2 +1,2 @@
 # !/usr/bin/env bash
-docker build -t pypatconsole-image .
+docker build -t meny-image .

@@ -12,11 +12,11 @@ from time import sleep
 from types import FunctionType, ModuleType
 from typing import Callable, Dict, Iterable, List, Optional, Union
 
-import pypatconsole.config as cng
-import pypatconsole.strings as strings
-from pypatconsole.config import _CASE_IGNORE
-from pypatconsole.funcmap import _get_case_name, construct_funcmap
-from pypatconsole.utils import (RE_ANSI, clear_screen, input_splitter,
+import meny.config as cng
+import meny.strings as strings
+from meny.config import _CASE_IGNORE
+from meny.funcmap import _get_case_name, construct_funcmap
+from meny.utils import (RE_ANSI, clear_screen, input_splitter,
                                 list_local_cases, print_help)
 
 
@@ -228,14 +228,14 @@ class Menu:
 
     def _menu_simple(self) -> str:
         # Import here to fix circular imports
-        from pypatconsole import simple_interface
+        from meny import simple_interface
 
         return simple_interface.interface(self)
 
     def _menu_curses(self) -> str:
         # Import here to fix circular imports
         try:
-            from pypatconsole import curses_interface
+            from meny import curses_interface
         except ImportError as e:
             raise ImportError(
                 f"Got error :\n\t{e}\n"

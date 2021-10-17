@@ -1,8 +1,8 @@
 import curses
 import curses.ascii
-from pypatconsole.utils import input_splitter
+from meny.utils import input_splitter
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
-import pypatconsole
+import meny
 import inspect
 from functools import wraps
 
@@ -149,7 +149,7 @@ class InputField(BaseWindow):
 
 
 class MainWindow(BaseWindow):
-    def __init__(self, cli: pypatconsole.Menu):
+    def __init__(self, cli: meny.Menu):
         self.funcmap = cli.funcmap
         self.title = cli.title
         self.funcs_w_programmatic_args: set = (
@@ -219,7 +219,7 @@ class MainWindow(BaseWindow):
         input_split_error_flag: bool = False
         try:
             # Raises ValueError for malformed input caused by missing closing quotations
-            inp_list = pypatconsole.input_splitter(inp)
+            inp_list = meny.input_splitter(inp)
         except ValueError as e:
             assert e.args[0] == "No closing quotation", (
                 "shlex internals has changed, expected ValueError with args[0] == "
@@ -291,6 +291,6 @@ class MainWindow(BaseWindow):
         return inputfield._inp
 
 
-def interface(cli: pypatconsole.Menu):
+def interface(cli: meny.Menu):
     _interface_object = MainWindow(cli)
     return curses.wrapper(_interface_object.run)

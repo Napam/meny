@@ -1,23 +1,21 @@
 # UPDATE DOCS!!!!!!!
 
-# Unem
+# Meny
 A simple and sexy way to make an console interface
-
-Fun fact: unem is menu but backwards
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
 
 # How to setup
 First install the package with the command (make sure you have Python 3.6 or higher)
 ```
-pip install pypatconsole
+pip install meny
 ```
-Then you can import ``pypatconsole`` in Python. The package lets you import three functions: ``menu``, ``list_local_cases`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``list_local_cases`` takes the output from ``locals()`` and lists all the functions in the local scope. ``clear_screen`` clears your screen, hence the name.
+Then you can import ``meny`` in Python. The package lets you import three functions: ``menu``, ``list_local_cases`` and ``clear_screen``. Usage of ``menu`` will be illustrated below. ``list_local_cases`` takes the output from ``locals()`` and lists all the functions in the local scope. ``clear_screen`` clears your screen, hence the name.
 
 This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.6, 3.7, and 3.8
 
 ## Note for Windows users
-An original goal for this was to rely on built in Python packages only, which it does, for unix systems. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. Pypatconsole will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
+An original goal for this was to rely on built in Python packages only, which it does, for unix systems. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`
@@ -27,7 +25,7 @@ I use Windows personally and `windows-curses` has worked fine so far. The `windo
 # How to implement
 Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the ``menu`` function at the bottom
 ```python
-from pypatconsole import menu
+from meny import menu
 
             .
             .
@@ -109,7 +107,7 @@ Say we are editing console.py
 ```python
 from random import randint
 from time import sleep
-from pypatconsole import menu
+from meny import menu
 
 def case1():
     '''
@@ -174,15 +172,15 @@ There are two frontends implemented; the simple frontend and the fancy frontend.
 
 It possible to override the default frontend throughout the Python program by doing
 ```python
-import pypatconsole as ppc
-ppc.config.default_frontend = "auto" # auto, fancy, or simple
+import meny
+meny.config.default_frontend = "auto" # auto, fancy, or simple
 ```
 as opposed to specifying the choice of frontend for every `menu(..., frontend="...")` call. 
 
 ## Arguments
 The cases can take arguments as well! Simply implement them as functions with type hints (type hints are mandatory for the case functions):
 ````python
-from pypatconsole import menu
+from meny import menu
 
 def case1(a: int, b: int):
     '''Add two integers'''
@@ -243,7 +241,7 @@ their designated types is done using `eval` with som string sanitation.
 ## Programmatic Arguments
 You can supply arguments programmtically to your case functions:
 ```python
-from pypatconsole import menu
+from meny import menu
 def case6(a, b, c, d):
     """
     Programmatic arguments
@@ -263,7 +261,7 @@ Functions that takes arguments programmatically cannot take arguments through th
 If you want to implement nested cases, then you can simply reuse the menu function in the function scope. When doing nested cases, you should not give the keyword ``main=True`` to the ``menu`` function.
 
 ```python
-from pypatconsole import menu
+from meny import menu
 
 def parentcase1():
     '''Fizz'''
@@ -280,7 +278,7 @@ menu(locals(), title=' Main menu ', main=True)
 ```
 You can create another module for the other cases and pass them as well:
 ```python
-from pypatconsole import menu
+from meny import menu
 import other_cases
 
 def samplecase():
@@ -291,7 +289,7 @@ menu(other_cases, title= ' Main menu ', main=True)
 
 or you can give a list of functions, which will enable you to force the ordering of the cases as well:
 ```python
-from pypatconsole import menu
+from meny import menu
 
 def parentcase1():
     '''Fizz'''
@@ -333,7 +331,7 @@ def case_decorator(func):
 ```
 Since the decorator is a function, you cannot have it in the same namespace as the case functions, so you can for example implement it in another file. To use it you do as following:
 ```python
-from pypatconsole import menu
+from meny import menu
 from case_decorator import case_decorator
 
 # A lot of cases here

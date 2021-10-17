@@ -1,6 +1,6 @@
-# from pypatconsole.consoleclass import CLI
-from pypatconsole.utils import clear_screen
-import pypatconsole.strings as strings
+# from meny.consoleclass import CLI
+from meny.utils import clear_screen
+import meny.strings as strings
 from typing import Dict, Tuple, Callable
 
 

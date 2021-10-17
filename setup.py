@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pypatconsole",
-    version="0.0.20",
+    name="meny",
+    version="0.0.1",
     author="Naphat Amundsen",
     author_email="naphat@live.com",
     description="Simple and sexy console interface",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Napam/PyPat-Console",
+    url="https://github.com/Napam/meny",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -1,6 +1,6 @@
 from types import FunctionType
 
-from pypatconsole.config import _CASE_IGNORE, _CASE_TITLE
+from meny.config import _CASE_IGNORE, _CASE_TITLE
 
 
 def case(title: str):

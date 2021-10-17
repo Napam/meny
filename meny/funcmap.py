@@ -9,7 +9,7 @@ from inspect import unwrap
 from types import FunctionType
 from typing import Callable, Dict, Iterable, Optional, Tuple
 
-from pypatconsole.config import _CASE_TITLE
+from meny.config import _CASE_TITLE
 
 
 def _get_case_name(func: FunctionType) -> str:

@@ -19,10 +19,7 @@ class TestUtils(unittest.TestCase):
             return x * x * x
 
         cases = meny.utils._extract_and_preprocess_functions(locals())
-        self.assertEqual(len(cases), 3)
-        self.assertIs(cases[0], linear)
-        self.assertIs(cases[1], quadratic)
-        self.assertIs(cases[2], cubic)
+        self.assertListEqual(cases, [linear, quadratic, cubic])
 
     def test_input_splitter(self):
         """input_splitter parses input correctly"""

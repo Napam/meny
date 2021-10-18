@@ -8,16 +8,16 @@ from time import sleep
 from types import FunctionType, ModuleType
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from meny import strings as strings
 from meny import config as cng
+from meny import strings as strings
 from meny.funcmap import _get_case_name, construct_funcmap
 from meny.utils import (
     RE_ANSI,
+    _assert_supported,
+    _extract_and_preprocess_functions,
     clear_screen,
     input_splitter,
-    _extract_and_preprocess_functions,
     print_help,
-    _assert_supported,
 )
 
 

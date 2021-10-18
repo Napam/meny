@@ -288,7 +288,7 @@ import other_cases
 def samplecase():
     '''Foo'''
     menu(other_cases, title= ' Title here ')
-menu(other_cases, title= ' Main menu ', main=True)
+menu(other_cases, title= ' Main menu ')
 ```
 
 or you can give a list of functions, which will enable you to force the ordering of the cases as well:
@@ -343,7 +343,7 @@ from case_decorator import case_decorator
 
 # A lot of cases here
 
-menu(locals(), decorator=case_decorator, main=True)
+menu(locals(), decorator=case_decorator)
 ```
 
 # Why
@@ -362,7 +362,7 @@ Data scraping and data cleaning pipeline for stock data
 6. Exit program
 Enter choice:
 ```
-Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. PyPat-Console will enable a very quick implementation of a console.
+Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. `meny` will enable a very quick implementation of a console.
 Without the console I would need to find the right file to run (and maybe comment things out first as well). The console organizes everything into one place.
 
 ## Database interface

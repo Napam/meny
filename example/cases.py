@@ -138,7 +138,7 @@ def programmatic(a, b, c, d):
 
 
 def just_function_name(arg: str = "Hello World"):
-    print("This function does not use ppc.case decorator and therefore the menu only shows the name")
+    print("This function does not use meny.case decorator and therefore the menu only shows the name")
     print(f'Also, here is the input: "{arg}"')
     print("Press enter to return")
     input()

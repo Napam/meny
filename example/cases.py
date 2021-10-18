@@ -123,13 +123,13 @@ def anothernested():
             print("#" * 10)
         sleep(1)
 
-
     @meny.title("Print list")
     def printlist(a: list):
         print(a)
         sleep(1)
 
     meny.menu(locals(), title=" Shapes ")
+
 
 @meny.title("Programmatic arguments")
 def programmatic(a, b, c, d):
@@ -138,13 +138,15 @@ def programmatic(a, b, c, d):
 
 
 def just_function_name(arg: str = "Hello World"):
-    print("This function does not use meny.case decorator and therefore the menu only shows the name")
+    print(
+        "This function does not use meny.case decorator and therefore the menu only shows the name"
+    )
     print(f'Also, here is the input: "{arg}"')
     print("Press enter to return")
     input()
 
 
-def simple_func(a=1, b: str="2", c=3.0):
+def simple_func(a=1, b: str = "2", c=3.0):
     print(a, b, c)
     sleep(1)
 

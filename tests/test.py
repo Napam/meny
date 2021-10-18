@@ -4,7 +4,7 @@ import meny as meny
 
 class TestUtils(unittest.TestCase):
     def test__extract_and_preprocess_functions(self):
-        """list_local_cases manages to get functions"""
+        """_extract_and_preprocess_functions manages to get functions"""
 
         class Dummy:
             pass
@@ -18,8 +18,17 @@ class TestUtils(unittest.TestCase):
         def cubic(x: int):
             return x * x * x
 
+        def func1():
+            pass
+
+        def func2():
+            pass
+
+        def func3():
+            pass
+
         cases = meny.utils._extract_and_preprocess_functions(locals())
-        self.assertListEqual(cases, [linear, quadratic, cubic])
+        self.assertListEqual(cases, [linear, quadratic, cubic, func1, func2, func3])
 
     def test_input_splitter(self):
         """input_splitter parses input correctly"""
@@ -57,6 +66,24 @@ class TestUtils(unittest.TestCase):
         except AssertionError:
             gotException = True
         self.assertFalse(gotException)
+
+    def test_set_default_frontend(self):
+        """set_default_frontend works for simple, fancy, auto and only those"""
+        meny.set_default_frontend("simple")
+        self.assertEqual(meny.config.DEFAULT_FRONTEND, "simple")
+        meny.set_default_frontend("fancy")
+        self.assertEqual(meny.config.DEFAULT_FRONTEND, "fancy")
+        meny.set_default_frontend("auto")
+        self.assertEqual(meny.config.DEFAULT_FRONTEND, "auto")
+
+        with self.assertRaises(AssertionError):
+            meny.set_default_frontend("bingbongdingdong")
+
+        with self.assertRaises(AssertionError):
+            meny.set_default_frontend("electricboogaloo")
+
+        with self.assertRaises(AssertionError):
+            meny.set_default_frontend("gunsnroses")
 
 
 if __name__ == "__main__":

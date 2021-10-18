@@ -15,4 +15,5 @@ def nested_module_menu():
     def abacus():
         print("ABACUS!")
         sleep(1)
+
     meny.menu(locals())

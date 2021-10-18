@@ -41,10 +41,6 @@ def _assert_supported(arg: Any, paramname: str, supported: Container):
     )
 
 
-def _get_default_if_none(val: Any, default: Any) -> Any:
-    return default if val is None else val
-
-
 def set_default_frontend(frontend: str):
     """Options: (simple, fancy, auto)"""
     _assert_supported(frontend, "frontend", ("simple", "fancy", "auto"))

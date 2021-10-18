@@ -18,7 +18,6 @@ from meny.utils import (
     _extract_and_preprocess_functions,
     print_help,
     _assert_supported,
-    _get_default_if_none,
 )
 
 
@@ -372,12 +371,6 @@ def menu(
     --------
     CLI (Command Line Interface) object. Use .run() method to activate menu.
     """
-
-    title = _get_default_if_none(title, strings.DEFAULT_TITLE)
-    on_blank = _get_default_if_none(on_blank, cng.DEFAULT_ON_BLANK)
-    on_kbinterrupt = _get_default_if_none(on_kbinterrupt, cng.DEFAULT_ON_INTERRUPT)
-    frontend = _get_default_if_none(frontend, cng.DEFAULT_FRONTEND)
-
     if isinstance(cases, ModuleType):
         cases_to_send = _get_module_cases(cases)
     elif isinstance(cases, dict):
@@ -394,7 +387,9 @@ def menu(
 
     elif isinstance(cases, Iterable):
         # Looks kinda stupid, but it reuses the code, which is nice
-        cases_to_send = _extract_and_preprocess_functions({case.__name__:case for case in cases})
+        cases_to_send = _extract_and_preprocess_functions(
+            {case.__name__: case for case in cases}
+        )
     else:
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
 
@@ -406,13 +401,13 @@ def menu(
 
     cli = Menu(
         cases=cases_to_send,
-        title=title,
-        on_blank=on_blank,
-        on_kbinterrupt=on_kbinterrupt,
+        title=title or strings.DEFAULT_TITLE,
+        on_blank=on_blank or cng.DEFAULT_ON_BLANK,
+        on_kbinterrupt=on_kbinterrupt or cng.DEFAULT_ON_INTERRUPT,
         decorator=decorator,
         case_args=case_args,
         case_kwargs=case_kwargs,
-        frontend=frontend,
+        frontend=frontend or cng.DEFAULT_FRONTEND,
     )
     if run:
         cli.run()

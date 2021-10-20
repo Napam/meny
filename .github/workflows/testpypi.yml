@@ -14,9 +14,11 @@ jobs:
           with:
             python-version: "3.7"
         - name: Install setuptools and wheel
-            run: python3 -m pip install --upgrade setuptools wheel
+            run: |
+                python3 -m pip install --upgrade setuptools wheel
         - name: Build artifact
-            run: python -m build --sdist --wheel --outdir dist/
+            run: | 
+                python -m build --sdist --wheel --outdir dist/
         - name: Publish distribution 📦 to Test PyPI
           uses: pypa/gh-action-pypi-publish@master
           with:

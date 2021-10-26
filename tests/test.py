@@ -1,10 +1,9 @@
 import unittest
 import meny as meny
 
-
 class TestUtils(unittest.TestCase):
     def test__extract_and_preprocess_functions(self):
-        """_extract_and_preprocess_functions manages to get functions"""
+        """_extract_and_preprocess_functions manages to extract functions from locals() in correct order"""
 
         class Dummy:
             pass
@@ -45,7 +44,7 @@ class TestUtils(unittest.TestCase):
             "-123",
         ]
 
-        args = meny.input_splitter(" ".join(inputlist))
+        args = meny.input_splitter(" \t  \b".join(inputlist))
         self.assertSetEqual(set(inputlist), set(args))
 
     def test_RE_ANSI(self):
@@ -84,6 +83,27 @@ class TestUtils(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             meny.set_default_frontend("gunsnroses")
+
+    def test__handle_args(self):
+        """
+        _handle_args evaluates strings to correct types
+        """
+        def function(a, b, c, d, e, f, g, h):
+            pass
+
+        args = [
+            "hehe",
+            12,
+            123.0,
+            True,
+            {"dictionary": 123},
+            ("t", "u", "p", "l", 3),
+            ["l", 1, 5, "t"],
+            {"s", "e", "t"},
+        ]
+
+        args2 = meny._menu._handle_args(function, [repr(arg) for arg in args])
+        self.assertListEqual(args, args2)
 
 
 if __name__ == "__main__":

@@ -2,15 +2,16 @@
 A simple and sexy way to make an console interface
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
+(the gif is a bit outdated at the moment)
 
 # How to setup
-First install the package with the command (make sure you have Python 3.6 or higher)
+First install the package with the command (make sure you have Python 3.7 or higher)
 ```
 pip install meny
 ```
 Then you can import ``meny`` in Python. The most central functions in this package are `meny.menu` and `meny.title`, which will be covered below.
 
-This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.6, 3.7, and 3.8
+This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.7, 3.8, and 3.9
 
 ## Note for Windows users
 An original goal for this was to rely on built in Python packages only, which it does, for unix systems. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.

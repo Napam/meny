@@ -111,6 +111,7 @@ class Menu:
     # Menu depth counter to keep track of how many nested menus are running. This will work across
     # modules since Python modules doubles as singletons.
     _depth: int = 0
+    _returns: dict = {}
 
     def __init__(
         self,
@@ -197,14 +198,17 @@ class Menu:
                         "This function takes arguments progammatically"
                         " and should not be given any arguments"
                     )
-                casefunc(*programmatic_args, **programmatic_kwargs)
-            elif args:  # If user arguments
+                returnval = casefunc(*programmatic_args, **programmatic_kwargs)
+            elif args:
                 # Raises TypeError if wrong number of arguments
-                casefunc(*_handle_args(casefunc, args))
-            else:  # No arguments
-                # Will raise TypeError if casefunc() actually
-                # requires arguments
-                casefunc()
+                returnval = casefunc(*_handle_args(casefunc, args))
+            else:
+                # Will raise TypeError if casefunc() actually requires arguments
+                returnval = casefunc()
+
+            if returnval is not None:
+                self._returns[casefunc.__name__] = returnval
+
         # TODO: Should I catch TypeError? What if actual TypeError occurs?
         #       Maybe should catch everything and just display it in big red text? Contemplate!
         except (TypeError, MenuError) as e:
@@ -279,7 +283,7 @@ class Menu:
             if self.once:
                 self._deactivate()
 
-    def run(self):
+    def run(self) -> Dict:
         """
         Initialized menu loop
         """
@@ -290,15 +294,19 @@ class Menu:
         except KeyboardInterrupt:
             if self.on_kbinterrupt == "raise":
                 self._deactivate()
-                raise  # "Propagate exception"
+                raise
             elif self.on_kbinterrupt == "return":
                 print()
-                return
         except MenuQuit:
             if Menu._depth > 1:
                 raise
         finally:
             Menu._depth -= 1
+
+        returns = self._returns.copy()
+        if self._depth == 0:
+            self._returns.clear()
+        return returns
 
 
 def _get_module_cases(module: ModuleType) -> List[FunctionType]:
@@ -367,7 +375,7 @@ def menu(
     case_args: Optional[Dict[FunctionType, tuple]] = None,
     case_kwargs: Optional[Dict[FunctionType, dict]] = None,
     frontend: Optional[str] = None,
-) -> Dict[FunctionType, Any]:
+) -> Dict[str, Any]:
     """
     Factory function for the CLI class. This function initializes a menu.
 
@@ -405,8 +413,8 @@ def menu(
                     "simple": Use the simple (but compatible with basically everything) frontend
     Returns
     --------
-    Dictionary where functions are keys, and values are anything. Represents return values of case 
-    functions.
+    Dictionary where functions names (strings) are keys, and values are anything. Represents return 
+    values of case functions.
     """
     cli = build_menu(**locals())
     return cli.run()

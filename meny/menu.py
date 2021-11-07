@@ -112,9 +112,9 @@ class Menu:
     # Menu depth counter to keep track of how many nested menus are running. This will work across
     # modules since Python modules doubles as singletons.
     _depth: int = 0
-    _stack: list = []
+    _stack: List[dict] = []
     _returns: dict = {}
-    _curr: dict
+    _curr: dict = _returns
 
     def __init__(
         self,
@@ -198,8 +198,9 @@ class Menu:
 
     def _handle_return_tree(self, casefunc, returnval):
         if returnval is not None:
-            Menu._curr = {"return": returnval}
-            Menu._returns[casefunc.__name__] = Menu._curr
+            # Menu._curr = {"return": returnval}
+            # Menu._returns[casefunc.__name__] = Menu._curr
+            pass
 
     def _handle_case(self, casefunc: FunctionType, args: List[str]):
         """
@@ -208,8 +209,8 @@ class Menu:
             handle return values,\
             push stack
         """
-        Menu._curr = {}
-        Menu._returns[casefunc.__name__] = Menu._curr
+        Menu._curr[casefunc.__name__] = {}
+        Menu._curr = Menu._curr[casefunc.__name__]
 
         programmatic_args = self.case_args.get(casefunc, ())
         programmatic_kwargs = self.case_kwargs.get(casefunc, {})

@@ -19,3 +19,7 @@ for key in chain(stack[1:], casefunc):
 
 wanted = {"func1": {"return": 1, "bingbong": {"return": value}}}
 print(json.dumps(wanted, indent=4))
+
+curr = {}
+curr = curr["lol"] = {}
+print(curr)

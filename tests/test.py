@@ -1,5 +1,7 @@
 import unittest
 import meny as meny
+import random
+
 
 class TestUtils(unittest.TestCase):
     def test__extract_and_preprocess_functions(self):
@@ -59,9 +61,7 @@ class TestUtils(unittest.TestCase):
 
         gotException = False
         try:
-            meny.utils._assert_supported(
-                "dog", "animal", ("dog", "rabbit")
-            )  # Shuold be no error
+            meny.utils._assert_supported("dog", "animal", ("dog", "rabbit"))  # Shuold be no error
         except AssertionError:
             gotException = True
         self.assertFalse(gotException)
@@ -88,6 +88,7 @@ class TestUtils(unittest.TestCase):
         """
         _handle_args evaluates strings to correct types
         """
+
         def function(a, b, c, d, e, f, g, h):
             pass
 
@@ -104,6 +105,28 @@ class TestUtils(unittest.TestCase):
 
         args2 = meny._menu._handle_args(function, [repr(arg) for arg in args])
         self.assertListEqual(args, args2)
+
+    def test__funcmap_output(self):
+        """
+        Test funcmap output
+        """
+
+        def abba():
+            pass
+
+        def mamma():
+            pass
+
+        def mia():
+            pass
+
+        funcs = random.choices([abba, mamma, mia], k=64)
+        funcmap = meny._menu.construct_funcmap(funcs)
+        self.assertEqual(len(funcs), len(funcmap))
+        self.assertListEqual([str(i) for i in range(1, len(funcs) + 1)], list(funcmap.keys()))
+        for f, kv in zip(funcs, funcmap.values()):
+            self.assertIsInstance(kv[0], str)
+            self.assertIs(f, kv[1])
 
 
 if __name__ == "__main__":

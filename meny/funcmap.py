@@ -28,7 +28,7 @@ def _get_case_name(func: FunctionType) -> str:
 
 def construct_funcmap(
     funcs: Iterable[FunctionType], decorator: Optional[FunctionType] = None
-) -> Dict[str, Tuple[str, Callable]]:
+) -> Dict[str, Tuple[str, FunctionType]]:
     """
     Parameters
     ------------
@@ -47,16 +47,13 @@ def construct_funcmap(
     if not isinstance(funcs, Iterable):
         raise TypeError(f"Unsupported type for functions: got {type(funcs)}")
 
-    if decorator is not None:
-        return {
-            str(i): (_get_case_name(func), decorator(func))
-            for i, func in enumerate(funcs, start=1)
-        }
-    else:
-        return {
-            str(i): (_get_case_name(func), func)
-            for i, func in enumerate(funcs, start=1)
-        }
+    if decorator is None:
+        decorator = lambda f: f
+
+    return {
+        str(i): (_get_case_name(func), decorator(func))
+        for i, func in enumerate(funcs, start=1)
+    }
 
 
 if __name__ == "__main__":

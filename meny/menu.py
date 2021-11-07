@@ -163,8 +163,6 @@ class Menu:
             self.on_blank = self._deactivate
         elif on_blank == "pass":
             self.on_blank = self._pass
-        else:
-            raise ValueError("Invalid choice of on_blank")
 
         # Special options
         self.special_cases = {
@@ -186,10 +184,6 @@ class Menu:
             self._frontend = self._menu_curses
         elif frontend == "simple":
             self._frontend = self._menu_simple
-        else:
-            raise ValueError(
-                f"Got unexpected specification for frontend: {self._frontend}"
-            )
 
     def _deactivate(self):
         self.active = False
@@ -328,8 +322,8 @@ def menu(
     case_args: Optional[Dict[FunctionType, tuple]] = None,
     case_kwargs: Optional[Dict[FunctionType, dict]] = None,
     frontend: Optional[str] = None,
-):
-    """¨
+) -> Menu:
+    """
     Factory function for the CLI class. This function initializes a menu.
 
     Parameters

@@ -19,11 +19,7 @@ def _get_case_name(func: FunctionType) -> str:
     title if set, else just function name
     """
     funcvars = vars(unwrap(func))
-    return (
-        funcvars.get(_CASE_TITLE, False)
-        or funcvars.get(_DICT_KEY, False)
-        or func.__name__
-    )
+    return funcvars.get(_CASE_TITLE, False) or funcvars.get(_DICT_KEY, False) or func.__name__
 
 
 def construct_funcmap(
@@ -50,10 +46,7 @@ def construct_funcmap(
     if decorator is None:
         decorator = lambda f: f
 
-    return {
-        str(i): (_get_case_name(func), decorator(func))
-        for i, func in enumerate(funcs, start=1)
-    }
+    return {str(i): (_get_case_name(func), decorator(func)) for i, func in enumerate(funcs, start=1)}
 
 
 if __name__ == "__main__":

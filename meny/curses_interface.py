@@ -61,13 +61,9 @@ class InputField(BaseWindow):
         Gets string in input field
         """
         if n:
-            string = (
-                self._window.instr(self.begin_y, self.begin_x, n).decode(decode).strip()
-            )
+            string = self._window.instr(self.begin_y, self.begin_x, n).decode(decode).strip()
         else:
-            string = (
-                self._window.instr(self.begin_y, self.begin_x).decode(decode).strip()
-            )
+            string = self._window.instr(self.begin_y, self.begin_x).decode(decode).strip()
         return string
 
     def sync_window_with_inp(self):
@@ -152,9 +148,7 @@ class MainWindow(BaseWindow):
     def __init__(self, cli: meny.Menu):
         self.funcmap = cli.funcmap
         self.title = cli.title
-        self.funcs_w_programmatic_args: set = (
-            cli.case_args.keys() | cli.case_kwargs.keys()
-        )
+        self.funcs_w_programmatic_args: set = cli.case_args.keys() | cli.case_kwargs.keys()
 
         self.key2index = {key: index for index, key in enumerate(self.funcmap)}
         self.index2key = tuple(self.funcmap)
@@ -244,9 +238,7 @@ class MainWindow(BaseWindow):
 
         # Highlight with red if given too many arguments or if input parser complained
         if (n_tokens > (iterlen + 1)) or input_split_error_flag:
-            self._window.chgat(
-                prev_y + 1, prev_x, len(str(signature)), curses.color_pair(1)
-            )
+            self._window.chgat(prev_y + 1, prev_x, len(str(signature)), curses.color_pair(1))
 
     def run(self, window: "curses._CursesWindow"):
         """
@@ -258,9 +250,7 @@ class MainWindow(BaseWindow):
         curses.use_default_colors()
         curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_RED)
         curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        super().__init__(
-            curses.newpad(2048, 2048)
-        )  # This will populate the self._window attribute
+        super().__init__(curses.newpad(2048, 2048))  # This will populate the self._window attribute
 
         def refresh_pad():
             lines, cols = window.getmaxyx()
@@ -268,9 +258,7 @@ class MainWindow(BaseWindow):
 
         # Print funcmap
         funcmap_strings = [f"{key}. {val[0]}" for key, val in self.funcmap.items()]
-        maxstrlen = max(
-            map(len, funcmap_strings)
-        )  # Get length of longest string in funcmap
+        maxstrlen = max(map(len, funcmap_strings))  # Get length of longest string in funcmap
         maxstrlen = max(maxstrlen, len(self.title))
         self.cprint(f"{self.title:^{maxstrlen}}", curses.A_UNDERLINE)
         for s in funcmap_strings:

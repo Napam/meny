@@ -1,1 +1,0 @@
-black meny/*.py tests/*.py example/*.py *.py

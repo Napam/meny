@@ -54,9 +54,7 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
     params = argsspec.args
 
     if len(args) > len(params):
-        raise MenuError(
-            f"Got too many arguments, should be {len(params)}, but got {len(args)}"
-        )
+        raise MenuError(f"Got too many arguments, should be {len(params)}, but got {len(args)}")
 
     typed_arglist = [None] * len(args)
     try:
@@ -64,8 +62,7 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
             typed_arglist[i] = literal_eval(arg)
     except (ValueError, SyntaxError) as e:
         raise MenuError(
-            f"Got arguments: {args}\n"
-            f"But could not evaluate argument at position {i}:\n\t {arg}"
+            f"Got arguments: {args}\n" f"But could not evaluate argument at position {i}:\n\t {arg}"
         ) from e
     return typed_arglist
 
@@ -84,9 +81,7 @@ def _error_info_case(error: Exception, func: FunctionType) -> None:
         f"Function signature: {signature(func)}"
     )
     lenerror = max(map(len, str(error).split("\n")))
-    lenerror = max(
-        lenerror, max(map(len, RE_ANSI.sub("", selected_case_str).split("\n")))
-    )
+    lenerror = max(lenerror, max(map(len, RE_ANSI.sub("", selected_case_str).split("\n"))))
     print(strings.BOLD + strings.RED + f"{' ERROR ':#^{lenerror}}" + strings.END)
     print(selected_case_str)
     print(f'{f" Error message ":=^{lenerror}}')
@@ -99,12 +94,7 @@ def _error_info_case(error: Exception, func: FunctionType) -> None:
 
 def _error_info_parse(error: Exception):
     lenerror = max(map(len, str(error).split("\n")))
-    print(
-        strings.BOLD
-        + strings.RED
-        + f"{' ARGUMENT PARSE ERROR ':#^{lenerror}}"
-        + strings.END
-    )
+    print(strings.BOLD + strings.RED + f"{' ARGUMENT PARSE ERROR ':#^{lenerror}}" + strings.END)
     print(f'{f" Error message ":=^{lenerror}}')
     print(error)
     print(f'{f"":=^{lenerror}}')
@@ -375,23 +365,17 @@ def menu(
 
         moduleName: Union[str, None] = cases.get("__name__", None)
         if moduleName == "__main__":
-            cases_to_send = [
-                case for case in cases_to_send if case.__module__ == "__main__"
-            ]
+            cases_to_send = [case for case in cases_to_send if case.__module__ == "__main__"]
 
     elif isinstance(cases, Iterable):
         # Looks kinda stupid, but it reuses the code, which is nice
-        cases_to_send = _extract_and_preprocess_functions(
-            {case.__name__: case for case in cases}
-        )
+        cases_to_send = _extract_and_preprocess_functions({case.__name__: case for case in cases})
     else:
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
 
     cases_to_send: Iterable[FunctionType]
 
-    cases_to_send = filter(
-        lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send
-    )
+    cases_to_send = filter(lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send)
 
     cli = Menu(
         cases=cases_to_send,

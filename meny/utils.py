@@ -12,9 +12,7 @@ from meny import strings
 # *Nix uses clear, windows uses cls
 __CLEAR_COMMAND = "cls" if os.name == "nt" else "clear"
 
-RE_ANSI = re.compile(
-    r"\x1b\[[;\d]*[A-Za-z]"
-)  # Taken from tqdm source code, matches escape codes
+RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
 
 RE_INPUT = re.compile("[\w.-]+|\[.*?\]|\{.*?\}|\(.*?\)|\".*?\"|'.*?'")
 
@@ -52,9 +50,7 @@ def clear_screen() -> None:
     os.system(__CLEAR_COMMAND)
 
 
-def _extract_and_preprocess_functions(
-    dict_: Dict[str, FunctionType]
-) -> List[FunctionType]:
+def _extract_and_preprocess_functions(dict_: Dict[str, FunctionType]) -> List[FunctionType]:
     """
     Parameters
     -------------

@@ -3,9 +3,10 @@ Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
 from ast import literal_eval
+from collections import deque
 from inspect import getfullargspec, getmodule, isfunction, signature, unwrap
 from time import sleep
-from types import FunctionType, ModuleType
+from types import FunctionType, MappingProxyType, ModuleType
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from meny import config as cng
@@ -111,7 +112,9 @@ class Menu:
     # Menu depth counter to keep track of how many nested menus are running. This will work across
     # modules since Python modules doubles as singletons.
     _depth: int = 0
+    _stack: list = []
     _returns: dict = {}
+    _curr: dict
 
     def __init__(
         self,
@@ -157,6 +160,8 @@ class Menu:
         elif on_blank == "pass":
             self.on_blank = self._pass
 
+        self._return_handler = self._handle_return_tree
+
         # Special options
         self.special_cases = {
             "..": self.on_blank,
@@ -187,13 +192,27 @@ class Menu:
     def _pass(self):
         pass
 
+    def _handle_return_flat(self, casefunc, returnval):
+        if returnval is not None:
+            self._returns[casefunc.__name__] = returnval
+
+    def _handle_return_tree(self, casefunc, returnval):
+        if returnval is not None:
+            Menu._curr = {"return": returnval}
+            Menu._returns[casefunc.__name__] = Menu._curr
+
     def _handle_case(self, casefunc: FunctionType, args: List[str]):
         """
-        Handles what to do with a casefunc from funcmap, also handles return values.
+        Responsibilities:\
+            call given casefunc with correct arguments,\
+            handle return values,\
+            push stack
         """
+        Menu._curr = {}
+        Menu._returns[casefunc.__name__] = Menu._curr
+
         programmatic_args = self.case_args.get(casefunc, ())
         programmatic_kwargs = self.case_kwargs.get(casefunc, {})
-
         try:
             if programmatic_args or programmatic_kwargs:  # If programmatic arguments
                 if args:
@@ -209,8 +228,7 @@ class Menu:
                 # Will raise TypeError if casefunc() actually requires arguments
                 returnval = casefunc()
 
-            if returnval is not None:
-                self._returns[casefunc.__name__] = returnval
+            # self._return_handler(casefunc, returnval)
 
         # TODO: Should I catch TypeError? What if actual TypeError occurs?
         #       Maybe should catch everything and just display it in big red text? Contemplate!
@@ -288,10 +306,18 @@ class Menu:
 
     def run(self) -> Dict:
         """
-        Initialized menu loop
+        Responsibilities:\
+            call menu loop,\
+            handle MenuQuit and KeyboardInterrupt,\
+            push first stack,\
+            pop stack,\
+            count depth
         """
         self.active = True
         Menu._depth += 1
+        if len(Menu._stack) == 0:
+            Menu._stack.append(cng._ROOT)
+
         try:
             self._menu_loop()
         except KeyboardInterrupt:
@@ -305,6 +331,7 @@ class Menu:
                 raise
         finally:
             Menu._depth -= 1
+            Menu._stack.pop()
 
         returns = self._returns.copy()
         if self._depth == 0:
@@ -399,7 +426,7 @@ def menu(
         'return', will return to parent menu\
         'pass', does nothing. This should only be used for the main menu.
 
-    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
+    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.\
                     If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
 
     decorator: Decorator to applied for all case functions.

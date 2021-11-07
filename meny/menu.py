@@ -188,6 +188,9 @@ class Menu:
         pass
 
     def _handle_case(self, casefunc: FunctionType, args: List[str]):
+        """
+        Handles what to do with a casefunc from funcmap, also handles return values.
+        """
         programmatic_args = self.case_args.get(casefunc, ())
         programmatic_kwargs = self.case_kwargs.get(casefunc, {})
 
@@ -318,7 +321,7 @@ def _get_module_cases(module: ModuleType) -> List[FunctionType]:
 def build_menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
     title: Optional[str] = None,
-    once: bool = False,
+    once: Optional[bool] = None,
     on_blank: Optional[str] = None,
     on_kbinterrupt: Optional[str] = None,
     decorator: Optional[FunctionType] = None,
@@ -352,6 +355,9 @@ def build_menu(
 
     cases_to_send = filter(lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send)
 
+    if once is None:
+        once = cng.DEFAULT_ONCE
+
     return Menu(
         cases=cases_to_send,
         title=title or strings.DEFAULT_TITLE,
@@ -368,7 +374,7 @@ def build_menu(
 def menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
     title: Optional[str] = None,
-    once: bool = False,
+    once: Optional[bool] = None,
     on_blank: Optional[str] = None,
     on_kbinterrupt: Optional[str] = None,
     decorator: Optional[FunctionType] = None,

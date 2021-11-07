@@ -10,7 +10,7 @@ from typing import Any, Container, Dict, List
 from meny import strings
 
 # *Nix uses clear, windows uses cls
-__CLEAR_COMMAND = "cls" if os.name == "nt" else "clear"
+_CLEAR_COMMAND = "cls" if os.name == "nt" else "clear"
 
 RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
 
@@ -45,9 +45,14 @@ def set_default_frontend(frontend: str):
     cng.DEFAULT_FRONTEND = frontend
 
 
+def set_default_once(once: bool):
+    _assert_supported(type(once), "once", (bool,))
+    cng.DEFAULT_ONCE = once
+
+
 def clear_screen() -> None:
     """Obvious"""
-    os.system(__CLEAR_COMMAND)
+    os.system(_CLEAR_COMMAND)
 
 
 def _extract_and_preprocess_functions(dict_: Dict[str, FunctionType]) -> List[FunctionType]:

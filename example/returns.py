@@ -4,6 +4,8 @@ POC use case of case functions that returns values
 
 import meny
 
+meny.set_default_once(True)
+
 
 def returnsOne():
     def returnsTwo():

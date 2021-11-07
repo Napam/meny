@@ -116,6 +116,7 @@ class Menu:
         self,
         cases: Iterable[FunctionType],
         title: str,
+        once: bool,
         on_blank: str,
         on_kbinterrupt: str,
         frontend: str,
@@ -140,6 +141,7 @@ class Menu:
 
         self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
+        self.once = once
         self.on_kbinterrupt = on_kbinterrupt
         self.case_args = case_args
         self.case_kwargs = case_kwargs
@@ -274,6 +276,9 @@ class Menu:
                 print(strings.INVALID_TERMINAL_INPUT_MSG)
                 sleep(cng.MSG_WAIT_TIME)
 
+            if self.once:
+                self._deactivate()
+
     def run(self):
         """
         Initialized menu loop
@@ -302,58 +307,20 @@ def _get_module_cases(module: ModuleType) -> List[FunctionType]:
     return [func for func in vars(module).values() if inModule(func)]
 
 
-def menu(
+def build_menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
     title: Optional[str] = None,
+    once: bool = False,
     on_blank: Optional[str] = None,
     on_kbinterrupt: Optional[str] = None,
     decorator: Optional[FunctionType] = None,
-    run: bool = True,
     case_args: Optional[Dict[FunctionType, tuple]] = None,
     case_kwargs: Optional[Dict[FunctionType, dict]] = None,
     frontend: Optional[str] = None,
 ) -> Menu:
     """
-    Factory function for the CLI class. This function initializes a menu.
-
-    Parameters
-    ------------
-    cases: a dictionary where keys are functions names and values are functions
-
-           Or an iterable of functions
-
-           Or a module containing functions
-
-    title: title of menu
-
-    on_blank: What to do the when given blank input. Available options are:
-             'return', will return to parent menu
-
-             'pass', does nothing. This should only be used for the main menu.
-
-    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
-                    If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
-
-    decorator: Decorator to applied for all case functions.
-
-    run: To invoke .run() method on CLI object or not.
-
-    cases_args: Optional[Dict[FunctionType, tuple]], dictionary with function as key and tuple of
-                positional arguments as values
-
-    cases_kwargs: Optional[Dict[FunctionType, dict]], dictionary with function as key and dict of
-                  keyword arguments as values
-
-    frontend: str, specify desired frontend:
-                    "auto": Will try to use fancy frontend if curses module is available, else
-                            use simple frontend (default)
-                    "fancy": Use fancy front end (if on Windows, install
-                             windows-curses first or Python will not be able to find the required
-                             "curses" package that the fancy frontend uses)
-                    "simple": Use the simple (but compatible with basically everything) frontend
-    Returns
-    --------
-    CLI (Command Line Interface) object. Use .run() method to activate menu.
+    This is a factory for the Menu class to reduce boilerplate.
+    See docstring in menu() below
     """
     if isinstance(cases, ModuleType):
         cases_to_send = _get_module_cases(cases)
@@ -377,9 +344,10 @@ def menu(
 
     cases_to_send = filter(lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send)
 
-    cli = Menu(
+    return Menu(
         cases=cases_to_send,
         title=title or strings.DEFAULT_TITLE,
+        once=once,
         on_blank=on_blank or cng.DEFAULT_ON_BLANK,
         on_kbinterrupt=on_kbinterrupt or cng.DEFAULT_ON_INTERRUPT,
         decorator=decorator,
@@ -387,10 +355,61 @@ def menu(
         case_kwargs=case_kwargs,
         frontend=frontend or cng.DEFAULT_FRONTEND,
     )
-    if run:
-        cli.run()
 
-    return cli
+
+def menu(
+    cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
+    title: Optional[str] = None,
+    once: bool = False,
+    on_blank: Optional[str] = None,
+    on_kbinterrupt: Optional[str] = None,
+    decorator: Optional[FunctionType] = None,
+    case_args: Optional[Dict[FunctionType, tuple]] = None,
+    case_kwargs: Optional[Dict[FunctionType, dict]] = None,
+    frontend: Optional[str] = None,
+) -> Dict[FunctionType, Any]:
+    """
+    Factory function for the CLI class. This function initializes a menu.
+
+    Parameters
+    ------------
+    cases: a dictionary where keys are functions names and values are functions\
+           Or an iterable of functions\
+           Or a module containing functions
+
+    title: title of menu
+
+    once: If you want menu to return after a a single choice. 
+
+    on_blank: What to do the when given blank input. Available options are:\
+        'return', will return to parent menu\
+        'pass', does nothing. This should only be used for the main menu.
+
+    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
+                    If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
+
+    decorator: Decorator to applied for all case functions.
+
+    cases_args: Optional[Dict[FunctionType, tuple]], dictionary with function as key and tuple of
+                positional arguments as values
+
+    cases_kwargs: Optional[Dict[FunctionType, dict]], dictionary with function as key and dict of
+                  keyword arguments as values
+
+    frontend: str, specify desired frontend:\
+                    "auto": Will try to use fancy frontend if curses module is available, else\
+                            use simple frontend (default)\
+                    "fancy": Use fancy front end (if on Windows, install\
+                             windows-curses first or Python will not be able to find the required\
+                             "curses" package that the fancy frontend uses)\
+                    "simple": Use the simple (but compatible with basically everything) frontend
+    Returns
+    --------
+    Dictionary where functions are keys, and values are anything. Represents return values of case 
+    functions.
+    """
+    cli = build_menu(**locals())
+    return cli.run()
 
 
 if __name__ == "__main__":

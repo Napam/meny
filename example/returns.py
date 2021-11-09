@@ -41,6 +41,7 @@ def returnsOne2():
 vals1 = meny.menu(locals(), "MENU 1")
 # vals2 = meny.menu(locals(), "MENU 2")
 print(json.dumps(vals1, indent=4))
+print(vals1)
 # print(json.dumps(vals2, indent=4))
 
 a = {

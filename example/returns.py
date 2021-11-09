@@ -3,6 +3,7 @@ POC use case of case functions that returns values
 """
 
 import meny
+import json
 
 meny.set_default_once(False)
 
@@ -37,14 +38,12 @@ def returnsOne2():
     return 1
 
 
-vals1 = meny.menu(locals())
-# vals2 = meny.menu(locals())
-print(vals1)
-# print(vals2)
+vals1 = meny.menu(locals(), "MENU 1")
+# vals2 = meny.menu(locals(), "MENU 2")
+print(json.dumps(vals1, indent=4))
+# print(json.dumps(vals2, indent=4))
 
 a = {
     "returnsOne": {"value": 1, "returnsTwo": {"value": 2, "returnsThree": {"value": 3}}},
     "returnsOne2": {"value": 1, "returnsTwo": {"value": 2, "returnsThree": {"value": 3}}},
 }
-
-print(a["returnsOne"]["value"])

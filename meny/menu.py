@@ -109,12 +109,8 @@ class Menu:
     Command Line Interface class
     """
 
-    # Menu depth counter to keep track of how many nested menus are running. This will work across
-    # modules since Python modules doubles as singletons.
-    _depth: int = 0
     _stack: List[dict] = []
-    _returns: dict = {}
-    _curr: dict = _returns
+    _curr_case: Optional[FunctionType] = None
 
     def __init__(
         self,
@@ -207,11 +203,10 @@ class Menu:
         Responsibilities:\
             call given casefunc with correct arguments,\
             handle return values,\
-            push stack
+            Menu._curr_case
         """
-        Menu._curr[casefunc.__name__] = {}
-        Menu._curr = Menu._curr[casefunc.__name__]
 
+        Menu._curr_case = casefunc
         programmatic_args = self.case_args.get(casefunc, ())
         programmatic_kwargs = self.case_kwargs.get(casefunc, {})
         try:
@@ -229,7 +224,7 @@ class Menu:
                 # Will raise TypeError if casefunc() actually requires arguments
                 returnval = casefunc()
 
-            # self._return_handler(casefunc, returnval)
+            # Menu._stack[-1]["return"] = returnval
 
         # TODO: Should I catch TypeError? What if actual TypeError occurs?
         #       Maybe should catch everything and just display it in big red text? Contemplate!
@@ -305,6 +300,10 @@ class Menu:
             if self.once:
                 self._deactivate()
 
+    def _reset(self):
+        Menu._returns.clear()
+        Menu._curr_case = None
+
     def run(self) -> Dict:
         """
         Responsibilities:\
@@ -315,9 +314,13 @@ class Menu:
             count depth
         """
         self.active = True
-        Menu._depth += 1
         if len(Menu._stack) == 0:
-            Menu._stack.append(cng._ROOT)
+            Menu._stack.append({})
+        else:
+            old_scope = Menu._stack[-1]
+            next_scope = old_scope.get(Menu._curr_case.__name__, {})
+            old_scope[Menu._curr_case.__name__] = next_scope
+            Menu._stack.append(next_scope)
 
         try:
             self._menu_loop()
@@ -328,16 +331,12 @@ class Menu:
             elif self.on_kbinterrupt == "return":
                 print()
         except MenuQuit:
-            if Menu._depth > 1:
+            if len(Menu._stack) > 1:
                 raise
         finally:
-            Menu._depth -= 1
-            Menu._stack.pop()
+            scope = Menu._stack.pop()
 
-        returns = self._returns.copy()
-        if self._depth == 0:
-            self._returns.clear()
-        return returns
+        return scope
 
 
 def _get_module_cases(module: ModuleType) -> List[FunctionType]:

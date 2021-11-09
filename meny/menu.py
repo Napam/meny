@@ -224,7 +224,7 @@ class Menu:
                 # Will raise TypeError if casefunc() actually requires arguments
                 returnval = casefunc()
 
-            # Menu._stack[-1]["return"] = returnval
+            Menu._stack[-1]["return"] = returnval
 
         # TODO: Should I catch TypeError? What if actual TypeError occurs?
         #       Maybe should catch everything and just display it in big red text? Contemplate!

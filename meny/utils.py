@@ -4,8 +4,8 @@ Common stuff for console stuff
 import os
 import re
 from meny import config as cng
-from inspect import isfunction
-from types import FunctionType
+from inspect import getmodule, isfunction
+from types import FunctionType, ModuleType
 from typing import Any, Container, Dict, List
 from meny import strings
 
@@ -86,19 +86,10 @@ def input_splitter(argstring: str) -> List[str]:
     return RE_INPUT.findall(argstring)
 
 
-def print_help(*args, **kwargs) -> None:
-    print(
-        """
-        To exit or return from menu interface (even if you are in a nested menu): Enter q
-
-        To return to parent menu: Enter blank (press enter without giving input)
-                                  or enter '..'. If you are in main menu, this 
-                                  will exit the menu as well. 
-
-        Press enter to exit help screen
-        """
-    )
-    input()
+def _get_module_cases(module: ModuleType) -> List[FunctionType]:
+    """Get all functions defined in module"""
+    inModule = lambda f: isfunction(f) and (getmodule(f) == module)
+    return [func for func in vars(module).values() if inModule(func)]
 
 
 if __name__ == "__main__":

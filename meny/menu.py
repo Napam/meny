@@ -3,23 +3,22 @@ Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
 from ast import literal_eval
-from collections import deque
-from inspect import getfullargspec, getmodule, isfunction, signature, unwrap
+from inspect import getfullargspec, unwrap
 from time import sleep
-from types import FunctionType, MappingProxyType, ModuleType
+from types import FunctionType, ModuleType
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from meny import config as cng
-from meny import strings as strings
-from meny.funcmap import _get_case_name, construct_funcmap
+from meny import strings
+from meny.funcmap import construct_funcmap
 from meny.utils import (
-    RE_ANSI,
     _assert_supported,
     _extract_and_preprocess_functions,
+    _get_module_cases,
     clear_screen,
     input_splitter,
-    print_help,
 )
+from meny.infos import _error_info_case, _error_info_parse, print_help
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -68,40 +67,19 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
     return typed_arglist
 
 
-def _error_info_case(error: Exception, func: FunctionType) -> None:
-    """
-    Used to handle error for cases
-
-    Error: E.g. ValueError
-
-    func: case function
-    """
-    selected_case_str = (
-        f'Selected case: "{strings.YELLOW+_get_case_name(func)+strings.END}"\n'
-        f'Case function: "{strings.YELLOW+str(func)+strings.END}"\n'
-        f"Function signature: {signature(func)}"
-    )
-    lenerror = max(map(len, str(error).split("\n")))
-    lenerror = max(lenerror, max(map(len, RE_ANSI.sub("", selected_case_str).split("\n"))))
-    print(strings.BOLD + strings.RED + f"{' ERROR ':#^{lenerror}}" + strings.END)
-    print(selected_case_str)
-    print(f'{f" Error message ":=^{lenerror}}')
-    print(error)
-    print(f'{f"":=^{lenerror}}')
-    print()
-    print(strings.INPUT_WAIT_PROMPT_MSG)
-    input()
-
-
-def _error_info_parse(error: Exception):
-    lenerror = max(map(len, str(error).split("\n")))
-    print(strings.BOLD + strings.RED + f"{' ARGUMENT PARSE ERROR ':#^{lenerror}}" + strings.END)
-    print(f'{f" Error message ":=^{lenerror}}')
-    print(error)
-    print(f'{f"":=^{lenerror}}')
-    print()
-    print(strings.INPUT_WAIT_PROMPT_MSG)
-    input()
+def _handle_casefunc(casefunc: FunctionType, args: List[str], pargs: Iterable[Any], pkwargs: Dict[Any, Any]):
+    if pargs or pkwargs:  # If programmatic arguments
+        if args:
+            raise MenuError(
+                "This function takes arguments progammatically" " and should not be given any arguments"
+            )
+        return casefunc(*pargs, **pkwargs)
+    elif args:
+        # Raises TypeError if wrong number of arguments
+        return casefunc(*_handle_args(casefunc, args))
+    else:
+        # Will raise TypeError if casefunc() actually requires arguments
+        return casefunc()
 
 
 class Menu:
@@ -156,9 +134,7 @@ class Menu:
         if on_blank == "return":
             self.on_blank = self._deactivate
         elif on_blank == "pass":
-            self.on_blank = self._pass
-
-        self._return_handler = self._handle_return_tree
+            self.on_blank = lambda: None
 
         # Special options
         self.special_cases = {
@@ -187,19 +163,6 @@ class Menu:
     def _quit(self):
         raise MenuQuit
 
-    def _pass(self):
-        pass
-
-    def _handle_return_flat(self, casefunc, returnval):
-        if returnval is not None:
-            self._returns[casefunc.__name__] = returnval
-
-    def _handle_return_tree(self, casefunc, returnval):
-        if returnval is not None:
-            # Menu._curr = {"return": returnval}
-            # Menu._returns[casefunc.__name__] = Menu._curr
-            pass
-
     def _handle_case(self, casefunc: FunctionType, args: List[str]):
         """
         Responsibilities:\
@@ -207,39 +170,23 @@ class Menu:
             push pop stack,\
             handle return values
         """
-        programmatic_args = self.case_args.get(casefunc, ())
-        programmatic_kwargs = self.case_kwargs.get(casefunc, {})
+        program_args = self.case_args.get(casefunc, ())
+        program_kwargs = self.case_kwargs.get(casefunc, {})
         try:
             if len(Menu._stack) == 0:
                 Menu._stack.append({})
-            old_scope = Menu._stack[-1]
-            next_scope = old_scope.get(casefunc.__name__, {})
-            old_scope[casefunc.__name__] = next_scope
+            this_scope = Menu._stack[-1]  # Get scope of current menu
+            next_scope = this_scope.get(casefunc.__name__, {})  # Create / get next scope
+            this_scope[casefunc.__name__] = next_scope  # Insert next scope into old scope
             Menu._stack.append(next_scope)
-
-            if programmatic_args or programmatic_kwargs:  # If programmatic arguments
-                if args:
-                    raise MenuError(
-                        "This function takes arguments progammatically"
-                        " and should not be given any arguments"
-                    )
-                returnval = casefunc(*programmatic_args, **programmatic_kwargs)
-            elif args:
-                # Raises TypeError if wrong number of arguments
-                returnval = casefunc(*_handle_args(casefunc, args))
-            else:
-                # Will raise TypeError if casefunc() actually requires arguments
-                returnval = casefunc()
-
-            Menu._stack[-1]["return"] = returnval
-            Menu._stack.pop()
-            Menu._return = Menu._stack[-1]
-
-        # TODO: Should I catch TypeError? What if actual TypeError occurs?
-        #       Maybe should catch everything and just display it in big red text? Contemplate!
+            next_scope["return"] = _handle_casefunc(casefunc, args, program_args, program_kwargs)
         except (TypeError, MenuError) as e:
-            Menu._stack.pop()
+            # TODO: Should I catch TypeError? What if actual TypeError occurs?
+            #       Maybe should catch everything and just display it in big red text? Contemplate!
             _error_info_case(e, casefunc)
+        finally:
+            Menu._stack.pop()
+            Menu._return = Menu._stack[-1]  # Set current return scope to previous
 
     def _menu_simple(self) -> str:
         # Import here to fix circular imports
@@ -339,12 +286,6 @@ class Menu:
             Menu._depth -= 1
 
         return Menu._return
-
-
-def _get_module_cases(module: ModuleType) -> List[FunctionType]:
-    """Get all functions defined in module"""
-    inModule = lambda f: isfunction(f) and (getmodule(f) == module)
-    return [func for func in vars(module).values() if inModule(func)]
 
 
 def build_menu(

@@ -84,6 +84,22 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(AssertionError):
             meny.set_default_frontend("gunsnroses")
 
+    def test_set_default_once(self):
+        """set_default_frontend works for simple, fancy, auto and only those"""
+        meny.set_default_once(False)
+        self.assertFalse(meny.config.DEFAULT_ONCE)
+        meny.set_default_once(True)
+        self.assertTrue(meny.config.DEFAULT_ONCE)
+
+        with self.assertRaises(AssertionError):
+            meny.set_default_frontend("bingbongdingdong")
+
+        with self.assertRaises(AssertionError):
+            meny.set_default_frontend(123)
+
+        with self.assertRaises(AssertionError):
+            meny.set_default_frontend("gunsnroses")
+
     def test__handle_args(self):
         """
         _handle_args evaluates strings to correct types
@@ -103,7 +119,7 @@ class TestUtils(unittest.TestCase):
             {"s", "e", "t"},
         ]
 
-        args2 = meny._menu._handle_args(function, [repr(arg) for arg in args])
+        args2 = meny.casehandlers._handle_args(function, [repr(arg) for arg in args])
         self.assertListEqual(args, args2)
 
     def test__funcmap_output(self):
@@ -127,6 +143,101 @@ class TestUtils(unittest.TestCase):
         for f, kv in zip(funcs, funcmap.values()):
             self.assertIsInstance(kv[0], str)
             self.assertIs(f, kv[1])
+
+    def test__TreeHandler(self):
+        """
+        _TreeHandler returns currect tree structure
+        """
+
+        class DummyMenu:
+            _return = None
+
+            def __init__(self):
+                self.case_args = {}
+                self.case_kwargs = {}
+
+        dum = DummyMenu()
+
+        handler = meny.casehandlers._TreeHandler()
+
+        def func1(val=0):
+            if val == 2:
+                return val
+            handler(dum, func2, [f"{val+1}"])
+            return val
+
+        def func2(val=0):
+            if val == 2:
+                return val
+            handler(dum, func1, [f"{val+1}"])
+            return val
+
+        handler(dum, func1, [])
+        returns = {"func1": {"func2": {"func1": {"return": 2}, "return": 1}, "return": 0}}
+        self.assertDictEqual(returns, handler._stack[0])
+
+    def test__FlatHandler(self):
+        """
+        _FlatHandler returns currect flat structure
+        """
+
+        class DummyMenu:
+            _return = None
+
+            def __init__(self):
+                self.case_args = {}
+                self.case_kwargs = {}
+
+        dum = DummyMenu()
+
+        handler = meny.casehandlers._FlatHandler()
+
+        def func1(val=0):
+            if val == 2:
+                return val
+            handler(dum, func2, [f"{val+1}"])
+            return val
+
+        def func2(val=0):
+            if val == 2:
+                return val
+            handler(dum, func1, [f"{val+1}"])
+            return val
+
+        handler(dum, func1, [])
+        returns = {"func1": 0, "func2": 1}
+        self.assertDictEqual(returns, handler._return)
+
+    def test__handle_casefunc(self):
+        """Handle casfunc works as expected"""
+
+        class DummyMenu:
+            def __init__(self):
+                self.case_args = {}
+                self.case_kwargs = {}
+
+        menu = DummyMenu()
+
+        def func(a, b, c):
+            return (a, b, c)
+
+        returns = meny._handle_casefunc(func, ["1", "2", "3"], menu)
+        self.assertTupleEqual(returns, (1, 2, 3))
+
+        with self.assertRaises(TypeError):
+            meny._handle_casefunc(func, [], menu)
+
+        with self.assertRaises(TypeError):
+            meny._handle_casefunc(func, ["1", "2"], menu)
+
+        menu.case_args = {func: (1, 2)}
+
+        with self.assertRaises(meny.MenuError):
+            meny._handle_casefunc(func, ["1", "2", "3"], menu)
+
+        menu.case_kwargs = {func: {"c": 4}}
+        returns = meny._handle_casefunc(func, [], menu)
+        self.assertTupleEqual(returns, (1, 2, 4))
 
 
 if __name__ == "__main__":

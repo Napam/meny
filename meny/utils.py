@@ -46,12 +46,13 @@ def set_default_frontend(frontend: str):
 
 
 def set_default_once(once: bool):
+    """True or False"""
     _assert_supported(type(once), "once", (bool,))
     cng.DEFAULT_ONCE = once
 
 
 def clear_screen() -> None:
-    """Obvious"""
+    """OS independent terminal clear"""
     os.system(_CLEAR_COMMAND)
 
 

@@ -2,11 +2,9 @@
 Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
-from ast import literal_eval
-from inspect import getfullargspec, unwrap
 from time import sleep
 from types import FunctionType, ModuleType
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from meny import config as cng
 from meny import strings
@@ -18,7 +16,8 @@ from meny.utils import (
     clear_screen,
     input_splitter,
 )
-from meny.infos import _error_info_case, _error_info_parse, print_help
+from meny.infos import _error_info_parse, print_help
+from meny.exceptions import MenuQuit
 
 
 def raise_interrupt(*args, **kwargs) -> None:
@@ -28,58 +27,32 @@ def raise_interrupt(*args, **kwargs) -> None:
     raise KeyboardInterrupt
 
 
-class MenuError(Exception):
-    """
-    Custom exception for console related stuff since I dont want to catch too many exceptions
-    from Python.
-    """
+def _quit():
+    raise MenuQuit
 
 
-class MenuQuit(Exception):
-    """
-    For exiting all console instances
-    """
+def _menu_simple(instance) -> str:
+    # Import here to fix circular imports
+    from meny import simple_interface
+
+    return simple_interface.interface(instance)
 
 
-def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
-    """
-    Handles list of strings that are the arguments using ast.literal_eval.
-
-    E.g. return is [1, "cat", 2.0, False]
-                   int  str   float  bool
-    """
-    # Unwrap in case the function is wrapped
-    func = unwrap(func)
-    argsspec = getfullargspec(func)
-    params = argsspec.args
-
-    if len(args) > len(params):
-        raise MenuError(f"Got too many arguments, should be {len(params)}, but got {len(args)}")
-
-    typed_arglist = [None] * len(args)
+def _menu_curses(instance) -> str:
+    # Import here to fix circular imports
     try:
-        for i, arg in enumerate(args):
-            typed_arglist[i] = literal_eval(arg)
-    except (ValueError, SyntaxError) as e:
-        raise MenuError(
-            f"Got arguments: {args}\n" f"But could not evaluate argument at position {i}:\n\t {arg}"
+        from meny import curses_interface
+    except ImportError as e:
+        raise ImportError(
+            f"Got error :\n\t{e}\n"
+            "This is probably caused by inability to import the 'curses' module.\n"
+            "The curses module should be a built-in for Unix installations.\n"
+            "Windows does not have 'curses' by default, suggested fix:\n\t"
+            f"pip install windows-curses\n"
+            "windows-curses adds support for the standard Python curses module on Windows."
         ) from e
-    return typed_arglist
 
-
-def _handle_casefunc(casefunc: FunctionType, args: List[str], pargs: Iterable[Any], pkwargs: Dict[Any, Any]):
-    if pargs or pkwargs:  # If programmatic arguments
-        if args:
-            raise MenuError(
-                "This function takes arguments progammatically" " and should not be given any arguments"
-            )
-        return casefunc(*pargs, **pkwargs)
-    elif args:
-        # Raises TypeError if wrong number of arguments
-        return casefunc(*_handle_args(casefunc, args))
-    else:
-        # Will raise TypeError if casefunc() actually requires arguments
-        return casefunc()
+    return curses_interface.interface(instance)
 
 
 class Menu:
@@ -87,22 +60,23 @@ class Menu:
     Command Line Interface class
     """
 
-    _stack: List[dict] = []
-    _curr_case: Optional[FunctionType] = None
-    _return: dict = None
+    _return: Optional[dict] = None
     _depth: int = 0
+    _return_mode: Optional[str] = None
 
     def __init__(
         self,
         cases: Iterable[FunctionType],
         title: str,
-        once: bool,
-        on_blank: str,
-        on_kbinterrupt: str,
-        frontend: str,
-        decorator: Optional[FunctionType] = None,
+        *,
         case_args: Optional[Dict[FunctionType, tuple]] = None,
         case_kwargs: Optional[Dict[FunctionType, dict]] = None,
+        decorator: Optional[FunctionType] = None,
+        frontend: str,
+        on_blank: str,
+        on_kbinterrupt: str,
+        once: bool,
+        return_mode: str,
     ):
         """
         Input
@@ -115,9 +89,11 @@ class Menu:
 
         See docstring of menu function for more info
         """
+        assert cases, "Given argument for cases is falsey, is it empty?"
         _assert_supported(on_kbinterrupt, "on_kbinterrupt", ("raise", "return"))
         _assert_supported(on_blank, "on_blank", ("return", "pass"))
         _assert_supported(frontend, "frontend", ("simple", "fancy", "auto"))
+        _assert_supported(return_mode, "return_mode", ("flat", "tree"))
 
         self.funcmap = construct_funcmap(cases, decorator=decorator)
         self.title = title
@@ -139,83 +115,45 @@ class Menu:
         # Special options
         self.special_cases = {
             "..": self.on_blank,
-            "q": self._quit,
+            "q": _quit,
             "h": print_help,
         }
 
         if frontend == "auto":
-            self._frontend = self._menu_simple
+            self._frontend = _menu_simple
             try:
                 import curses
 
-                self._frontend = self._menu_curses
+                self._frontend = _menu_curses
             except ImportError:
                 pass
 
         elif frontend == "fancy":
-            self._frontend = self._menu_curses
+            self._frontend = _menu_curses
         elif frontend == "simple":
-            self._frontend = self._menu_simple
+            self._frontend = _menu_simple
+
+        if Menu._return_mode is None:
+            Menu._return_mode = return_mode
+
+        if Menu._return_mode == "flat":
+            from meny.casehandlers import _FlatHandler
+
+            self._case_handler: Callable = _FlatHandler()
+        elif Menu._return_mode == "tree":
+            from meny.casehandlers import _TreeHandler
+
+            self._case_handler: Callable = _TreeHandler()
 
     def _deactivate(self):
         self.active = False
-
-    def _quit(self):
-        raise MenuQuit
-
-    def _handle_case(self, casefunc: FunctionType, args: List[str]):
-        """
-        Responsibilities:\
-            call given casefunc with correct arguments,\
-            push pop stack,\
-            handle return values
-        """
-        program_args = self.case_args.get(casefunc, ())
-        program_kwargs = self.case_kwargs.get(casefunc, {})
-        try:
-            if len(Menu._stack) == 0:
-                Menu._stack.append({})
-            this_scope = Menu._stack[-1]  # Get scope of current menu
-            next_scope = this_scope.get(casefunc.__name__, {})  # Create / get next scope
-            this_scope[casefunc.__name__] = next_scope  # Insert next scope into old scope
-            Menu._stack.append(next_scope)
-            next_scope["return"] = _handle_casefunc(casefunc, args, program_args, program_kwargs)
-        except (TypeError, MenuError) as e:
-            # TODO: Should I catch TypeError? What if actual TypeError occurs?
-            #       Maybe should catch everything and just display it in big red text? Contemplate!
-            _error_info_case(e, casefunc)
-        finally:
-            Menu._stack.pop()
-            Menu._return = Menu._stack[-1]  # Set current return scope to previous
-
-    def _menu_simple(self) -> str:
-        # Import here to fix circular imports
-        from meny import simple_interface
-
-        return simple_interface.interface(self)
-
-    def _menu_curses(self) -> str:
-        # Import here to fix circular imports
-        try:
-            from meny import curses_interface
-        except ImportError as e:
-            raise ImportError(
-                f"Got error :\n\t{e}\n"
-                "This is probably caused by inability to import the 'curses' module.\n"
-                "The curses module should be a built-in for Unix installations.\n"
-                "Windows does not have 'curses' by default, suggested fix:\n\t"
-                f"pip install windows-curses\n"
-                "windows-curses adds support for the standard Python curses module on Windows."
-            ) from e
-
-        return curses_interface.interface(self)
 
     def _menu_loop(self):
         """
         Menu loop
         """
         while self.active:
-            inputstring: str = self._frontend()
+            inputstring: str = self._frontend(self)
 
             clear_screen()
             if (not inputstring) or inputstring == "\n":
@@ -244,22 +182,18 @@ class Menu:
                 # calls said function. Recall that items are
                 # (description, function), hence the [1]
                 casefunc = self.funcmap[case][1]
-                self._handle_case(casefunc, inputlist)
+                self._case_handler(self, casefunc, inputlist)
             elif case in self.special_cases:
                 # Items in special_cases are not tuples, but the
                 # actual functions, so no need to do [1]
                 casefunc = self.special_cases[case]
-                self._handle_case(casefunc, inputlist)
+                self._case_handler(self, casefunc, inputlist)
             else:
                 print(strings.INVALID_TERMINAL_INPUT_MSG)
                 sleep(cng.MSG_WAIT_TIME)
 
             if self.once:
                 self._deactivate()
-
-    def _reset(self):
-        Menu._returns.clear()
-        Menu._curr_case = None
 
     def run(self) -> Dict:
         """
@@ -284,24 +218,30 @@ class Menu:
                 raise
         finally:
             Menu._depth -= 1
+            if Menu._depth == 0:
+                Menu._return_mode = None
+                self._case_handler = None
 
-        return Menu._return
+        return Menu._return or {}
 
 
 def build_menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
     title: Optional[str] = None,
-    once: Optional[bool] = None,
-    on_blank: Optional[str] = None,
-    on_kbinterrupt: Optional[str] = None,
-    decorator: Optional[FunctionType] = None,
+    *,
     case_args: Optional[Dict[FunctionType, tuple]] = None,
     case_kwargs: Optional[Dict[FunctionType, dict]] = None,
+    decorator: Optional[FunctionType] = None,
     frontend: Optional[str] = None,
+    on_blank: Optional[str] = None,
+    on_kbinterrupt: Optional[str] = None,
+    once: Optional[bool] = None,
+    return_mode: Optional[str] = None,
 ) -> Menu:
     """
     This is a factory for the Menu class to reduce boilerplate.
-    See docstring in menu() below
+    See docstring in menu() below.
+    Returns
     """
     if isinstance(cases, ModuleType):
         cases_to_send = _get_module_cases(cases)
@@ -327,30 +267,32 @@ def build_menu(
 
     if once is None:
         once = cng.DEFAULT_ONCE
-
     return Menu(
         cases=cases_to_send,
-        title=title or strings.DEFAULT_TITLE,
-        once=once,
-        on_blank=on_blank or cng.DEFAULT_ON_BLANK,
-        on_kbinterrupt=on_kbinterrupt or cng.DEFAULT_ON_INTERRUPT,
-        decorator=decorator,
         case_args=case_args,
         case_kwargs=case_kwargs,
+        decorator=decorator,
         frontend=frontend or cng.DEFAULT_FRONTEND,
+        on_blank=on_blank or cng.DEFAULT_ON_BLANK,
+        on_kbinterrupt=on_kbinterrupt or cng.DEFAULT_ON_INTERRUPT,
+        once=once,
+        return_mode=return_mode or cng.DEFAULT_RETURN_MODE,
+        title=title or strings.DEFAULT_TITLE,
     )
 
 
 def menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
     title: Optional[str] = None,
-    once: Optional[bool] = None,
-    on_blank: Optional[str] = None,
-    on_kbinterrupt: Optional[str] = None,
-    decorator: Optional[FunctionType] = None,
+    *,
     case_args: Optional[Dict[FunctionType, tuple]] = None,
     case_kwargs: Optional[Dict[FunctionType, dict]] = None,
+    decorator: Optional[FunctionType] = None,
     frontend: Optional[str] = None,
+    on_blank: Optional[str] = None,
+    on_kbinterrupt: Optional[str] = None,
+    once: Optional[bool] = None,
+    return_mode: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
     Factory function for the CLI class. This function initializes a menu.

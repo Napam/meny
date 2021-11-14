@@ -241,7 +241,7 @@ def build_menu(
     """
     This is a factory for the Menu class to reduce boilerplate.
     See docstring in menu() below.
-    Returns
+    Returns  Menu object
     """
     if isinstance(cases, ModuleType):
         cases_to_send = _get_module_cases(cases)
@@ -269,6 +269,7 @@ def build_menu(
         once = cng.DEFAULT_ONCE
     return Menu(
         cases=cases_to_send,
+        title=title or strings.DEFAULT_TITLE,
         case_args=case_args,
         case_kwargs=case_kwargs,
         decorator=decorator,
@@ -277,7 +278,6 @@ def build_menu(
         on_kbinterrupt=on_kbinterrupt or cng.DEFAULT_ON_INTERRUPT,
         once=once,
         return_mode=return_mode or cng.DEFAULT_RETURN_MODE,
-        title=title or strings.DEFAULT_TITLE,
     )
 
 
@@ -297,42 +297,77 @@ def menu(
     """
     Factory function for the CLI class. This function initializes a menu.
 
-    Parameters
-    ------------
-    cases: a dictionary where keys are functions names and values are functions\
-           Or an iterable of functions\
-           Or a module containing functions
+    ## Parameters
+    - `cases`: can be
+        - a dictionary where keys are functions names and values are functions
+        - an iterable of functions
+        - a module containing functions
 
-    title: title of menu
+    - `title`: title of menu
 
-    once: If you want menu to return after a a single choice. 
+    - `cases_args`: dictionary with function as key and tuple of positional arguments as values
 
-    on_blank: What to do the when given blank input. Available options are:\
-        'return', will return to parent menu\
-        'pass', does nothing. This should only be used for the main menu.
+    - `cases_kwargs`: dictionary with function as key and dict of keyword arguments as values
 
-    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.\
-                    If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
+    - `once`: If you want menu to return after a a single choice.
 
-    decorator: Decorator to applied for all case functions.
+    - `on_blank`: What to do the when given blank input. Available options are:
+        - `"return"`, will return to parent menu
+        - `"pass"`, does nothing. This should only be used for the root menu.
 
-    cases_args: Optional[Dict[FunctionType, tuple]], dictionary with function as key and tuple of
-                positional arguments as values
+    - `on_kbinterrupt`: Behavior when encountering KeyboardInterrupt exception when the menu is running.
+                      If `"raise"`, then will raise `KeyboardInterrupt`, if `"return"` the menu returns.
 
-    cases_kwargs: Optional[Dict[FunctionType, dict]], dictionary with function as key and dict of
-                  keyword arguments as values
+    - `decorator`: Decorator to applied for all case functions.
 
-    frontend: str, specify desired frontend:\
-                    "auto": Will try to use fancy frontend if curses module is available, else\
-                            use simple frontend (default)\
-                    "fancy": Use fancy front end (if on Windows, install\
-                             windows-curses first or Python will not be able to find the required\
-                             "curses" package that the fancy frontend uses)\
-                    "simple": Use the simple (but compatible with basically everything) frontend
-    Returns
-    --------
-    Dictionary where functions names (strings) are keys, and values are anything. Represents return 
+    - `frontend`: specify desired frontend:
+        - `"auto"`: Will try to use fancy frontend if curses module is available, else
+                use simple frontend (default)
+        - `"fancy"`: Use fancy front end (if on Windows, install
+                    windows-curses first or Python will not be able to find the required
+                    `"curses"` package that the fancy frontend uses)
+        - `"simple"`: Use the simple (but compatible with basically everything) frontend
+
+    - `return_mode`: the dictionary structure to be returned after the menu is done running. Only effective
+        menu is root menu, as nested menus will use root's. Return mode options are:
+        - `"flat"`: This is the default. Returns dictionary with function names (as `str`)
+                as keys, and their return values as values (if they are ran), if not their names
+                will not be in the dictinary (see examples). The downside of this return mode is if you have
+                nested menus, where the nested menus reuse function names that the parent menus have. The
+                parent menus may overwrite the return values from the nested menus.
+        - "tree": Returns a nested dictionary structure, representing the structure of nested menus
+                  (if you have that).
+
+    ## Returns
+    Dictionary where functions names (strings) are keys, and values are anything. Represents return
     values of case functions.
+
+    ## Examples
+    >>> def returnsOne():
+    ...     def returnsOne():
+    ...         return "1"
+    ...     menu(locals())
+    ...     return 1
+    ...
+    >>> def returnsTwo():
+    ...     return 2
+    ...
+    >>> returns = menu(locals(), return_mode="flat") # Assume we have entered all cases
+    { "returnsOne": 1, "returnsTwo": 2, }
+    >>> returns = menu(locals(), return_mode="tree") # Assume we have entered all cases
+    {
+        "returnsOne": {
+            "returnsOne": {
+                "return": "1"
+            }
+            "return": 1
+        },
+        "returnsTwo": {
+            "returns": 2
+        },
+    }
+    >>> returns["returnsOne"]["returnsOne"]["return"]
+    '1'
     """
     cli = build_menu(**locals())
     return cli.run()

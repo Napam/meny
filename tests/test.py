@@ -146,7 +146,7 @@ class TestUtils(unittest.TestCase):
 
     def test__TreeHandler(self):
         """
-        _TreeHandler returns currect tree structure
+        _TreeHandler returns correct tree structure
         """
 
         class DummyMenu:
@@ -178,7 +178,7 @@ class TestUtils(unittest.TestCase):
 
     def test__FlatHandler(self):
         """
-        _FlatHandler returns currect flat structure
+        _FlatHandler returns correct flat structure
         """
 
         class DummyMenu:

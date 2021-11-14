@@ -1,28 +1,35 @@
 # Meny
+
 A simple and sexy way to make an console interface
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
 (the gif is a bit outdated at the moment)
 
 # How to setup
+
 First install the package with the command (make sure you have Python 3.7 or higher)
+
 ```
 pip install meny
 ```
-Then you can import ``meny`` in Python. The most central functions in this package are `meny.menu` and `meny.title`, which will be covered below.
+
+Then you can import `meny` in Python. The most central functions in this package are `meny.menu` and `meny.title`, which will be covered below.
 
 This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.7, 3.8, and 3.9
 
 ## Note for Windows users
+
 An original goal for this was to rely on built in Python packages only, which it does, for unix systems. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`
 
-I use Windows personally and `windows-curses` has worked fine so far. The `windows-curses` source code is availabe on github and [can be found here](https://github.com/zephyrproject-rtos/windows-curses). 
+I use Windows personally and `windows-curses` has worked fine so far. The `windows-curses` source code is availabe on github and [can be found here](https://github.com/zephyrproject-rtos/windows-curses).
 
 # How to implement
-Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the ``menu`` function at the bottom
+
+Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the `menu` function at the bottom
+
 ```python
 from meny import menu
 
@@ -32,9 +39,11 @@ from meny import menu
 
 menu(locals(), title=' Main menu title here ')
 ```
+
 The `locals()` function is a Python built-in function which returns a dictionary with variable names as keys and the corresponding objects as values from the local scope. You can import whatever modules, classes and functions you want in the file without them interfering with the functions defined your file. The order of the cases is by definition order.
 
-The function signature of ``menu`` along with its docstring is as follows:
+The function signature of `menu` along with its docstring is as follows:
+
 ```python
 def menu(
     cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
@@ -94,6 +103,7 @@ def menu(
 ## Simple examples
 
 Say we are editing console.py
+
 ```python
 from random import randint
 from time import sleep
@@ -123,7 +133,7 @@ def random_integer():
 meny.menu(locals(), title=' Main menu ')
 ```
 
-will result with this when running: ```python console.py```:
+will result with this when running: `python console.py`:
 
 ```
 -------------- Main menu ---------------
@@ -132,10 +142,13 @@ will result with this when running: ```python console.py```:
 
 Input:
 ```
-You then specify which case you want to run by entering the input number as the first token. The tokens after (delimited by space) will be passed to the case function as positional arguments. The argument tokens will be evaluated as Python literals. 
+
+You then specify which case you want to run by entering the input number as the first token. The tokens after (delimited by space) will be passed to the case function as positional arguments. The argument tokens will be evaluated as Python literals.
 
 ## Case names
+
 By default it will use the function names as the case names. However you can use the `meny.title` decorator to apply a title that will be used instead:
+
 ```python
 from random import randint
 from time import sleep
@@ -166,7 +179,9 @@ def random_integer():
 
 meny.menu(locals(), title=' Main menu ')
 ```
+
 Which will produce:
+
 ```
 -------------- Main menu ---------------
 1. FizzBuzz!
@@ -175,37 +190,42 @@ Which will produce:
 Input:
 ```
 
-
-
 ## Special cases
-Entering ``..`` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program. This has the same effect as just pressing enter when there is nothing in the input field.
 
-Entering ``q`` will exit the menu interface.  
+Entering `..` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program. This has the same effect as just pressing enter when there is nothing in the input field.
 
-Entering ``h`` will display this text that explains the special cases.
+Entering `q` will exit the menu interface.
 
-Enter ``-1`` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like list[-1]
+Entering `h` will display this text that explains the special cases.
+
+Enter `-1` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like list[-1]
 
 ## Frontend and usage
-There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are 
-- `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module 
-          is available, else use simple frontend.
-- `simple`: Use simple frontend, should work on all systems since it is completely based on the 
-            build in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter. 
-- `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy
-           frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds
-           the the ability to traverse the options using the arrow keys.
+
+There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are
+
+-   `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module
+    is available, else use simple frontend.
+-   `simple`: Use simple frontend, should work on all systems since it is completely based on the
+    build in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter.
+-   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy
+    frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds
+    the the ability to traverse the options using the arrow keys.
 
 It possible to override the default frontend throughout the Python program by doing
+
 ```python
 import meny
 meny.set_default_frontend("auto") # auto, fancy, or simple
 ```
-as opposed to specifying the choice of frontend for every `meny.menu(..., frontend="...")` call. 
+
+as opposed to specifying the choice of frontend for every `meny.menu(..., frontend="...")` call.
 
 ## Arguments
+
 The cases can take arguments as well!
-````python
+
+```python
 import meny
 from time import sleep
 
@@ -219,14 +239,16 @@ def appendstrings(a, b):
 
 # Type hints won't interfere with meny, and will actually be displayed when using the fancy frontend
 @meny.title("Print elements and their types")
-def displaylist(a: list): 
+def displaylist(a: list):
     [print(f'Element {i}: {elem}, type: {type(elem)}') for i, elem in enumerate(a)]
     sleep(1)
 
 meny.menu(locals(), title=' Main menu ')
-````
+```
+
 Then simply give the arguments along with the choice:
-````
+
+```
 -------------- Main menu ---------------
 1. addints
 2. appendstrings
@@ -236,22 +258,26 @@ Then simply give the arguments along with the choice:
 Input: 1 60 9
 
 69
-````
-````
+```
+
+```
 Input: 2 "cat and dog" mathemathics
 
 cat and dogmathemathics
-````
-````
+```
+
+```
 Input: 3 ['cat', 69, 420.0]
 
 Element 0: cat, type: <class 'str'>
 Element 1: 69, type: <class 'int'>
 Element 2: 420.0, type: <class 'float'>
-````
+```
 
 ## Programmatic Arguments
+
 You can supply arguments programmtically to your case functions:
+
 ```python
 import meny
 
@@ -263,9 +289,11 @@ case_args = {programmatic_args: (1, 2)}
 case_kwargs = {programmatic_args: {"d": 4, "c": 3}}
 meny.menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
 ```
-Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. 
+
+Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli.
 
 ## Nested cases
+
 If you want to implement nested cases, then you can simply reuse the menu function in the function scope.
 
 ```python
@@ -281,7 +309,9 @@ def parent():
     menu(locals(), title= ' Title here ')
 menu(locals(), title=' Main menu ')
 ```
+
 You can create another module for the other cases and pass them as well:
+
 ```python
 from meny import menu
 import other_cases
@@ -293,6 +323,7 @@ menu(other_cases, title= ' Main menu ')
 ```
 
 or you can give a list of functions, which will enable you to force the ordering of the cases as well:
+
 ```python
 import meny
 
@@ -308,7 +339,9 @@ meny.menu(locals(), title=' Main menu ')
 ```
 
 ## What if I want to define functions without having them displayed in the menu?
-Easy! Simply apply the `meny.ignore` decorator on functions to make `meny` ignore them. You can also create a class of static methods to hide functions within a class since classes will be ignored by `meny` anyways. This problem is also naturally avoided if just specifies the functions manually either using a `dict` or `list`. 
+
+Easy! Simply apply the `meny.ignore` decorator on functions to make `meny` ignore them. You can also create a class of static methods to hide functions within a class since classes will be ignored by `meny` anyways. This problem is also naturally avoided if just specifies the functions manually either using a `dict` or `list`.
+
 ```python
 import meny
 @meny.ignore
@@ -317,7 +350,8 @@ def ignored():
 ```
 
 ## Optional: Decorator
-To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the ``menu`` function. However, it is important that the decorator  implements the ``__wrapped__`` attribute (this is to handle docstrings of wrappers as arguments for wrapped functions). Generally, it should look like this
+
+To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the `menu` function. However, it is important that the decorator implements the `__wrapped__` attribute (this is to handle docstrings of wrappers as arguments for wrapped functions). Generally, it should look like this
 
 ```python
 import sleep
@@ -325,7 +359,7 @@ from functools import wraps
 
 def case_decorator(func):
     '''Decorator to enforce commmon behavior for cases'''
-    @wraps(func) # VERY IMPORTANT TO WRAP FUNCTIONS TO ENSURE THAT 
+    @wraps(func) # VERY IMPORTANT TO WRAP FUNCTIONS TO ENSURE THAT
                  # case_wrapper.__wrapped__ is set properly
     def case_wrapper(*args, **kwargs):
         '''Verbosity wrapper'''
@@ -337,7 +371,9 @@ def case_decorator(func):
         return retobj
     return case_wrapper
 ```
+
 It can then easily be applied to all functions like so:
+
 ```python
 from meny import menu
 from case_decorator import case_decorator
@@ -348,11 +384,14 @@ menu(locals(), decorator=case_decorator)
 ```
 
 # Why
+
 Sometimes you want to have a simple console interface so you can do things step by step.
 Here are some applications:
 
 ## Stock data pipeline
+
 Data scraping and data cleaning pipeline for stock data
+
 ```
 ------------- Mulababy420 --------------
 1. Update all data
@@ -363,10 +402,12 @@ Data scraping and data cleaning pipeline for stock data
 6. Exit program
 Enter choice:
 ```
+
 Sometimes I don't want to run everything at once. Maybe I just want to backup data instead of doing all everything. `meny` will enable a very quick implementation of a console.
 Without the console I would need to find the right file to run (and maybe comment things out first as well). The console organizes everything into one place.
 
 ## Database interface
+
 ```
 ------BergenDB------
 1. Log rent
@@ -377,18 +418,20 @@ Without the console I would need to find the right file to run (and maybe commen
 6. Discard changes
 7. Exit
 ```
+
 I log my rent and power bills in a SQL database. I have made a Python API to manage the database, and I just do everything through the interface. No need to script anything or write any SQL queries.
 
 ## Control your Google Compute VM
+
 ```
-----------------GCE-----------------                                                                      
+----------------GCE-----------------
 1. SSH to personal instance
 2. SSH to project instance
 3. start/stop personal instance (0 to stop, 1 to start, 2 to restart)
 4. start/stop project instance (0 to stop, 1 to start, 2 to restart)
 5. Get status personal instance
 6. Get status project instance
-7. Other instance control      
+7. Other instance control
 
 Entering blank returns to parent menu
 Input:

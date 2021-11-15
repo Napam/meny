@@ -43,62 +43,108 @@ menu(locals(), title=' Main menu title here ')
 The `locals()` function is a Python built-in function which returns a dictionary with variable names as keys and the corresponding objects as values from the local scope. You can import whatever modules, classes and functions you want in the file without them interfering with the functions defined your file. The order of the cases is by definition order.
 
 The function signature of `menu` along with its docstring is as follows:
+Factory function for the CLI class. This function initializes a menu.
+<a name="docstring"></a>
 
-```python
-def menu(
-    cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
-    title: Optional[str] = None,
-    on_blank: Optional[str] = None,
-    on_kbinterrupt: Optional[str] = None,
-    decorator: Optional[FunctionType] = None,
-    run: bool = True,
-    case_args: Optional[Dict[FunctionType, tuple]] = None,
-    case_kwargs: Optional[Dict[FunctionType, dict]] = None,
-    frontend: Optional[str] = None,
-):
-    """¨
-    Factory function for the CLI class. This function initializes a menu.
-
-    Parameters
-    ------------
-    cases: a dictionary where keys are functions names and values are functions
-
-           Or an iterable of functions
-
-           Or a module containing functions
-
-    title: title of menu
-
-    on_blank: What to do the when given blank input. Available options are:
-             'return', will return to parent menu
-
-             'pass', does nothing. This should only be used for the main menu.
-
-    on_kbinterrupt: Behavior when encountering KeyboardInterrupt exception when the menu is running.
-                    If "raise", then will raise KeyboardInterrupt, if "return" the menu returns.
-
-    decorator: Decorator to applied for all case functions.
-
-    run: To invoke .run() method on CLI object or not.
-
-    cases_args: Optional[Dict[FunctionType, tuple]], dictionary with function as key and tuple of
-                positional arguments as values
-
-    cases_kwargs: Optional[Dict[FunctionType, dict]], dictionary with function as key and dict of
-                  keyword arguments as values
-
-    frontend: str, specify desired frontend:
-                    "auto": Will try to use fancy frontend if curses module is available, else
-                            use simple frontend (default)
-                    "fancy": Use fancy front end (if on Windows, install
-                             windows-curses first or Python will not be able to find the required
-                             "curses" package that the fancy frontend uses)
-                    "simple": Use the simple (but compatible with basically everything) frontend
-    Returns
-    --------
-    CLI (Command Line Interface) object. Use .run() method to activate menu.
-    """
-```
+> <br/>
+>
+> ```python
+> def menu(
+>    cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
+>    title: Optional[str] = None,
+>    *,
+>    case_args: Optional[Dict[FunctionType, tuple]] = None,
+>    case_kwargs: Optional[Dict[FunctionType, dict]] = None,
+>    decorator: Optional[FunctionType] = None,
+>    frontend: Optional[str] = None,
+>    on_blank: Optional[str] = None,
+>    on_kbinterrupt: Optional[str] = None,
+>    once: Optional[bool] = None,
+>    return_mode: Optional[bool] = None,
+> ) -> Dict[str, Any]:
+> ```
+>
+> ## Parameters
+>
+> -   `cases`: can be
+>
+>     -   a dictionary where keys are functions names and values are functions
+>     -   an iterable of functions
+>     -   a module containing functions
+>
+> -   `title`: title of menu
+>
+> -   `cases_args`: dictionary with function as key and tuple of positional arguments as values
+>
+> -   `cases_kwargs`: dictionary with function as key and dict of keyword arguments as values
+>
+> -   `once`: If you want menu to return after a a single choice.
+>
+> -   `on_blank`: What to do the when given blank input. Available options are:
+>
+>     -   `"return"`, will return to parent menu
+>     -   `"pass"`, does nothing. This should only be used for the root menu.
+>
+> -   `on_kbinterrupt`: Behavior when encountering KeyboardInterrupt exception when the menu is running.
+>     If `"raise"`, then will raise `KeyboardInterrupt`, if `"return"` the menu returns.
+>
+> -   `decorator`: Decorator to applied for all case functions.
+>
+> -   `frontend`: specify desired frontend:
+>
+>     -   `"auto"`: Will try to use fancy frontend if curses module is available, else
+>         use simple frontend (default)
+>     -   `"fancy"`: Use fancy front end (if on Windows, install
+>         windows-curses first or Python will not be able to find the required
+>         `"curses"` package that the fancy frontend uses)
+>     -   `"simple"`: Use the simple (but compatible with basically everything) frontend
+>
+> -   `return_mode`: the dictionary structure to be returned after the menu is done running. Only effective
+>     menu is root menu, as nested menus will use root's. Return mode options are:
+>     -   `"flat"`: This is the default. Returns dictionary with function names (as `str`)
+>         as keys, and their return values as values (if they are ran), if not their names
+>         will not be in the dictinary (see examples). The downside of this return mode is if you have
+>         nested menus, where the nested menus reuse function names that the parent menus have. The
+>         parent menus may overwrite the return values from the nested menus.
+>     -   "tree": Returns a nested dictionary structure, representing the structure of nested menus
+>         (if you have that).
+>
+> ## Returns
+>
+> Dictionary where functions names (strings) are keys, and values are anything. Represents return
+> values of case functions.
+>
+> ## Examples
+>
+> ```python
+> >>> def returnsOne():
+> ...     def returnsOne():
+> ...         return "1"
+> ...     menu(locals())
+> ...     return 1
+> ...
+> >>> def returnsTwo():
+> ...     return 2
+> ...
+> >>> returns = menu(locals(), return_mode="flat") # Assume we have entered all cases
+> { "returnsOne": 1, "returnsTwo": 2, }
+> >>> returns = menu(locals(), return_mode="tree") # Assume we have entered all cases
+> {
+>    "returnsOne": {
+>        "returnsOne": {
+>            "return": "1"
+>        }
+>        "return": 1
+>    },
+>    "returnsTwo": {
+>        "returns": 2
+>    },
+> }
+> >>> returns["returnsOne"]["returnsOne"]["return"]
+> '1'
+> ```
+>
+> <br/>
 
 ## Simple examples
 
@@ -192,13 +238,14 @@ Input:
 
 ## Special cases
 
-Entering `..` will exit the current menu, effectively moving you to the parent menu if you are implementing nested cases. If you are in the main menu it will exit the program. This has the same effect as just pressing enter when there is nothing in the input field.
+Entering `..` is equivalent to just pressing enter with an empty input. I implemented this because I just had
+a habit of writing `..` to "change directory" to the previous directory.
 
 Entering `q` will exit the menu interface.
 
 Entering `h` will display this text that explains the special cases.
 
-Enter `-1` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like list[-1]
+Enter `-1` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like `list[-1]`
 
 ## Frontend and usage
 
@@ -290,7 +337,8 @@ case_kwargs = {programmatic_args: {"d": 4, "c": 3}}
 meny.menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
 ```
 
-Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli.
+Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. In that case the menu will raisa a
+MenuError.
 
 ## Nested cases
 
@@ -337,6 +385,11 @@ def parent2():
     meny.menu([subcase2, subcase1], title= ' Title here ')
 meny.menu(locals(), title=' Main menu ')
 ```
+
+## Return values
+
+The menu will store the return values of the case functions (if have entered the cases). The usage
+is explained in the <a href="#docstring">docstring</a>.
 
 ## What if I want to define functions without having them displayed in the menu?
 
@@ -385,7 +438,8 @@ menu(locals(), decorator=case_decorator)
 
 # Why
 
-Sometimes you want to have a simple console interface so you can do things step by step.
+Sometimes you want to have a simple console interface so you can do things step by step. I specifically
+designed meny to be good at creating menus from existing code with the least interference.
 Here are some applications:
 
 ## Stock data pipeline

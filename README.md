@@ -106,7 +106,7 @@ Factory function for the CLI class. This function initializes a menu.
 >         will not be in the dictinary (see examples). The downside of this return mode is if you have
 >         nested menus, where the nested menus reuse function names that the parent menus have. The
 >         parent menus may overwrite the return values from the nested menus.
->     -   "tree": Returns a nested dictionary structure, representing the structure of nested menus
+>     -   `"tree"`: Returns a nested dictionary structure, representing the structure of nested menus
 >         (if you have that).
 >
 > ## Returns

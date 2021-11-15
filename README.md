@@ -5,6 +5,23 @@ A simple and sexy way to make an console interface
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
 (the gif is a bit outdated at the moment)
 
+## Table of contents
+
+1. <a href="#how-to-setup">How to setup</a>
+2. <a href="#note-for-windows-users">Note for Windows users</a>
+3. <a href="#how-to-implement">How to implement</a>
+    1. <a href="#simple-examples">Simple examples</a>
+    2. <a href="#case-names">Case names</a>
+    3. <a href="#special-cases">Special cases</a>
+    4. <a href="#frontend-and-usage">Frontend and usage</a>
+    5. <a href="#arguments">Arguments</a>
+    6. <a href="#programmatc-arguments">Programmatic Arguments</a>
+    7. <a href="#nested-cases">Nested cases</a>
+    8. <a href="#return-values">Return values</a>
+    9. <a href="#what-if-i-want-to-define-functions-without-having-them-displayed-in-the-menu">What if I want to define functions without having them displayed in the menu?</a>
+    10. <a href="#optional-decorator">Optional: Decorator</a>
+4. <a href="#why">Why</a>
+
 # How to setup
 
 First install the package with the command (make sure you have Python 3.7 or higher)
@@ -44,7 +61,7 @@ The `locals()` function is a Python built-in function which returns a dictionary
 
 The function signature of `menu` along with its docstring is as follows:
 Factory function for the CLI class. This function initializes a menu.
-<a name="docstring"></a>
+<a href="docstring"></a>
 
 > <br/>
 >
@@ -389,7 +406,7 @@ meny.menu(locals(), title=' Main menu ')
 ## Return values
 
 The menu will store the return values of the case functions (if have entered the cases). The usage
-is explained in the <a href="#docstring">docstring</a>.
+is explained in the <a name="#docstring">docstring</a>.
 
 ## What if I want to define functions without having them displayed in the menu?
 

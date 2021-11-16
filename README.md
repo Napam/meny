@@ -1,5 +1,6 @@
+![badge](https://github.com/Napam/meny/actions/workflows/pushpull.yml/badge.svg)
+![badge](https://github.com/Napam/meny/actions/workflows/publish.yml/badge.svg)
 # Meny
-
 A simple and sexy way to make an console interface
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)

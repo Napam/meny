@@ -143,9 +143,9 @@ Factory function for the CLI class. This function initializes a menu.
 > >>> def returnsTwo():
 > ...     return 2
 > ...
-> >>> returns = menu(locals(), return_mode="flat") # Assume we have entered all cases
+> >>> returns = menu(locals(), return_mode="flat") # Assume we have entered all cases and returned
 > { "returnsOne": 1, "returnsTwo": 2, }
-> >>> returns = menu(locals(), return_mode="tree") # Assume we have entered all cases
+> >>> returns = menu(locals(), return_mode="tree") # Assume we have entered all cases and returned
 > {
 >    "returnsOne": {
 >        "returnsOne": {

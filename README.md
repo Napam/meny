@@ -36,7 +36,7 @@ This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with P
 
 ## Note for Windows users
 
-An original goal for this was to rely on built in Python packages only, which it does, for unix systems. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
+An original goal for this was to rely on built in Python packages only, which it does, for linux and mac. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`

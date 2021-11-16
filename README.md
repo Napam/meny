@@ -151,7 +151,7 @@ Factory function for the CLI class. This function initializes a menu.
 >    "returnsOne": {
 >        "returnsOne": {
 >            "return": "1"
->        }
+>        },
 >        "return": 1
 >    },
 >    "returnsTwo": {

@@ -15,7 +15,7 @@ A simple and sexy way to make an console interface
     3. <a href="#special-cases">Special cases</a>
     4. <a href="#frontend-and-usage">Frontend and usage</a>
     5. <a href="#arguments">Arguments</a>
-    6. <a href="#programmatc-arguments">Programmatic Arguments</a>
+    6. <a href="#programmatic-arguments">Programmatic Arguments</a>
     7. <a href="#nested-cases">Nested cases</a>
     8. <a href="#return-values">Return values</a>
     9. <a href="#what-if-i-want-to-define-functions-without-having-them-displayed-in-the-menu">What if I want to define functions without having them displayed in the menu?</a>

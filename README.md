@@ -41,7 +41,7 @@ This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with P
 
 ## Note for Windows users
 
-TL;DR: If you want to use nice frontend do
+TL;DR: If you want to have the fancy frontend do
 
 ```
 pip install windows-curses

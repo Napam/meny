@@ -12,22 +12,22 @@ A simple and sexy way to make a console interface
 
 ## Table of contents
 
-1. <a href="#how-to-setup">How to setup</a>
-2. <a href="#note-for-windows-users">Note for Windows users</a>
-3. <a href="#how-to-implement">How to implement</a>
-    1. <a href="#simple-examples">Simple examples</a>
-    2. <a href="#case-names">Case names</a>
-    3. <a href="#special-cases">Special cases</a>
-    4. <a href="#frontend-and-usage">Frontend and usage</a>
-    5. <a href="#arguments">Arguments</a>
-    6. <a href="#programmatic-arguments">Programmatic Arguments</a>
-    7. <a href="#nested-cases">Nested cases</a>
-    8. <a href="#return-values">Return values</a>
-    9. <a href="#what-if-i-want-to-define-functions-without-having-them-displayed-in-the-menu">What if I want to define functions without having them displayed in the menu?</a>
-    10. <a href="#optional-decorator">Optional: Decorator</a>
-4. <a href="#why">Why</a>
+1. <a href="#_meny_setup">How to setup</a>
+1. <a href="#_meny_noteWindows">Note for Windows users</a>
+1. <a href="#_meny_howTo">How to implement</a>
+    1. <a href="#_meny_simpleExamples">Simple examples</a>
+    1. <a href="#_meny_caseNames">Case names</a>
+    1. <a href="#_meny_frontend">Frontend and usage</a>
+    1. <a href="#_meny_specialCases">Special cases</a>
+    1. <a href="#_meny_arguments">Arguments</a>
+    1. <a href="#_meny_progArguments">Programmatic Arguments</a>
+    1. <a href="#_meny_nested">Nested cases</a>
+    1. <a href="#_meny_return">Return values</a>
+    1. <a href="#_meny_ignore">What if I want to define functions without having them displayed in the menu?</a>
+    1. <a href="#_meny_decorator">Optional: Decorator</a>
+1. <a href="#_meny_why">Why</a>
 
-# How to setup
+# How to setup <a id="_meny_setup"></a>
 
 First install the package with the command (make sure you have Python 3.7 or higher)
 
@@ -39,7 +39,7 @@ Then you can import `meny` in Python. The most central functions in this package
 
 This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.7, 3.8, and 3.9
 
-## Note for Windows users
+## Note for Windows users <a id="_meny_noteWindows"></a>
 
 TL;DR: If you want to have the fancy frontend do
 
@@ -54,7 +54,7 @@ A way to get `curses` for Windows is to install `windows-curses`:
 
 I use Windows personally and `windows-curses` has worked fine so far. The `windows-curses` source code is availabe on github and [can be found here](https://github.com/zephyrproject-rtos/windows-curses).
 
-# How to implement
+# How to implement <a id="_meny_howTo"></a>
 
 Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the `menu` function at the bottom
 
@@ -72,7 +72,7 @@ The `locals()` function is a Python built-in function that returns a dictionary 
 
 The function signature of `menu` along with its docstring is as follows:
 Factory function for the CLI class. This function initializes a menu.
-<a id="docstring"></a>
+<a id="_meny_docstring"></a>
 
 > <br/>
 >
@@ -174,7 +174,7 @@ Factory function for the CLI class. This function initializes a menu.
 >
 > <br/>
 
-## Simple examples
+## Simple examples <a id="_meny_simpleExamples"></a>
 
 Say we are editing `console.py`
 
@@ -219,13 +219,13 @@ Input:
 
 You then specify which case you want to run by entering the input number as the first token. The tokens after (delimited by space) will be passed to the case function as positional arguments. The argument tokens will be evaluated as Python literals.
 
-## Frontend and usage
+## Frontend and usage <a id="_meny_frontend"></a>
 
 There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are
 
 -   `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module is available, else use simple frontend.
 -   `simple`: Use simple frontend, should work on all systems since it is completely based on the built-in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter.
--   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds the ability to traverse the options using the arrow keys.
+-   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds the ability to traverse the options using the **arrow keys**.
 
 It is possible to override the default frontend throughout the Python program by doing
 
@@ -236,11 +236,7 @@ meny.set_default_frontend("auto") # auto, fancy, or simple
 
 as opposed to specifying the choice of frontend for every `meny.menu(..., frontend="...")` call.
 
-### Fancy frontend
-
-The base functionality is the same, but you can now use the arrow keys to traverse the elements.
-
-## Case names
+## Case names <a id="_meny_caseNames"></a>
 
 By default, it will use the function names as the case names. However, you can use the `meny.title` decorator to apply a title that will be used instead:
 
@@ -248,6 +244,8 @@ By default, it will use the function names as the case names. However, you can u
 from random import randint
 from time import sleep
 import meny
+
+# fizzbuzz() and random_integer() are just example functions, you can make anything you want.
 
 @meny.title("FizzBuzz!")
 def fizzbuzz():
@@ -285,7 +283,7 @@ Which will produce:
 Input:
 ```
 
-## Special cases
+## Special cases <a id="_meny_specialCases"></a>
 
 Entering `..` is equivalent to just pressing enter with an empty input. I implemented this because I just had
 a habit of writing `..` to "change directory" to the previous directory.
@@ -296,7 +294,7 @@ Entering `h` will display this text that explains the special cases.
 
 Enter `-1` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like `list[-1]`
 
-## Arguments
+## Arguments <a id="_meny_arguments"></a>
 
 The cases can take arguments as well!
 
@@ -349,7 +347,7 @@ Element 1: 69, type: <class 'int'>
 Element 2: 420.0, type: <class 'float'>
 ```
 
-## Programmatic Arguments
+## Programmatic Arguments <a id="_meny_progArguments"></a>
 
 You can supply arguments programmtically to your case functions:
 
@@ -367,7 +365,7 @@ meny.menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
 
 Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. In that case the menu will raisa a MenuError.
 
-## Nested cases
+## Nested cases <a id="_meny_nested"></a>
 
 If you want to implement nested cases, then you can simply reuse the menu function in the function scope.
 
@@ -413,12 +411,12 @@ def parent2():
 meny.menu(locals(), title=' Main menu ')
 ```
 
-## Return values
+## Return values <a id="_meny_return"></a>
 
-The menu will store the return values of the case functions (if have entered the cases). The usage
-is explained in the <a href="#docstring">docstring</a>.
+The menu will store the return values of the case functions (if you have entered the cases). The usage
+is explained in the <a href="#_meny_docstring">docstring</a>.
 
-## What if I want to define functions without having them displayed in the menu?
+## What if I want to define functions without having them displayed in the menu? <a id="_meny_ignore"></a>
 
 Easy! Simply apply the `meny.ignore` decorator on functions to make `meny` ignore them. You can also create a class of static methods to hide functions within a class since classes will be ignored by `meny` anyways. This problem is also naturally avoided if just specifies the functions manually either using a `dict` or `list`.
 
@@ -429,7 +427,7 @@ def ignored():
     pass
 ```
 
-## Optional: Decorator
+## Optional: Decorator <a id="_meny_decorator"></a>
 
 To enforce a common behavior when entering and leaving a case within a menu, you give a decorator to the `menu` function. However, it is important that the decorator implements the `__wrapped__` attribute (this is to handle docstrings of wrappers as arguments for wrapped functions). Generally, it should look like this
 
@@ -463,7 +461,7 @@ from case_decorator import case_decorator
 menu(locals(), decorator=case_decorator)
 ```
 
-# Why
+# Why <a id="_meny_why"></a>
 
 Sometimes you want to have a simple console interface so you can do things step by step. I specifically
 designed meny to be good at creating menus from existing code with the least interference.

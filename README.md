@@ -1,9 +1,13 @@
 ![badge](https://github.com/Napam/meny/actions/workflows/pushpull.yml/badge.svg)
 ![badge](https://github.com/Napam/meny/actions/workflows/publish.yml/badge.svg)
+[![PyPI version](https://badge.fury.io/py/meny.svg)](https://badge.fury.io/py/meny)
+
 # Meny
-A simple and sexy way to make an console interface
+
+A simple and sexy way to make a console interface
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
+
 (the gif is a bit outdated at the moment)
 
 ## Table of contents
@@ -31,13 +35,19 @@ First install the package with the command (make sure you have Python 3.7 or hig
 pip install meny
 ```
 
-Then you can import `meny` in Python. The most central functions in this package are `meny.menu` and `meny.title`, which will be covered below.
+Then you can import `meny` in Python. The most central functions in this package are **`meny.menu`** and **`meny.title`**, which will be covered below.
 
 This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.7, 3.8, and 3.9
 
 ## Note for Windows users
 
-An original goal for this was to rely on built in Python packages only, which it does, for linux and mac. This package requires the `curses` library to be available in order to use the "fancy frontend" (seen in the gif). It is built in the Linux and Mac installations, but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built in `print` function.
+TL;DR: If you want to use nice frontend do
+
+```
+pip install windows-curses
+```
+
+An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the "fancy frontend" (seen in the gif). It is included with the Linux and Mac installations but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`
@@ -58,11 +68,11 @@ from meny import menu
 menu(locals(), title=' Main menu title here ')
 ```
 
-The `locals()` function is a Python built-in function which returns a dictionary with variable names as keys and the corresponding objects as values from the local scope. You can import whatever modules, classes and functions you want in the file without them interfering with the functions defined your file. The order of the cases is by definition order.
+The `locals()` function is a Python built-in function that returns a dictionary with variable names as keys and the corresponding objects as values from the local scope. You can import whatever modules, classes, and functions you want in the file without them interfering with the functions defined in your file. The order of the cases is by definition order.
 
 The function signature of `menu` along with its docstring is as follows:
 Factory function for the CLI class. This function initializes a menu.
-<a href="docstring"></a>
+<a id="docstring"></a>
 
 > <br/>
 >
@@ -166,7 +176,7 @@ Factory function for the CLI class. This function initializes a menu.
 
 ## Simple examples
 
-Say we are editing console.py
+Say we are editing `console.py`
 
 ```python
 from random import randint
@@ -209,9 +219,30 @@ Input:
 
 You then specify which case you want to run by entering the input number as the first token. The tokens after (delimited by space) will be passed to the case function as positional arguments. The argument tokens will be evaluated as Python literals.
 
+## Frontend and usage
+
+There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are
+
+-   `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module is available, else use simple frontend.
+-   `simple`: Use simple frontend, should work on all systems since it is completely based on the built-in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter.
+-   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds the ability to traverse the options using the arrow keys.
+
+It is possible to override the default frontend throughout the Python program by doing
+
+```python
+import meny
+meny.set_default_frontend("auto") # auto, fancy, or simple
+```
+
+as opposed to specifying the choice of frontend for every `meny.menu(..., frontend="...")` call.
+
+### Fancy frontend
+
+The base functionality is the same, but you can now use the arrow keys to traverse the elements.
+
 ## Case names
 
-By default it will use the function names as the case names. However you can use the `meny.title` decorator to apply a title that will be used instead:
+By default, it will use the function names as the case names. However, you can use the `meny.title` decorator to apply a title that will be used instead:
 
 ```python
 from random import randint
@@ -264,27 +295,6 @@ Entering `q` will exit the menu interface.
 Entering `h` will display this text that explains the special cases.
 
 Enter `-1` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like `list[-1]`
-
-## Frontend and usage
-
-There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are
-
--   `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module
-    is available, else use simple frontend.
--   `simple`: Use simple frontend, should work on all systems since it is completely based on the
-    build in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter.
--   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy
-    frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds
-    the the ability to traverse the options using the arrow keys.
-
-It possible to override the default frontend throughout the Python program by doing
-
-```python
-import meny
-meny.set_default_frontend("auto") # auto, fancy, or simple
-```
-
-as opposed to specifying the choice of frontend for every `meny.menu(..., frontend="...")` call.
 
 ## Arguments
 
@@ -355,8 +365,7 @@ case_kwargs = {programmatic_args: {"d": 4, "c": 3}}
 meny.menu(locals(), case_args=case_args, case_kwargs=case_kwargs)
 ```
 
-Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. In that case the menu will raisa a
-MenuError.
+Functions that takes arguments programmatically cannot take arguments through the cli, that is you cannot both supply programmatic arguments as well as arguments through the cli. In that case the menu will raisa a MenuError.
 
 ## Nested cases
 
@@ -407,7 +416,7 @@ meny.menu(locals(), title=' Main menu ')
 ## Return values
 
 The menu will store the return values of the case functions (if have entered the cases). The usage
-is explained in the <a name="#docstring">docstring</a>.
+is explained in the <a href="#docstring">docstring</a>.
 
 ## What if I want to define functions without having them displayed in the menu?
 

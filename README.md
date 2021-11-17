@@ -183,6 +183,8 @@ from random import randint
 from time import sleep
 import meny
 
+# fizzbuzz() and random_integer() are just examples, you can make whatever you want :)
+
 def fizzbuzz():
     for i in range(21):
         stringy = ''

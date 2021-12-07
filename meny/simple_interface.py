@@ -1,4 +1,3 @@
-# from meny.consoleclass import CLI
 from meny.utils import clear_screen
 import meny.strings as strings
 from typing import Dict, Tuple, Callable
@@ -27,7 +26,8 @@ def show_cases(funcmap: dict, title=strings.LOGO_TITLE) -> None:
 
 
 def interface(cli):
-    clear_screen()
+    print("\x1b[s", end="")  # Save current position
     show_cases(cli.funcmap, cli.title)
-    print()
-    return input(f"{strings.ENTER_PROMPT}: ")
+    retval = input(f"{strings.ENTER_PROMPT}: ")
+    print("\x1b[u\x1b[J", end="")  # Restore saved position
+    return retval

@@ -155,7 +155,6 @@ class Menu:
         while self.active:
             inputstring: str = self._frontend(self)
 
-            clear_screen()
             if (not inputstring) or inputstring == "\n":
                 self.on_blank()
                 continue

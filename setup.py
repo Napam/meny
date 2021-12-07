@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="meny",
-    version="0.0.5",
+    version="0.0.6",
     author="Naphat Amundsen",
     author_email="naphat@live.com",
     description="Simple and sexy console interface",

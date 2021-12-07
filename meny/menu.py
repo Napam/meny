@@ -13,7 +13,6 @@ from meny.utils import (
     _assert_supported,
     _extract_and_preprocess_functions,
     _get_module_cases,
-    clear_screen,
     input_splitter,
 )
 from meny.infos import _error_info_parse, print_help
@@ -196,10 +195,10 @@ class Menu:
 
     def run(self) -> Dict:
         """
-        Responsibilities:\
-            call menu loop,\
-            handle MenuQuit and KeyboardInterrupt,\
-            count depth
+        Responsibilities:
+        - call menu loop
+        - handle MenuQuit and KeyboardInterrupt
+        - count depth
         """
         self.active = True
         Menu._depth += 1
@@ -298,9 +297,9 @@ def menu(
 
     ## Parameters
     - `cases`: can be
-        - a dictionary where keys are functions names and values are functions
-        - an iterable of functions
-        - a module containing functions
+        - `Dict[str, FunctionType]`: a dictionary where keys are functions names and values are functions
+        - `Iterable[FunctionType]` an iterable of functions
+        - `ModuleType`: a module containing functions
 
     - `title`: title of menu
 
@@ -330,15 +329,15 @@ def menu(
     - `return_mode`: the dictionary structure to be returned after the menu is done running. Only effective
         menu is root menu, as nested menus will use root's. Return mode options are:
         - `"flat"`: This is the default. Returns dictionary with function names (as `str`)
-                as keys, and their return values as values (if they are ran), if not their names
-                will not be in the dictinary (see examples). The downside of this return mode is if you have
-                nested menus, where the nested menus reuse function names that the parent menus have. The
+                as keys, and their return values as values (if they have been called), if not their names
+                will not be in the dictionary (see examples). The downside of this return mode is if you have
+                nested menus, where the nested menus reuse function names in from parent menus. The
                 parent menus may overwrite the return values from the nested menus.
         - `"tree"`: Returns a nested dictionary structure, representing the structure of nested menus
                   (if you have that).
 
     ## Returns
-    Dictionary where functions names (strings) are keys, and values are anything. Represents return
+    `Dict[str, Any]`: Dictionary where functions names are keys, and values are anything. Represents return
     values of case functions.
 
     ## Examples

@@ -47,7 +47,7 @@ TL;DR: If you want to have the fancy frontend do
 pip install windows-curses
 ```
 
-An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the "fancy frontend" (seen in the gif). It is included with the Linux and Mac installations but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
+An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the "fancy frontend" (seen in the gif). It with CPython for Linux and Mac installations but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`
@@ -56,7 +56,7 @@ I use Windows personally and `windows-curses` has worked fine so far. The `windo
 
 # How to implement <a id="_meny_howTo"></a>
 
-Simply implement the cases (as functions) in a Python file, then to initialize the interface you simply use the `menu` function at the bottom
+Simply implement the menu cases (as functions) in a Python file, then to initialize the interface you simply call the `menu` function after you have defined your functions.
 
 ```python
 from meny import menu
@@ -96,9 +96,9 @@ Factory function for the CLI class. This function initializes a menu.
 >
 > -   `cases`: can be
 >
->     -   a dictionary where keys are functions names and values are functions
->     -   an iterable of functions
->     -   a module containing functions
+>     -   `Dict[str, FunctionType]`: a dictionary where keys are functions names and values are functions
+>     -   `Iterable[FunctionType]` an iterable of functions
+>     -   `ModuleType`: a module containing functions
 >
 > -   `title`: title of menu
 >
@@ -130,16 +130,16 @@ Factory function for the CLI class. This function initializes a menu.
 > -   `return_mode`: the dictionary structure to be returned after the menu is done running. Only effective
 >     menu is root menu, as nested menus will use root's. Return mode options are:
 >     -   `"flat"`: This is the default. Returns dictionary with function names (as `str`)
->         as keys, and their return values as values (if they are ran), if not their names
->         will not be in the dictinary (see examples). The downside of this return mode is if you have
->         nested menus, where the nested menus reuse function names that the parent menus have. The
+>         as keys, and their return values as values (if they have been called), if not their names
+>         will not be in the dictionary (see examples). The downside of this return mode is if you have
+>         nested menus, where the nested menus reuse function names in from parent menus. The
 >         parent menus may overwrite the return values from the nested menus.
 >     -   `"tree"`: Returns a nested dictionary structure, representing the structure of nested menus
 >         (if you have that).
 >
 > ## Returns
 >
-> Dictionary where functions names (strings) are keys, and values are anything. Represents return
+> `Dict[str, Any]`: Dictionary where functions names are keys, and values are anything. Represents return
 > values of case functions.
 >
 > ## Examples

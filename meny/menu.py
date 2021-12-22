@@ -54,6 +54,16 @@ def _menu_curses(instance) -> str:
     return curses_interface.interface(instance)
 
 
+def _restart() -> None:
+    """
+    Restart application
+    """
+    import sys
+    import os
+
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+
 class Menu:
     """
     Command Line Interface class
@@ -112,11 +122,7 @@ class Menu:
             self.on_blank = lambda: None
 
         # Special options
-        self.special_cases = {
-            "..": self.on_blank,
-            "q": _quit,
-            "h": print_help,
-        }
+        self.special_cases = {"..": self.on_blank, "q": _quit, "h": print_help, "r": _restart}
 
         if frontend == "auto":
             self._frontend = _menu_simple

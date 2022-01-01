@@ -5,6 +5,7 @@ from functools import wraps
 from typing import Optional, Union
 
 import meny
+from meny import config as cng
 
 
 def recover_cursor(f):
@@ -146,6 +147,7 @@ class InputField(BaseWindow):
 
 class MainWindow(BaseWindow):
     def __init__(self, cli: meny.Menu):
+        self.cli = cli
         self.funcmap = cli.funcmap
         self.title = cli.title
         self.funcs_w_programmatic_args: set = cli.case_args.keys() | cli.case_kwargs.keys()
@@ -153,6 +155,10 @@ class MainWindow(BaseWindow):
         self.key2index = {key: index for index, key in enumerate(self.funcmap)}
         self.index2key = tuple(self.funcmap)
         self.curr_index: Optional[int] = None
+
+    @property
+    def prev_case(self):
+        return self.cli.case
 
     @recover_cursor
     def highlight_funcmap(self, token: str, strlen: int):
@@ -253,12 +259,12 @@ class MainWindow(BaseWindow):
         self._window.move(prev_y + 1, prev_x)  # Under input field
         if len(tokens) == 1:
             message = "Press enter to restart"
-            pair = 2
+            pair = curses.color_pair(2)
         else:
             message = "Restart option does not accept arguments"
-            pair = 1
+            pair = curses.color_pair(1)
         self._window.addstr(message)
-        self._window.chgat(prev_y + 1, prev_x, len(message), curses.color_pair(pair))
+        self._window.chgat(prev_y + 1, prev_x, len(message), pair)
 
     def run(self, window: "curses._CursesWindow"):
         """
@@ -287,6 +293,11 @@ class MainWindow(BaseWindow):
         self.cprint("")
 
         inputfield = InputField(self)
+        if cng.DEFAULT_REMEMBER and (self.prev_case is not None):
+            inputfield.inp = self.prev_case + " "
+            inputfield.sync_window_with_inp()
+            self.highlight_funcmap(inputfield.first_token, maxstrlen)
+
         refresh_pad()
         while not inputfield._inp.endswith("\n"):
             # Get input using window instead of pad, using pad gives unexpected output

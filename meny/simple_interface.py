@@ -1,3 +1,4 @@
+import meny
 import meny.strings as strings
 from typing import Dict, Tuple, Callable
 
@@ -24,7 +25,7 @@ def show_cases(funcmap: dict, title=strings.LOGO_TITLE) -> None:
     print_funcmap(funcmap)
 
 
-def interface(cli):
+def interface(cli: meny.Menu):
     print("\x1b[s", end="")  # Save current position
     show_cases(cli.funcmap, cli.title)
     retval = input(f"{strings.ENTER_PROMPT}: ")

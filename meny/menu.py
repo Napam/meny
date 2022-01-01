@@ -14,6 +14,7 @@ from meny.utils import (
     _extract_and_preprocess_functions,
     _get_module_cases,
     input_splitter,
+    clear_screen,
 )
 from meny.infos import _error_info_parse, print_help
 from meny.exceptions import MenuQuit
@@ -110,6 +111,7 @@ class Menu:
         self.on_kbinterrupt = on_kbinterrupt
         self.case_args = case_args
         self.case_kwargs = case_kwargs
+        self.case: Optional[str] = None  # Last registered case entered
 
         if self.case_args is None:
             self.case_args = {}
@@ -160,6 +162,9 @@ class Menu:
         while self.active:
             inputstring: str = self._frontend(self)
 
+            if cng.DEFAULT_CLEAR:
+                clear_screen()
+
             if (not inputstring) or inputstring == "\n":
                 self.on_blank()
                 continue
@@ -172,25 +177,25 @@ class Menu:
                 continue
 
             # Get case
-            case = inputlist.pop(0)
+            self.case = inputlist.pop(0)
 
-            # If case starts with '-', indicates reverse choice (like np.ndarray[-1])
-            if case.startswith("-"):
+            # If self.case starts with '-', indicates reverse choice (like np.ndarray[-1])
+            if self.case.startswith("-"):
                 try:
-                    case = str(len(self.funcmap) + int(case) + 1)
+                    self.case = str(len(self.funcmap) + int(self.case) + 1)
                 except ValueError:
                     pass
 
-            if case in self.funcmap:
-                # Obtain case function from funcmap and
+            if self.case in self.funcmap:
+                # Obtain self.case function from funcmap and
                 # calls said function. Recall that items are
                 # (description, function), hence the [1]
-                casefunc = self.funcmap[case][1]
+                casefunc = self.funcmap[self.case][1]
                 self._case_handler(self, casefunc, inputlist)
-            elif case in self.special_cases:
+            elif self.case in self.special_cases:
                 # Items in special_cases are not tuples, but the
                 # actual functions, so no need to do [1]
-                casefunc = self.special_cases[case]
+                casefunc = self.special_cases[self.case]
                 self._case_handler(self, casefunc, inputlist)
             else:
                 print(strings.INVALID_TERMINAL_INPUT_MSG)

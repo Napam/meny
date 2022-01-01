@@ -40,15 +40,33 @@ def _assert_supported(arg: Any, paramname: str, supported: Container):
 
 
 def set_default_frontend(frontend: str):
-    """Options: (simple, fancy, auto)"""
+    """
+    Default value for meny.menu(frontend=...)
+    Options: (simple, fancy, auto)
+    """
     _assert_supported(frontend, "frontend", ("simple", "fancy", "auto"))
     cng.DEFAULT_FRONTEND = frontend
 
 
 def set_default_once(once: bool):
-    """True or False"""
+    """
+    Default value for
+    meny.menu(once=...)
+    """
     _assert_supported(type(once), "once", (bool,))
     cng.DEFAULT_ONCE = once
+
+
+def set_default_remember(remember: bool):
+    """Toggle for remembering last input"""
+    _assert_supported(type(remember), "remember", (bool,))
+    cng.DEFAULT_REMEMBER = remember
+
+
+def set_default_clear(remember: bool):
+    """Toggle for clearing console before showing menu"""
+    _assert_supported(type(remember), "remember", (bool,))
+    cng.DEFAULT_CLEAR = remember
 
 
 def clear_screen() -> None:

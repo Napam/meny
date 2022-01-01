@@ -61,10 +61,10 @@ class InputField(BaseWindow):
         Gets string in input field
         """
         if n:
-            string = self._window.instr(self.begin_y, self.begin_x, n).decode(decode).strip()
+            bytes_ = self._window.instr(self.begin_y, self.begin_x, n)
         else:
-            string = self._window.instr(self.begin_y, self.begin_x).decode(decode).strip()
-        return string
+            bytes_ = self._window.instr(self.begin_y, self.begin_x)
+        return bytes_.decode(decode).strip()
 
     def sync_window_with_inp(self):
         """
@@ -240,6 +240,26 @@ class MainWindow(BaseWindow):
         if (n_tokens > (iterlen + 1)) or input_split_error_flag:
             self._window.chgat(prev_y + 1, prev_x, len(str(signature)), curses.color_pair(1))
 
+    @recover_cursor
+    def notify_restart_token(self, inp: str):
+        tokens = inp.strip().split(" ")
+        if tokens[0] != "r":
+            return
+        prev_y, prev_x = self._window.getyx()
+        # Clear line under input field
+        self._window.move(prev_y + 1, 0)
+        self._window.clrtoeol()
+
+        self._window.move(prev_y + 1, prev_x)  # Under input field
+        if len(tokens) == 1:
+            message = "Press enter to restart"
+            pair = 2
+        else:
+            message = "Restart option does not accept arguments"
+            pair = 1
+        self._window.addstr(message)
+        self._window.chgat(prev_y + 1, prev_x, len(message), curses.color_pair(pair))
+
     def run(self, window: "curses._CursesWindow"):
         """
         Will do almost all work on a padded window, which
@@ -275,6 +295,7 @@ class MainWindow(BaseWindow):
             inputfield.handle_input(k, y, x)
             self.highlight_funcmap(inputfield.first_token, maxstrlen)
             self.hint_args(inputfield.inp)
+            self.notify_restart_token(inputfield.inp)
             refresh_pad()
         return inputfield._inp
 

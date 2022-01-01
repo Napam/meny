@@ -1,4 +1,3 @@
-from meny.utils import clear_screen
 import meny.strings as strings
 from typing import Dict, Tuple, Callable
 

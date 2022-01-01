@@ -296,6 +296,8 @@ Entering `h` will display this text that explains the special cases.
 
 Enter `-1` or any integer will "reverse" the choices, such that you take the last choice. This is inspired by Python lists where you can index like `list[-1]`
 
+Entering `r` will restart the *whole* Python program. This is usefull when debugging such that one can easily refresh code changes.
+
 ## Arguments <a id="_meny_arguments"></a>
 
 The cases can take arguments as well!

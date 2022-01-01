@@ -52,6 +52,9 @@ def print_help(*args, **kwargs) -> None:
                                   or enter '..'. If you are in main menu, this 
                                   will exit the menu as well. 
 
+        Enter 'r' to restart the Python program. This is usefull for debugging purposes to 
+        easily get code changes.
+
         Press enter to exit help screen
         """
     )

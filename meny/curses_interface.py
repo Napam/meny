@@ -151,6 +151,7 @@ class MainWindow(BaseWindow):
         self.funcmap = cli.funcmap
         self.title = cli.title
         self.funcs_w_programmatic_args: set = cli.case_args.keys() | cli.case_kwargs.keys()
+        self.available_cases = self.funcmap.keys() | cli.special_cases.keys()
 
         self.key2index = {key: index for index, key in enumerate(self.funcmap)}
         self.index2key = tuple(self.funcmap)
@@ -247,24 +248,35 @@ class MainWindow(BaseWindow):
             self._window.chgat(prev_y + 1, prev_x, len(str(signature)), curses.color_pair(1))
 
     @recover_cursor
-    def notify_restart_token(self, inp: str):
+    def notify_special_token(self, inp: str, target_token: str, action: str):
         tokens = inp.strip().split(" ")
-        if tokens[0] != "r":
+        if tokens[0] != target_token:
             return
-        prev_y, prev_x = self._window.getyx()
+        y, x = self._window.getyx()
         # Clear line under input field
-        self._window.move(prev_y + 1, 0)
+        self._window.move(y + 1, 0)
         self._window.clrtoeol()
 
-        self._window.move(prev_y + 1, prev_x)  # Under input field
+        self._window.move(y + 1, x)  # Under input field
         if len(tokens) == 1:
-            message = "Press enter to restart"
+            message = f"Press enter to {action}"
             pair = curses.color_pair(2)
         else:
-            message = "Restart option does not accept arguments"
+            message = f"Special case '{target_token}' does not accept arguments"
             pair = curses.color_pair(1)
         self._window.addstr(message)
-        self._window.chgat(prev_y + 1, prev_x, len(message), pair)
+        self._window.chgat(y + 1, x, len(message), pair)
+
+    @recover_cursor
+    def notify_invalid_case(self, first_token: str):
+        if first_token in self.available_cases or not first_token:
+            return
+
+        y, x = self._window.getyx()
+        message = "Invalid choice"
+        self._window.move(y + 1, x)  # Under input field
+        self._window.addstr("Invalid choice")
+        self._window.chgat(y + 1, x, len(message), curses.color_pair(1))
 
     def run(self, window: "curses._CursesWindow"):
         """
@@ -306,7 +318,11 @@ class MainWindow(BaseWindow):
             inputfield.handle_input(k, y, x)
             self.highlight_funcmap(inputfield.first_token, maxstrlen)
             self.hint_args(inputfield.inp)
-            self.notify_restart_token(inputfield.inp)
+            self.notify_special_token(inputfield.inp, "r", "restart")
+            self.notify_special_token(inputfield.inp, "q", "quit menu(s)")
+            self.notify_special_token(inputfield.inp, "h", "display help")
+            self.notify_special_token(inputfield.inp, "..", "go back")
+            self.notify_invalid_case(inputfield.first_token)
             refresh_pad()
         return inputfield._inp
 

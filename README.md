@@ -4,11 +4,24 @@
 
 # Meny
 
-A simple and sexy way to make a console interface
+Meny is a super light weight framework for creating CLI menus. (the gif is a bit outdated at the moment)
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
 
-(the gif is a bit outdated at the moment)
+### Imagine this:
+1. You have implemented some functions in some Python file(regardless of the intention of creating a CLI menu). 
+1. Then you realize it would be nice to have a CLI interface to call said functions.
+
+Today is your lucky day! Because Meny is especially designed for this scenario! (which I have encountered surprisingly many times, hence this package). just install and import `meny` and add 
+```python
+meny.menu(locals())
+``` 
+to the end your file. That is really it!
+
+### But why exactly this package?
+There already exists python packages to do so, but all of them require you to *refactor* your code in order to use them, and you need to *learn* how to use their APIs, which is kind of annoying since you just want an convenient interface for your functions. You don't wanna spend even more to time to learn yet another library, let alone refactor your code for a CLI menu. With `meny` you can literally just add `meny.menu(locals())` to the bottom of your Python file and you are literally good to go. 
+
+Of course, this package can do much more which you can see below, but its intention is to cover the "It would be nice to just have a cli menu for my functions now, but its too much effort to make / learn another library" scenario, which I believe it does the best of all I have seen.
 
 ## Table of contents
 
@@ -25,7 +38,7 @@ A simple and sexy way to make a console interface
     1. <a href="#_meny_return">Return values</a>
     1. <a href="#_meny_ignore">What if I want to define functions without having them displayed in the menu?</a>
     1. <a href="#_meny_decorator">Optional: Decorator</a>
-1. <a href="#_meny_why">Why</a>
+1. <a href="#_meny_realExamples">Real examples</a>
 
 # How to setup <a id="_meny_setup"></a>
 
@@ -41,13 +54,13 @@ This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with P
 
 ## Note for Windows users <a id="_meny_noteWindows"></a>
 
-TL;DR: If you want to have the fancy frontend do
+TL;DR: If you want to have the fancy frontend (like in the gif) do
 
 ```
 pip install windows-curses
 ```
 
-An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the "fancy frontend" (seen in the gif). It with CPython for Linux and Mac installations but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
+An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the fancy frontend. It is built-in with CPython for Linux and Mac installations but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`
@@ -465,11 +478,8 @@ from case_decorator import case_decorator
 menu(locals(), decorator=case_decorator)
 ```
 
-# Why <a id="_meny_why"></a>
-
-Sometimes you want to have a simple console interface so you can do things step by step. I specifically
-designed meny to be good at creating menus from existing code with the least interference.
-Here are some applications:
+# Real examples <a id="_meny_realExamples"></a>
+Here are some applications that I have implemented using `meny`:
 
 ## Stock data pipeline
 

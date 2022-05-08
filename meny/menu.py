@@ -99,6 +99,7 @@ class Menu:
 
         See docstring of menu function for more info
         """
+        cases = list(cases)
         assert cases, "Given argument for cases is falsey, is it empty?"
         _assert_supported(on_kbinterrupt, "on_kbinterrupt", ("raise", "return"))
         _assert_supported(on_blank, "on_blank", ("return", "pass"))

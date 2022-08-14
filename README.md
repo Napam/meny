@@ -19,7 +19,7 @@ meny yourfile.py
 You can also use `meny` programmatically as a package, of which this README will cover most of its usage.
 
 ### But why exactly this package?
-There already exists python packages to do so, but all of them require you to *refactor* your code in order to use them, and you need to *learn* how to use their APIs, which is kind of annoying since you just want an convenient interface for your functions. You don't want to spend even more to time to learn yet another library, let alone refactor your code for a CLI menu. With `meny` you can use the command `meny` or add `meny.menu(locals())` to the bottom of your Python file and you are good to go.
+There already exists python packages to do so, but seemingly all of them require you to *refactor* your code in order to use them, and you need to *learn* how to use their APIs, which is kind of annoying since you just want an convenient interface for your functions. You don't want to spend even more to time to learn yet another library, let alone refactor your code for a CLI menu. With `meny` you can use the command `meny` or add `meny.menu(locals())` to the bottom of your Python file and you are good to go.
 
 Of course, this package can do much more which you can see below, but its intention is to cover the "It would be nice to just have a cli menu for my functions now, but its too much effort to make / learn another library" scenario, which I believe it does well.
 

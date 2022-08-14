@@ -1,15 +1,13 @@
 import argparse
-import os
 import sys
 from pathlib import Path
-from typing import Union
 from .menu import menu
 from .menylogger import getLogger, INFO
 from .utils import _get_module_cases
 import importlib.util
 import importlib.machinery
 import traceback
-import types
+import pprint
 
 logger = getLogger("meny.cli", INFO)
 
@@ -70,10 +68,10 @@ def cli():
 
     returnDict = menu(cases, f"Functions in {file}", once=not args.repeat, return_mode='flat')
     values = list(returnDict.values())
-    if len(values) == 1:
-        print(values[0])
+    if len(values) == 1 and values[0] is not None:
+        pprint.pprint(values[0])
     elif len(values) > 0:
-        print(returnDict)
+        pprint.pprint(returnDict)
     else:
         sys.exit(1)
 

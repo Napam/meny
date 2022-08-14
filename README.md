@@ -70,7 +70,7 @@ I use Windows personally and `windows-curses` has worked fine so far. The `windo
 
 # Command-line interface <a id="_meny_commandlineInterface"></a>
 As mentioned above, you can do `meny your_python_file.py` in your terminal and it will parse the file and present its functions. For example you have the file `os_example.py`:
-```
+```python
 import platform
 
 def print_os():

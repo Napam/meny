@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 from pathlib import Path
 from typing import Union
@@ -6,7 +7,9 @@ from .menu import menu
 from .menylogger import getLogger, INFO
 from .utils import _get_module_cases
 import importlib.util
+import importlib.machinery
 import traceback
+import types
 
 logger = getLogger("meny.cli", INFO)
 
@@ -19,19 +22,19 @@ def resolve_path(file: str) -> Path:
         return path.resolve()
 
 
-def load_module_from_path(path: Union[Path, str]):
+def load_module_from_path(path: Path):
     sys.path.append(str(Path(path).parent))
-    spec = importlib.util.spec_from_file_location(f"_meny_module_{path.stem}", str(path))
+    loader = importlib.machinery.SourceFileLoader(f'__meny_module_{path.stem}', str(path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
     module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
+    loader.exec_module(module)
     sys.path.pop()
     return module
 
 
 def cli():
     parser = argparse.ArgumentParser(
-        prog="Meny", description="Start a meny on a specified Python file"
+        prog="meny", description="Start a meny on a specified Python file"
     )
 
     parser.add_argument("pythonfile", type=str, nargs=1, help="a python file to start a menu on")

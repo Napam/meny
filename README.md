@@ -9,36 +9,37 @@ Meny is a super light weight framework for creating CLI menus. (the gif is a bit
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
 
 ### Imagine this:
-1. You have implemented some functions in some Python file(regardless of the intention of creating a CLI menu). 
+1. You have implemented some functions in some Python file (regardless of the intention of creating a CLI menu).
 1. Then you realize it would be nice to have a CLI interface to call said functions.
 
-Today is your lucky day! Because Meny is especially designed for this scenario! (which I have encountered surprisingly many times, hence this package). just install and import `meny` and add 
-```python
-meny.menu(locals())
-``` 
-to the end your file. That is really it!
+Today is your lucky day! Because Meny is especially designed for this scenario! (which I have encountered surprisingly many times, hence this package). Just install and import `meny` do
+```
+meny yourfile.py
+```
+You can also use `meny` programmatically as a package, of which this README will cover most of its usage.
 
 ### But why exactly this package?
-There already exists python packages to do so, but all of them require you to *refactor* your code in order to use them, and you need to *learn* how to use their APIs, which is kind of annoying since you just want an convenient interface for your functions. You don't wanna spend even more to time to learn yet another library, let alone refactor your code for a CLI menu. With `meny` you can literally just add `meny.menu(locals())` to the bottom of your Python file and you are literally good to go. 
+There already exists python packages to do so, but all of them require you to *refactor* your code in order to use them, and you need to *learn* how to use their APIs, which is kind of annoying since you just want an convenient interface for your functions. You don't want to spend even more to time to learn yet another library, let alone refactor your code for a CLI menu. With `meny` you can use the command `meny` or add `meny.menu(locals())` to the bottom of your Python file and you are good to go.
 
-Of course, this package can do much more which you can see below, but its intention is to cover the "It would be nice to just have a cli menu for my functions now, but its too much effort to make / learn another library" scenario, which I believe it does the best of all I have seen.
+Of course, this package can do much more which you can see below, but its intention is to cover the "It would be nice to just have a cli menu for my functions now, but its too much effort to make / learn another library" scenario, which I believe it does well.
 
 ## Table of contents
 
 1. <a href="#_meny_setup">How to setup</a>
-1. <a href="#_meny_noteWindows">Note for Windows users</a>
-1. <a href="#_meny_howTo">How to implement</a>
+2. <a href="#_meny_noteWindows">Note for Windows users</a>
+3. <a href="#_meny_commandlineInterfcae">Command-line Interface</a>
+4. <a href="#_meny_programmaticInterface">Programmatic interface</a>
     1. <a href="#_meny_simpleExamples">Simple examples</a>
-    1. <a href="#_meny_caseNames">Case names</a>
-    1. <a href="#_meny_frontend">Frontend and usage</a>
-    1. <a href="#_meny_specialCases">Special cases</a>
-    1. <a href="#_meny_arguments">Arguments</a>
-    1. <a href="#_meny_progArguments">Programmatic Arguments</a>
-    1. <a href="#_meny_nested">Nested cases</a>
-    1. <a href="#_meny_return">Return values</a>
-    1. <a href="#_meny_ignore">What if I want to define functions without having them displayed in the menu?</a>
-    1. <a href="#_meny_decorator">Optional: Decorator</a>
-1. <a href="#_meny_realExamples">Real examples</a>
+    2. <a href="#_meny_caseNames">Case names</a>
+    3. <a href="#_meny_frontend">Frontend and usage</a>
+    4. <a href="#_meny_specialCases">Special cases</a>
+    5. <a href="#_meny_arguments">Arguments</a>
+    6. <a href="#_meny_progArguments">Programmatic Arguments</a>
+    7. <a href="#_meny_nested">Nested cases</a>
+    8. <a href="#_meny_return">Return values</a>
+    9. <a href="#_meny_ignore">What if I want to define functions without having them displayed in the menu?</a>
+    10. <a href="#_meny_decorator">Optional: Decorator</a>
+5. <a href="#_meny_realExamples">Real examples</a>
 
 # How to setup <a id="_meny_setup"></a>
 
@@ -60,14 +61,39 @@ TL;DR: If you want to have the fancy frontend (like in the gif) do
 pip install windows-curses
 ```
 
-An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the fancy frontend. It is built-in with CPython for Linux and Mac installations but not in Windows. meny will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
+An original goal for this package was to rely on built-in Python packages only, which it does, for Linux and Mac. This package requires the `curses` library to use the fancy frontend. It is built-in with CPython for Linux and Mac installations but not in Windows. `meny` will still work without `curses` as it also ships with a simple frontend that only uses the built-in `print` function.
 
 A way to get `curses` for Windows is to install `windows-curses`:
 `pip install windows-curses`
 
 I use Windows personally and `windows-curses` has worked fine so far. The `windows-curses` source code is availabe on github and [can be found here](https://github.com/zephyrproject-rtos/windows-curses).
 
-# How to implement <a id="_meny_howTo"></a>
+# Command-line interface <a id="_meny_commandlineInterface"></a>
+As mentioned above, you can do `meny your_python_file.py` in your terminal and it will parse the file and present its functions. For example you have the file `os_example.py`:
+```
+import platform
+
+def print_os():
+    operating_system = platform.system()
+    print(f"Your operating is {platform.system()}")
+    return operating_system
+```
+Then you can do
+```
+meny print_os
+```
+and you will see
+```
+---- Functions in os_example.py ----
+1. print_os
+```
+If you select `print_os`, the function will be executed and you will see its output and also return value in your terminal:
+```
+Your operating system is Linux
+'Linux'
+```
+
+# Programmatic Interface <a id="_meny_programmaticInterface"></a>
 
 Simply implement the menu cases (as functions) in a Python file, then to initialize the interface you simply call the `menu` function after you have defined your functions.
 
@@ -101,7 +127,7 @@ Factory function for the CLI class. This function initializes a menu.
 >    on_blank: Optional[str] = None,
 >    on_kbinterrupt: Optional[str] = None,
 >    once: Optional[bool] = None,
->    return_mode: Optional[bool] = None,
+>    return_mode: Optional[str] = None,
 > ) -> Dict[str, Any]:
 > ```
 >

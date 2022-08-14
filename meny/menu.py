@@ -302,7 +302,7 @@ def menu(
     on_blank: Optional[str] = None,
     on_kbinterrupt: Optional[str] = None,
     once: Optional[bool] = None,
-    return_mode: Optional[bool] = None,
+    return_mode: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Factory function for the CLI class. This function initializes a menu.

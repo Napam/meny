@@ -52,20 +52,29 @@ def cli():
         filepath = resolve_path(file)
     except FileNotFoundError as e:
         logger.error(f"Could not find \x1b[33m{file}\x1b[0m")
-        exit()
+        sys.exit(1)
 
     try:
         module = load_module_from_path(filepath)
-    except AttributeError as e:
+    except Exception as e:
         logger.error("".join(traceback.TracebackException.from_exception(e).format()))
         logger.error(f"Something went wrong when attempting to import \x1b[33m{filepath}\x1b[0m")
         logger.error(f"Received error: {e}")
         logger.error(f"Please ensure that \x1b[33m{filepath}\x1b[0m contains valid Python code")
-        exit()
+        sys.exit(1)
 
     cases = _get_module_cases(module)
     if len(cases) == 0:
         logger.info(f"There are no defined functions in \x1b[33m{filepath}\x1b[0m")
-        exit()
+        sys.exit(1)
 
-    menu(cases, f"Functions in {file}", once=not args.repeat)
+    returnDict = menu(cases, f"Functions in {file}", once=not args.repeat, return_mode='flat')
+    values = list(returnDict.values())
+    if len(values) == 1:
+        print(values[0])
+    elif len(values) > 0:
+        print(returnDict)
+    else:
+        sys.exit(1)
+
+    sys.exit(0)

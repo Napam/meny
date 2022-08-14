@@ -1,5 +1,7 @@
 Instructions on how to update package (since you never remember how)
 
+NOTE: this is now handled by build pipelines
+
 Ensure latest version of setuptools, wheel and twine are installed:
     python3 -m pip install --upgrade setuptools wheel twine
 
@@ -13,4 +15,4 @@ If you want to upload to TestPyPi then do
     twine upload --repository testpypi dist/*
 
 More info:
-    https://packaging.python.org/tutorials/packaging-projects/ 
+    https://packaging.python.org/tutorials/packaging-projects/

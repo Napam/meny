@@ -49,9 +49,9 @@ First install the package with the command (make sure you have Python 3.7 or hig
 pip install meny
 ```
 
-Then you can import `meny` in Python. The most central functions in this package are **`meny.menu`** and **`meny.title`**, which will be covered below.
+Then you can import `meny` in Python. This will make `meny` available in your shell. For programmatic use the most central functions in this package are **`meny.menu`** and **`meny.title`**, which will be covered below.
 
-This package has only been tested on Windows 10 and Ubuntu (18.04, 20.04) with Python 3.7, 3.8, and 3.9
+This package has been tested on Windows 10, Windows 11, MacOS (idk which version that was), and Ubuntu (18.04, 20.04, 22.04) with Python 3.7, 3.8, 3.9, 3.10
 
 ## Note for Windows users <a id="_meny_noteWindows"></a>
 

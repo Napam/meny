@@ -31,7 +31,7 @@ Of course, this package can do much more which you can see below, but its intent
 4. <a href="#_meny_programmaticInterface">Programmatic interface</a>
     1. <a href="#_meny_simpleExamples">Simple examples</a>
     2. <a href="#_meny_caseNames">Case names</a>
-    3. <a href="#_meny_frontend">Frontend and usage</a>
+    3. <a href="#_meny_frontend">Choosing frontends</a>
     4. <a href="#_meny_specialCases">Special cases</a>
     5. <a href="#_meny_arguments">Arguments</a>
     6. <a href="#_meny_progArguments">Programmatic Arguments</a>
@@ -92,6 +92,21 @@ If you select `print_os`, the function will be executed and you will see its out
 Your operating system is Linux
 'Linux'
 ```
+
+# Usage
+It easiest to explain the fundamental idea with the simple frontend, which will look something like this:
+```
+---- Title ----
+1. functionA
+2. functionB
+
+input:
+```
+- To select a case you specify its number on the left. For example to run `functionA`, type `1` then press enter. 
+- To go back press enter without any input
+- Enter `h` to see usage
+
+When you use the fancy frontend you can traverse the options using your arrow keys (which will save the hassle of typing which function you want to run). You can find how to switch between fancy and simple frontend <a href="#_meny_frontend">here</a>.
 
 # Programmatic Interface <a id="_meny_programmaticInterface"></a>
 
@@ -260,13 +275,12 @@ Input:
 
 You then specify which case you want to run by entering the input number as the first token. The tokens after (delimited by space) will be passed to the case function as positional arguments. The argument tokens will be evaluated as Python literals.
 
-## Frontend and usage <a id="_meny_frontend"></a>
-
+## Choosing frontends <a id="_meny_frontend"></a>
 There are two frontends implemented; the simple frontend and the fancy frontend. The selection of frontend will be selected based on the detected operating system. One can pass the choice of frontend: `menu(..., frontend="auto")`. The possible choices are
 
 -   `auto`: Will try to use the fancy front end (using `curses`) by checking if the `curses` module is available, else use simple frontend.
 -   `simple`: Use simple frontend, should work on all systems since it is completely based on the built-in print function. Use by typing the corresponding key (e.g. 1) to the displayed cases and press enter.
--   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds the ability to traverse the options using the **arrow keys**.
+-   `fancy`: Use fancy frontend, will raise `ImportError` if `curses` is unavailable. The fancy frontend is "fancy" as in it gives visual indicators on what you are doing, and also adds the ability to traverse the options using the **arrow keys** such that you don't have to type the number yourself.
 
 It is possible to override the default frontend throughout the Python program by doing
 

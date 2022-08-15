@@ -27,7 +27,7 @@ Of course, this package can do much more which you can see below, but its intent
 
 1. <a href="#_meny_setup">How to setup</a>
 2. <a href="#_meny_noteWindows">Note for Windows users</a>
-3. <a href="#_meny_commandlineInterface">Command-line Interface</a>
+3. <a href="#_meny_terminalinterface">Terminal interface</a>
 4. <a href="#_meny_usage">Usage</a>
 5. <a href="#_meny_programmaticInterface">Programmatic interface</a>
     1. <a href="#_meny_simpleExamples">Simple examples</a>
@@ -69,7 +69,7 @@ A way to get `curses` for Windows is to install `windows-curses`:
 
 I use Windows personally and `windows-curses` has worked fine so far. The `windows-curses` source code is availabe on github and [can be found here](https://github.com/zephyrproject-rtos/windows-curses).
 
-# Command-line interface <a id="_meny_commandlineInterface"></a>
+# Terminal interface <a id="_meny_terminalinterface"></a>
 As mentioned above, you can do `meny your_python_file.py` in your terminal and it will parse the file and present its functions. For example you have the file `os_example.py`:
 ```python
 import platform

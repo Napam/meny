@@ -36,8 +36,9 @@ def case3():
 
 from time import sleep
 
-import meny
 
+from meny import menu
+import meny
 import cases_nested
 
 meny.set_default_frontend("fancy")

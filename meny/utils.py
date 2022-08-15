@@ -107,8 +107,11 @@ def input_splitter(argstring: str) -> List[str]:
 
 def _get_module_cases(module: ModuleType) -> List[FunctionType]:
     """Get all functions defined in module"""
-    isUserDefinedFunction = lambda f: isfunction(f)
-    return [func for func in vars(module).values() if isUserDefinedFunction(func)]
+    def inModule(f):
+        moduleOfF = getmodule(f)
+        # If moduleOfF is None, assume that it is loaded using load_module_from_path found in cli.py
+        return isfunction(f) and (moduleOfF == module or moduleOfF is None)
+    return [func for func in vars(module).values() if inModule(func)]
 
 
 if __name__ == "__main__":

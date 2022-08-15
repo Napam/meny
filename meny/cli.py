@@ -68,9 +68,10 @@ def cli():
 
     returnDict = menu(cases, f"Functions in {file}", once=not args.repeat, return_mode='flat')
     values = list(returnDict.values())
+
     if len(values) == 1 and values[0] is not None:
         pprint.pprint(values[0])
-    elif len(values) > 0:
+    elif len(values) > 1:
         pprint.pprint(returnDict)
     else:
         sys.exit(1)

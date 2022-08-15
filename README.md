@@ -27,8 +27,9 @@ Of course, this package can do much more which you can see below, but its intent
 
 1. <a href="#_meny_setup">How to setup</a>
 2. <a href="#_meny_noteWindows">Note for Windows users</a>
-3. <a href="#_meny_commandlineInterfcae">Command-line Interface</a>
-4. <a href="#_meny_programmaticInterface">Programmatic interface</a>
+3. <a href="#_meny_commandlineInterface">Command-line Interface</a>
+4. <a href="#_meny_usage">Usage</a>
+5. <a href="#_meny_programmaticInterface">Programmatic interface</a>
     1. <a href="#_meny_simpleExamples">Simple examples</a>
     2. <a href="#_meny_caseNames">Case names</a>
     3. <a href="#_meny_frontend">Choosing frontends</a>
@@ -39,7 +40,7 @@ Of course, this package can do much more which you can see below, but its intent
     8. <a href="#_meny_return">Return values</a>
     9. <a href="#_meny_ignore">What if I want to define functions without having them displayed in the menu?</a>
     10. <a href="#_meny_decorator">Optional: Decorator</a>
-5. <a href="#_meny_realExamples">Real examples</a>
+6. <a href="#_meny_realExamples">Real examples</a>
 
 # How to setup <a id="_meny_setup"></a>
 
@@ -93,7 +94,7 @@ Your operating system is Linux
 'Linux'
 ```
 
-# Usage
+# Usage <a id="_meny_usage"></a>
 It easiest to explain the fundamental idea with the simple frontend, which will look something like this:
 ```
 ---- Title ----

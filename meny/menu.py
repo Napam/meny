@@ -18,7 +18,7 @@ from meny.utils import (
 )
 from meny.infos import _error_info_parse, print_help
 from meny.exceptions import MenuQuit
-
+import os
 
 def raise_interrupt(*args, **kwargs) -> None:
     """
@@ -212,6 +212,7 @@ class Menu:
         - handle MenuQuit and KeyboardInterrupt
         - count depth
         """
+        os.system("") # Said to enable asci escape codes in terminal
         self.active = True
         Menu._depth += 1
 

@@ -1,5 +1,6 @@
 {
   "Echo 'Hello World'": "echo Hello World",
+  "Greet": "echo Hello @name, you are so cool!",
   "Count all lines of Python code in the current directory": "cat *.py | wc -l",
   "Weather menu": {
     "Get weather in current location": "curl wttr.in?0",

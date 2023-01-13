@@ -1,0 +1,8 @@
+{
+  "Echo 'Hello World'": "echo Hello World",
+  "Count all lines of Python code in the current directory": "cat *.py | wc -l",
+  "Weather menu": {
+    "Get weather in current location": "curl wttr.in?0",
+    "Get weather in given location": "curl wttr.in/@place?0"
+  }
+}

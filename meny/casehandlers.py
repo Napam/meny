@@ -26,8 +26,11 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
 
     typed_arglist = [None] * len(args)
     try:
-        for i, arg in enumerate(args):
-            typed_arglist[i] = literal_eval(arg)
+        for i, (param, arg) in enumerate(zip(params, args)):
+            if argsspec.annotations[param] == str:
+                typed_arglist[i] = arg
+            else:
+                typed_arglist[i] = literal_eval(arg)
     except (ValueError, SyntaxError) as e:
         raise MenuError(
             f"Got arguments: {args}\n" f"But could not evaluate argument at position {i}:\n\t {arg}"

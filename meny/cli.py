@@ -12,6 +12,9 @@ import string
 import re
 import json
 import subprocess
+import shutil
+import platform
+import signal
 
 logger = getLogger("meny.cli", INFO)
 
@@ -26,7 +29,7 @@ def resolve_path(file: str) -> Path:
 
 def load_module_from_path(path: Path):
     sys.path.append(str(Path(path).parent))
-    loader = importlib.machinery.SourceFileLoader(f'__meny_module_{path.stem}', str(path))
+    loader = importlib.machinery.SourceFileLoader(f"__meny_module_{path.stem}", str(path))
     spec = importlib.util.spec_from_loader(loader.name, loader)
     module = importlib.util.module_from_spec(spec)
     loader.exec_module(module)
@@ -49,28 +52,29 @@ def menu_from_python_code(filepath: Path, repeat: bool):
         logger.info(f"There are no defined functions in \x1b[33m{filepath}\x1b[0m")
         sys.exit(1)
 
-    return menu(cases, f"Functions in {filepath}", once=not repeat, return_mode='flat')
+    return menu(cases, f"Functions in {filepath}", once=not repeat, return_mode="flat")
 
 
 class MenyTemplate(string.Template):
     delimiter = "@"
 
 
-def get_casefunc(command):
+def get_casefunc(command: str, executable: str):
     template = MenyTemplate(command)
     params = [named or braced for _, named, braced, _ in re.findall(template.pattern, command)]
-    signature = ",".join(params)
+    params = list(dict.fromkeys(params))
+    signature = ",".join(f"{param}: str" for param in params)
     args = ",".join(f"{arg}={arg}" for arg in params)
 
     ns = {}
-    txt = f"def f({signature}): subprocess.call(template.safe_substitute({args}), shell=True)"
+    txt = f"def f({signature}): subprocess.call(template.safe_substitute({args}), shell=True, executable='{executable}')"
     exec(txt, {**globals(), **locals()}, ns)
 
-    return ns['f']
+    return ns["f"]
 
 
-def menu_from_json(filepath: Path):
-    with open(filepath, 'r') as f:
+def menu_from_json(filepath: Path, executable: str):
+    with open(filepath, "r") as f:
         try:
             spec = json.load(f)
         except Exception as e:
@@ -81,7 +85,7 @@ def menu_from_json(filepath: Path):
         cases = {}
         for title, command_or_dict in spec.items():
             if isinstance(command_or_dict, str):
-                cases[title] = get_casefunc(command_or_dict)
+                cases[title] = get_casefunc(command_or_dict, executable)
             if isinstance(command_or_dict, dict):
                 cases[title] = _menu_from_json(command_or_dict)
         return lambda: menu(cases, once=not spec.get("__repeat__", False))
@@ -90,16 +94,18 @@ def menu_from_json(filepath: Path):
 
 
 def cli():
-    parser = argparse.ArgumentParser(
-        prog="meny", description="Start a meny on a specified Python file or JSON"
-    )
+    parser = argparse.ArgumentParser(prog="meny", description="Start a meny on a specified Python file or JSON")
 
     parser.add_argument("file", type=str, nargs=1, help="a python or json file to start a menu on")
+    parser.add_argument("-r", "--repeat", help="dont exit meny after running a case", action="store_true")
     parser.add_argument(
-        "-r",
-        "--repeat",
-        help="dont exit meny after running a case",
-        action="store_true"
+        "-e",
+        "--executable",
+        help="Shell program to run the commands in a given json file."
+        " Only effective when creating menus from json files."
+        " Will attempt to use bash for Unix systems, and "
+        "powershell for Windows. Else will default to whatever "
+        "Python chooses (usually sh and cmd for Unix and Windows respectively)",
     )
 
     args = parser.parse_args()
@@ -111,16 +117,28 @@ def cli():
         logger.error(f"Could not find \x1b[33m{file}\x1b[0m")
         sys.exit(1)
 
-    if filepath.suffix == ".json":
-        returnDict = menu_from_json(filepath)
-    else:
-        returnDict = menu_from_python_code(filepath, args.repeat)
-        values = list(returnDict.values())
-        if len(values) == 1 and values[0] is not None:
-            pprint.pprint(values[0])
-        elif len(values) > 1:
-            pprint.pprint(returnDict)
+    try:
+        signal.signal(signal.SIGINT, lambda *args, **kwargs: None)
+        if filepath.suffix == ".json":
+            if platform.system() == "Windows":
+                executable = shutil.which("powershell")
+            else:
+                executable = shutil.which("bash")
+            returnDict = menu_from_json(filepath, args.executable or executable)
         else:
-            sys.exit(1)
+            returnDict = menu_from_python_code(filepath, args.repeat)
+            values = list(returnDict.values())
+            if len(values) == 1 and values[0] is not None:
+                pprint.pprint(values[0])
+            elif len(values) > 1:
+                pprint.pprint(returnDict)
+            else:
+                sys.exit(1)
+    except Exception as e:
+        # Handle curses error when SIGINT. This way is cross platform for the people who doesn't have curses
+        if "no input" == str(e):
+            pass
+        else:
+            raise e
 
     sys.exit(0)

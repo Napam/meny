@@ -27,7 +27,7 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
     typed_arglist = [None] * len(args)
     try:
         for i, (param, arg) in enumerate(zip(params, args)):
-            if argsspec.annotations[param] == str:
+            if argsspec.annotations.get(param, None) == str:
                 typed_arglist[i] = arg
             else:
                 typed_arglist[i] = literal_eval(arg)

@@ -59,10 +59,10 @@ class MenyTemplate(string.Template):
     delimiter = "@"
     pattern = r"""
     @(?:
-      (?P<escaped>@)                     | # Escape sequence of two delimiters
-      (?P<named>\w+)             | # delimiter and a Python identifier
-      {(?P<braced>\w+=?\w*)}   | # delimiter and a braced identifier
-      (?P<invalid>)                        # Other ill-formed delimiter exprs
+      (?P<escaped>@)         | # Escape sequence of two delimiters
+      (?P<named>\w+)         | # delimiter and a Python identifier
+      {(?P<braced>\w+=?\w*)} | # delimiter and a braced identifier
+      (?P<invalid>)            # Other ill-formed delimiter exprs
     )
     """
 
@@ -113,16 +113,16 @@ def menu_from_json(filepath: Path, executable: str):
             logger.error(f"Error when parsing {filepath}: {e}")
             sys.exit()
 
-    def _menu_from_json(spec: dict):
+    def _menu_from_json(spec: dict, menutitle: str):
         cases = {}
         for title, command_or_dict in spec.items():
             if isinstance(command_or_dict, str):
                 cases[title] = get_casefunc(command_or_dict, executable)[0]
             if isinstance(command_or_dict, dict):
-                cases[title] = _menu_from_json(command_or_dict)
-        return lambda: menu(cases, once=not spec.get("__repeat__", False))
+                cases[title] = _menu_from_json(command_or_dict, menutitle=title)
+        return lambda: menu(cases, title=menutitle, once=not spec.get("__repeat__", False))
 
-    return _menu_from_json(spec)()
+    return _menu_from_json(spec, filepath.name)()
 
 
 def cli():

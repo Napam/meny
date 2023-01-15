@@ -1,6 +1,7 @@
 import unittest
 import meny as meny
 import random
+import meny.cli
 
 
 class TestUtils(unittest.TestCase):
@@ -238,6 +239,11 @@ class TestUtils(unittest.TestCase):
         menu.case_kwargs = {func: {"c": 4}}
         returns = meny._handle_casefunc(func, [], menu)
         self.assertTupleEqual(returns, (1, 2, 4))
+
+    def test_get_casefunc(self):
+        f, txt = meny.cli.get_casefunc("echo '@a @{b} @{c}s Number: @{d=123}'", None)
+        expected = "def f(a: str, b: str, c: str, d: str='123'): subprocess.call(template.safe_substitute(a=a, b=b, c=c, d=d), shell=True, executable=None)"
+        self.assertEqual(expected, txt)
 
 
 if __name__ == "__main__":

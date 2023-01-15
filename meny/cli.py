@@ -57,20 +57,52 @@ def menu_from_python_code(filepath: Path, repeat: bool):
 
 class MenyTemplate(string.Template):
     delimiter = "@"
+    pattern = r"""
+    @(?:
+      (?P<escaped>@)                     | # Escape sequence of two delimiters
+      (?P<named>\w+)             | # delimiter and a Python identifier
+      {(?P<braced>\w+=?\w*)}   | # delimiter and a braced identifier
+      (?P<invalid>)                        # Other ill-formed delimiter exprs
+    )
+    """
 
 
 def get_casefunc(command: str, executable: str):
-    template = MenyTemplate(command)
-    params = [named or braced for _, named, braced, _ in re.findall(template.pattern, command)]
-    params = list(dict.fromkeys(params))
-    signature = ",".join(f"{param}: str" for param in params)
-    args = ",".join(f"{arg}={arg}" for arg in params)
+    parse_template = MenyTemplate(command)
+    arg_components = []
+    signature_components = []
+    for _, named, braced, _ in re.findall(parse_template.pattern, command):
+        if named:
+            arg_components.append(f"{named}={named}")
+            signature_components.append(f"{named}: str")
+            continue
+
+        if not braced:
+            continue
+
+        if "=" in braced:
+            braced, default = braced.split("=")
+            signature_components.append(f"{braced}: str='{default}'")
+        else:
+            signature_components.append(f"{braced}: str")
+
+        arg_components.append(f"{braced}={braced}")
+
+    signature_components = list(dict.fromkeys(signature_components))
+    arg_components = list(dict.fromkeys(arg_components))
+    signature = ", ".join(signature_components)
+    args = ", ".join(arg_components)
+
+    # Remove default argument from command string
+    template = MenyTemplate(re.sub(r"@{(\w+)=\w*}", r"@{\1}", command))
+    if executable is not None:
+        executable = f"'{executable}'"
 
     ns = {}
-    txt = f"def f({signature}): subprocess.call(template.safe_substitute({args}), shell=True, executable='{executable}')"
+    txt = f"def f({signature}): subprocess.call(template.safe_substitute({args}), shell=True, executable={executable})"
     exec(txt, {**globals(), **locals()}, ns)
 
-    return ns["f"]
+    return ns["f"], txt
 
 
 def menu_from_json(filepath: Path, executable: str):
@@ -85,7 +117,7 @@ def menu_from_json(filepath: Path, executable: str):
         cases = {}
         for title, command_or_dict in spec.items():
             if isinstance(command_or_dict, str):
-                cases[title] = get_casefunc(command_or_dict, executable)
+                cases[title] = get_casefunc(command_or_dict, executable)[0]
             if isinstance(command_or_dict, dict):
                 cases[title] = _menu_from_json(command_or_dict)
         return lambda: menu(cases, once=not spec.get("__repeat__", False))

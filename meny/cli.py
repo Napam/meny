@@ -105,7 +105,7 @@ def get_casefunc(command: str, executable: str):
     return ns["f"], txt
 
 
-def menu_from_json(filepath: Path, executable: str):
+def menu_from_json(filepath: Path, repeat: bool, executable: str):
     with open(filepath, "r") as f:
         try:
             spec = json.load(f)
@@ -114,13 +114,14 @@ def menu_from_json(filepath: Path, executable: str):
             sys.exit()
 
     def _menu_from_json(spec: dict, menutitle: str):
+        once = not repeat or spec.get("__repeat__", False)
         cases = {}
         for title, command_or_dict in spec.items():
             if isinstance(command_or_dict, str):
                 cases[title] = get_casefunc(command_or_dict, executable)[0]
             if isinstance(command_or_dict, dict):
                 cases[title] = _menu_from_json(command_or_dict, menutitle=title)
-        return lambda: menu(cases, title=menutitle, once=not spec.get("__repeat__", False))
+        return lambda: menu(cases, title=menutitle, once=once)
 
     return _menu_from_json(spec, filepath.name)()
 
@@ -128,16 +129,22 @@ def menu_from_json(filepath: Path, executable: str):
 def cli():
     parser = argparse.ArgumentParser(prog="meny", description="Start a meny on a specified Python file or JSON")
 
-    parser.add_argument("file", type=str, nargs=1, help="a python or json file to start a menu on")
-    parser.add_argument("-r", "--repeat", help="dont exit meny after running a case", action="store_true")
+    parser.add_argument("file", type=str, nargs=1, help="A python or json file to start a menu on")
+    parser.add_argument(
+        "-r",
+        "--repeat",
+        help="Dont exit meny after running a case. If used on JSON it is equivalent to set the __repeat__ "
+        "flag on the objects of all levels",
+        action="store_true",
+    )
     parser.add_argument(
         "-e",
         "--executable",
         help="Shell program to run the commands in a given json file."
         " Only effective when creating menus from json files."
-        " Will attempt to use bash for Unix systems, and "
-        "powershell for Windows. Else will default to whatever "
-        "Python chooses (usually sh and cmd for Unix and Windows respectively)",
+        " Will attempt to use 'bash' for Unix systems, and "
+        "'powershell' for Windows. Else will default to whatever "
+        "Python chooses (usually 'sh' and 'cmd' for Unix and Windows respectively)",
     )
 
     args = parser.parse_args()
@@ -156,7 +163,7 @@ def cli():
                 executable = shutil.which("powershell")
             else:
                 executable = shutil.which("bash")
-            returnDict = menu_from_json(filepath, args.executable or executable)
+            returnDict = menu_from_json(filepath, args.repeat, args.executable or executable)
         else:
             returnDict = menu_from_python_code(filepath, args.repeat)
             values = list(returnDict.values())

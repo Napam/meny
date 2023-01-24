@@ -56,12 +56,13 @@ def menu_from_python_code(filepath: Path, repeat: bool):
 
 
 class MenyTemplate(string.Template):
+    default_arg = r"[\w ]*"
     delimiter = "@"
-    pattern = r"""
+    pattern = fr"""
     @(?:
       (?P<escaped>@)         | # Escape sequence of two delimiters
       (?P<named>\w+)         | # delimiter and a Python identifier
-      {(?P<braced>\w+=?\w*)} | # delimiter and a braced identifier
+      {{(?P<braced>\w+=?{default_arg})}} | # delimiter and a braced identifier
       (?P<invalid>)            # Other ill-formed delimiter exprs
     )
     """
@@ -94,7 +95,7 @@ def get_casefunc(command: str, executable: str):
     args = ", ".join(arg_components)
 
     # Remove default argument from command string
-    template = MenyTemplate(re.sub(r"@{(\w+)=\w*}", r"@{\1}", command))
+    template = MenyTemplate(re.sub(fr"@{{(\w+)={MenyTemplate.default_arg}}}", r"@{\1}", command))
     if executable is not None:
         executable = f"'{executable}'"
 

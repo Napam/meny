@@ -1,6 +1,6 @@
 {
   "Echo 'Hello World'": "echo Hello World",
-  "Greet": "echo Hello @name, you are so cool!",
+  "Greet": "echo Hello @{name=John Wick}, you are so cool!",
   "FizzBuzz": "for ((i=1;i<=@n;i++)); do if ! ((i%15)); then echo @{fizz=Fizz}@{buzz=Buzz}; elif ! ((i%3)); then echo @{fizz=Fizz}; elif ! ((i%5)); then echo @{buzz=Buzz}; else echo $i; fi; done",
   "Count all lines of Python code in the current directory": "cat *.py | wc -l",
   "Weather menu": {

@@ -16,13 +16,14 @@ Today is your lucky day! Because Meny is especially designed for this scenario! 
 ```
 meny yourfile.py
 ```
-You can also use `meny` programmatically as a package, of which this README will cover most of its usage.
+You can also use `meny` programmatically as a python package, of which this README will cover most of its usage.
 
 ### But why exactly this package?
 There already exists python packages to do so, but seemingly all of them require you to *refactor* your code in order to use them, and you need to *learn* how to use their APIs, which is kind of annoying since you just want an convenient interface for your functions. You don't want to spend even more to time to learn yet another library, let alone refactor your code for a CLI menu. With `meny` you can use the command `meny` or add `meny.menu(locals())` to the bottom of your Python file and you are good to go.
 
 Of course, this package can do much more which you can see below, but its intention is to cover the "It would be nice to just have a cli menu for my functions now, but its too much effort to make / learn another library" scenario, which I believe it does well.
 
+Also, you can define the menus as JSONs!
 ## Table of contents
 
 1. <a href="#_meny_setup">How to setup</a>
@@ -94,6 +95,26 @@ Your operating system is Linux
 'Linux'
 ```
 
+## On JSON files
+You can also define your menu as a JSON! The JSON will define the case names along with a terminal command. There is an example file in the repository called `readme_examples.json`:
+```json
+{
+  "English greeting": "echo Hello @name! It is very nice to meet you!",
+  "Japanese greeting using braced syntax": "echo Konichiwa @{namae}san! Hajimemashite!",
+  "Spanish introduction with default argument": "echo Hola! Me llamo @{nombre=John Wick}!",
+  "Weather menu": {
+    "Get weather in current location": "curl wttr.in?0",
+    "Get weather in given location": "curl wttr.in/@place?0"
+  }
+}
+```
+You can simply run the following command in your shell (assuming you are in the examples directory):
+```
+meny readme_examples.json
+```
+Then it will create the following menu:
+
+
 # Usage <a id="_meny_usage"></a>
 It easiest to explain the fundamental idea with the simple frontend, which will look something like this:
 ```
@@ -103,7 +124,7 @@ It easiest to explain the fundamental idea with the simple frontend, which will 
 
 input:
 ```
-- To select a case you specify its number on the left. For example to run `functionA`, type `1` then press enter. 
+- To select a case you specify its number on the left. For example to run `functionA`, type `1` then press enter.
 - To go back press enter without any input
 - Enter `h` to see usage
 

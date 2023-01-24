@@ -1,0 +1,9 @@
+{
+  "English greeting": "echo Hello @name! It is very nice to meet you!",
+  "Japanese greeting using braced syntax": "echo Konichiwa @{namae}san! Hajimemashite!",
+  "Spanish introduction with default argument": "echo Hola! Me llamo @{nombre=John Wick}!",
+  "Weather menu": {
+    "Get weather in the current location": "curl wttr.in?0",
+    "Get weather in a given location": "curl wttr.in/@place?0"
+  }
+}

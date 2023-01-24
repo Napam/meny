@@ -4,7 +4,7 @@
 
 # Meny
 
-Meny is a super light weight framework for creating CLI menus. (the gif is a bit outdated at the moment)
+Meny is a super light weight framework for creating CLI menus
 
 ![If you see this text, then the gif is broken](https://media.giphy.com/media/SKUrfvxzbXkQ80gdMM/giphy.gif)
 
@@ -29,6 +29,7 @@ Also, you can define the menus as JSONs!
 1. <a href="#_meny_setup">How to setup</a>
 2. <a href="#_meny_noteWindows">Note for Windows users</a>
 3. <a href="#_meny_terminalinterface">Terminal interface</a>
+    1. <a href="#_meny_onJsonFiles">On JSON files</a>
 4. <a href="#_meny_usage">Usage</a>
 5. <a href="#_meny_programmaticInterface">Programmatic interface</a>
     1. <a href="#_meny_simpleExamples">Simple examples</a>
@@ -95,7 +96,7 @@ Your operating system is Linux
 'Linux'
 ```
 
-## On JSON files
+## On JSON files <a id="_meny_onJsonFiles"></a>
 You can also define your menu as a JSON! The JSON will define the case names along with a terminal command. There is an example file in the repository called `readme_examples.json`:
 ```json
 {
@@ -113,7 +114,9 @@ You can simply run the following command in your shell (assuming you are in the 
 meny readme_examples.json
 ```
 Then it will create the following menu:
+<video src='https://user-images.githubusercontent.com/47104226/214406989-5cf3c818-4346-4de3-a893-014398375128.mp4'>
 
+As you can see it is possible to specify parameters in the json by using `@thisSyntax` or `@{thisSyntax}`, and even parameters with default arguments like `@{this=123}`. The braced syntax is usefull when you want an argument to be directly adjacent to other letters as you see in the Japanese greeting example.
 
 # Usage <a id="_meny_usage"></a>
 It easiest to explain the fundamental idea with the simple frontend, which will look something like this:

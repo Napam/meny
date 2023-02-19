@@ -208,7 +208,7 @@ class Menu:
 
     def run_all_cases(self):
         for case in self.funcmap.values():
-            case()
+            case[1]()
 
     def run(self) -> Dict:
         """

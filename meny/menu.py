@@ -20,6 +20,7 @@ from meny.infos import _error_info_parse, print_help
 from meny.exceptions import MenuQuit
 import os
 
+
 def raise_interrupt(*args, **kwargs) -> None:
     """
     Raises keyboard interrupt
@@ -125,7 +126,7 @@ class Menu:
             self.on_blank = lambda: None
 
         # Special options
-        self.special_cases = {"..": self.on_blank, "q": _quit, "h": print_help, "r": _restart}
+        self.special_cases = {"..": self.on_blank, "q": _quit, "h": print_help, "r": _restart, "a": self.run_all_cases}
 
         if frontend == "auto":
             self._frontend = _menu_simple
@@ -205,6 +206,10 @@ class Menu:
             if self.once:
                 self._deactivate()
 
+    def run_all_cases(self):
+        for case in self.funcmap.values():
+            case()
+
     def run(self) -> Dict:
         """
         Responsibilities:
@@ -212,7 +217,7 @@ class Menu:
         - handle MenuQuit and KeyboardInterrupt
         - count depth
         """
-        os.system("") # Said to enable asci escape codes in terminal
+        os.system("")  # Said to enable asci escape codes in terminal
         self.active = True
         Menu._depth += 1
 

@@ -376,6 +376,8 @@ Enter `-1` or any integer will "reverse" the choices, such that you take the las
 
 Entering `r` will restart the *whole* Python program. This is usefull when debugging such that one can easily refresh code changes.
 
+Entering `a` will run all cases in the current menu.
+
 ## Arguments <a id="_meny_arguments"></a>
 
 The cases can take arguments as well!

@@ -318,10 +318,13 @@ class MainWindow(BaseWindow):
             inputfield.handle_input(k, y, x)
             self.highlight_funcmap(inputfield.first_token, maxstrlen)
             self.hint_args(inputfield.inp)
+
             self.notify_special_token(inputfield.inp, "r", "restart")
             self.notify_special_token(inputfield.inp, "q", "quit menu(s)")
             self.notify_special_token(inputfield.inp, "h", "display help")
             self.notify_special_token(inputfield.inp, "..", "go back")
+            self.notify_special_token(inputfield.inp, "a", "run all cases")
+
             self.notify_invalid_case(inputfield.first_token)
             refresh_pad()
         return inputfield._inp

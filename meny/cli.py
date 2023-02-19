@@ -164,6 +164,7 @@ def cli():
                 executable = shutil.which("powershell")
             else:
                 executable = shutil.which("bash")
+            executable = Path(executable).as_posix() # Need this or will crash in windows due to backslash stuff
             returnDict = menu_from_json(filepath, args.repeat, args.executable or executable)
         else:
             returnDict = menu_from_python_code(filepath, args.repeat)

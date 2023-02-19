@@ -1,0 +1,10 @@
+{
+  "Echo 'Hello World'": "echo 'Hello World'",
+  "Greet": "echo 'Hello @{name=John Wick}, you are so cool!'",
+  "FizzBuzz": "1..@n|%{$o='';if($_%3-eq0){$o+='@{fizz=Fizz}'};if($_%5-eq0){$o+='@{buzz=Buzz}'};if(!$o){$o=$_};$o}",
+  "Count all lines of Python code in the current directory": "Get-ChildItem -Filter '*.py' -Recurse | Get-Content | Measure-Object -line",
+  "Weather menu": {
+    "Get weather in current location": "$(Invoke-WebRequest -Uri wttr.in/?0).content",
+    "Get weather in given location": "$(Invoke-WebRequest -Uri wttr.in/@place?0).content"
+  }
+}

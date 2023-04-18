@@ -49,11 +49,13 @@ def print_help(*args, **kwargs) -> None:
         To exit or return from menu interface (even if you are in a nested menu): Enter q
 
         To return to parent menu: Enter blank (press enter without giving input)
-                                  or enter '..'. If you are in main menu, this 
-                                  will exit the menu as well. 
+                                  or enter '..'. If you are in main menu, this
+                                  will exit the menu as well.
 
-        Enter 'r' to restart the Python program. This is usefull for debugging purposes to 
+        Enter 'r' to restart the Python program. This is usefull for debugging purposes to
         easily get code changes.
+
+        Enter 'a' to run all the cases from top to bottom
 
         Press enter to exit help screen
         """

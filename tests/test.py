@@ -29,7 +29,7 @@ class TestUtils(unittest.TestCase):
         def func3():
             pass
 
-        cases = meny.utils._extract_and_preprocess_functions(locals())
+        cases = meny.utils.extract_and_preprocess_functions(locals())
         self.assertListEqual(cases, [linear, quadratic, cubic, func1, func2, func3])
 
     def test_input_splitter(self):

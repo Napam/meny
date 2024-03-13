@@ -2,17 +2,19 @@
 Contains the command line interface (CLI) class, along its factory function:
 menu()
 """
+
+from importlib.util import find_spec
 from time import sleep
 from types import FunctionType, ModuleType
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union, Sequence
 
 from meny import config as cng
 from meny import strings
 from meny.funcmap import construct_funcmap
 from meny.utils import (
     _assert_supported,
-    _extract_and_preprocess_functions,
-    _get_module_cases,
+    extract_and_preprocess_functions,
+    get_module_cases,
     input_splitter,
     clear_screen,
 )
@@ -21,7 +23,7 @@ from meny.exceptions import MenuQuit
 import os
 
 
-def raise_interrupt(*args, **kwargs) -> None:
+def raise_interrupt(*__args__, **__kwargs__) -> None:
     """
     Raises keyboard interrupt
     """
@@ -130,12 +132,8 @@ class Menu:
 
         if frontend == "auto":
             self._frontend = _menu_simple
-            try:
-                import curses
-
+            if find_spec("curses"):
                 self._frontend = _menu_curses
-            except ImportError:
-                pass
 
         elif frontend == "fancy":
             self._frontend = _menu_curses
@@ -236,13 +234,12 @@ class Menu:
             Menu._depth -= 1
             if Menu._depth == 0:
                 Menu._return_mode = None
-                self._case_handler = None
 
         return Menu._return or {}
 
 
 def build_menu(
-    cases: Union[Iterable[FunctionType], Dict[str, FunctionType], ModuleType],
+    cases: Union[Sequence[FunctionType], Dict[str, FunctionType], ModuleType],
     title: Optional[str] = None,
     *,
     case_args: Optional[Dict[FunctionType, tuple]] = None,
@@ -260,9 +257,9 @@ def build_menu(
     Returns  Menu object
     """
     if isinstance(cases, ModuleType):
-        cases_to_send = _get_module_cases(cases)
+        cases_to_send = get_module_cases(cases)
     elif isinstance(cases, dict):
-        cases_to_send = _extract_and_preprocess_functions(cases)
+        cases_to_send = extract_and_preprocess_functions(cases)
         # If this menu is the first menu initialized, and is given the locally
         # defined functions, then must filter the functions that are defined
         # in __main__
@@ -271,13 +268,13 @@ def build_menu(
         if moduleName == "__main__":
             cases_to_send = [case for case in cases_to_send if case.__module__ == "__main__"]
 
-    elif isinstance(cases, Iterable):
+    elif isinstance(cases, Sequence):
         # Looks kinda stupid, but it reuses the code, which is nice
-        cases_to_send = _extract_and_preprocess_functions({case.__name__: case for case in cases})
+        cases_to_send = extract_and_preprocess_functions({case.__name__: case for case in cases})
     else:
         raise TypeError(f"Invalid type for cases, got: {type(cases)}")
 
-    cases_to_send: Iterable[FunctionType]
+    cases_to_send: Sequence[FunctionType]
 
     cases_to_send = filter(lambda case: cng._CASE_IGNORE not in vars(case), cases_to_send)
 

@@ -14,7 +14,7 @@ _CLEAR_COMMAND = "cls" if os.name == "nt" else "clear"
 
 RE_ANSI = re.compile(r"\x1b\[[;\d]*[A-Za-z]")  # Taken from tqdm source code, matches escape codes
 
-RE_INPUT = re.compile("[\w.-]+|\[.*?\]|\{.*?\}|\(.*?\)|\".*?\"|'.*?'")
+RE_INPUT = re.compile(r"[\w.-]+|\[.*?\]|\{.*?\}|\(.*?\)|\".*?\"|'.*?'")
 
 
 def _assert_supported(arg: Any, paramname: str, supported: Container):
@@ -27,7 +27,7 @@ def _assert_supported(arg: Any, paramname: str, supported: Container):
     AssertionError: Got unsupported argument for parameter "animal". Available options are: ('dog', 'rabbit')
     """
     assert arg in supported, (
-        f'Got unsupported argument "'
+        'Got unsupported argument "'
         + strings.YELLOW
         + str(arg)
         + strings.END
@@ -74,7 +74,7 @@ def clear_screen() -> None:
     os.system(_CLEAR_COMMAND)
 
 
-def _extract_and_preprocess_functions(dict_: Dict[str, FunctionType]) -> List[FunctionType]:
+def extract_and_preprocess_functions(dict_: Dict[str, FunctionType]) -> List[FunctionType]:
     """
     Parameters
     -------------
@@ -105,7 +105,7 @@ def input_splitter(argstring: str) -> List[str]:
     return RE_INPUT.findall(argstring)
 
 
-def _get_module_cases(module: ModuleType) -> List[FunctionType]:
+def get_module_cases(module: ModuleType) -> List[FunctionType]:
     """Get all functions defined in module"""
     def inModule(f):
         moduleOfF = getmodule(f)

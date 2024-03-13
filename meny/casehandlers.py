@@ -1,15 +1,14 @@
-from abc import abstractclassmethod
-from typing import Any, Dict, Iterable, List, Optional
+from abc import abstractclassmethod, abstractmethod
+from typing import Any, Sequence, List
 import meny
 from meny.exceptions import MenuError
 from ast import literal_eval
 from inspect import getfullargspec, unwrap
 from types import FunctionType
 from meny.infos import _error_info_case
-from meny.exceptions import MenuError
 
 
-def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
+def _handle_args(func: FunctionType, args: Sequence[str]) -> List:
     """
     Handles list of strings that are the arguments using ast.literal_eval.
 
@@ -24,7 +23,9 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
     if len(args) > len(params):
         raise MenuError(f"Got too many arguments, should be {len(params)}, but got {len(args)}")
 
-    typed_arglist = [None] * len(args)
+    typed_arglist: List[str | None] = [None] * len(args)
+    i = 0
+    arg = None
     try:
         for i, (param, arg) in enumerate(zip(params, args)):
             if argsspec.annotations.get(param, None) == str:
@@ -32,20 +33,16 @@ def _handle_args(func: FunctionType, args: Iterable[str]) -> List:
             else:
                 typed_arglist[i] = literal_eval(arg)
     except (ValueError, SyntaxError) as e:
-        raise MenuError(
-            f"Got arguments: {args}\n" f"But could not evaluate argument at position {i}:\n\t {arg}"
-        ) from e
+        raise MenuError(f"Got arguments: {args}\n" f"But could not evaluate argument at position {i}:\n\t {arg}") from e
     return typed_arglist
 
 
 def _handle_casefunc(casefunc: FunctionType, args: List[str], menu: meny.Menu) -> Any:
-    program_args = menu.case_args.get(casefunc, ())
-    program_kwargs = menu.case_kwargs.get(casefunc, {})
+    program_args = (menu.case_args or {}).get(casefunc, ())
+    program_kwargs = (menu.case_kwargs or {}).get(casefunc, {})
     if program_args or program_kwargs:  # If programmatic arguments
         if args:
-            raise MenuError(
-                "This function takes arguments progammatically" " and should not be given any arguments"
-            )
+            raise MenuError("This function takes arguments progammatically" " and should not be given any arguments")
         return casefunc(*program_args, **program_kwargs)
     elif args:
         # Raises TypeError if wrong number of arguments
@@ -67,7 +64,8 @@ class _CaseHandler:
         finally:
             cls.afterCallReturn(menu, casefunc, args)
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def onCall(cls, menu: meny.Menu, casefunc: FunctionType, args: List[str]) -> None:
         """
         Responsibility:
@@ -75,7 +73,8 @@ class _CaseHandler:
             Do whatever else to enforce handler behavior (related to unittests)
         """
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def afterCallReturn(cls, menu: meny.Menu, casefunc: FunctionType, args: List[str]) -> None:
         """
         Responsibility:

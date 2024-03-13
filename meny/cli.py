@@ -11,7 +11,6 @@ import pprint
 import string
 import re
 import json
-import subprocess
 import shutil
 import platform
 import signal
@@ -31,6 +30,8 @@ def load_module_from_path(path: Path):
     sys.path.append(str(Path(path).parent))
     loader = importlib.machinery.SourceFileLoader(f"__meny_module_{path.stem}", str(path))
     spec = importlib.util.spec_from_loader(loader.name, loader)
+    if spec is None:
+        raise ImportError(f"Could not load {path}")
     module = importlib.util.module_from_spec(spec)
     loader.exec_module(module)
     sys.path.pop()
@@ -58,14 +59,14 @@ def menu_from_python_code(filepath: Path, repeat: bool):
 class MenyTemplate(string.Template):
     default_arg = r"[\w ]*"
     delimiter = "@"
-    pattern = fr"""
+    pattern = rf"""
     @(?:
       (?P<escaped>@)         | # Escape sequence of two delimiters
       (?P<named>\w+)         | # delimiter and a Python identifier
       {{(?P<braced>\w+=?{default_arg})}} | # delimiter and a braced identifier
       (?P<invalid>)            # Other ill-formed delimiter exprs
     )
-    """
+    """  # type: ignore
 
 
 def get_casefunc(command: str, executable: str):
@@ -95,7 +96,6 @@ def get_casefunc(command: str, executable: str):
     args = ", ".join(arg_components)
 
     # Remove default argument from command string
-    template = MenyTemplate(re.sub(fr"@{{(\w+)={MenyTemplate.default_arg}}}", r"@{\1}", command))
     if executable is not None:
         executable = f"'{executable}'"
 
@@ -158,13 +158,17 @@ def cli():
         sys.exit(1)
 
     try:
-        signal.signal(signal.SIGINT, lambda *args, **kwargs: None)
+        signal.signal(signal.SIGINT, lambda *__args__, **__kwargs__: None)
         if filepath.suffix == ".json":
             if platform.system() == "Windows":
                 executable = shutil.which("powershell")
             else:
                 executable = shutil.which("bash")
-            executable = Path(executable).as_posix() # Need this or will crash in windows due to backslash stuff
+
+            if not executable:
+                executable = "sh"
+
+            executable = Path(executable).as_posix()  # Need this or will crash in windows due to backslash stuff
             returnDict = menu_from_json(filepath, args.repeat, args.executable or executable)
         else:
             returnDict = menu_from_python_code(filepath, args.repeat)

@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from .menu import menu
 from .menylogger import getLogger, INFO
-from .utils import _get_module_cases
+from .utils import get_module_cases
 import importlib.util
 import importlib.machinery
 import traceback
@@ -48,7 +48,7 @@ def menu_from_python_code(filepath: Path, repeat: bool):
         logger.error(f"Please ensure that \x1b[33m{filepath}\x1b[0m contains valid Python code")
         sys.exit(1)
 
-    cases = _get_module_cases(module)
+    cases = get_module_cases(module)
     if len(cases) == 0:
         logger.info(f"There are no defined functions in \x1b[33m{filepath}\x1b[0m")
         sys.exit(1)

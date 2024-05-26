@@ -12,7 +12,7 @@ Meny is a super light weight framework for creating CLI menus
 1. You have implemented some functions in some Python file (regardless of the intention of creating a CLI menu).
 1. Then you realize it would be nice to have a CLI interface to call said functions.
 
-Today is your lucky day! Because Meny is especially designed for this scenario! (which I have encountered surprisingly many times, hence this package). Just install and import `meny` and do
+Today is your lucky day! Because Meny is especially designed for this scenario! (which I have encountered surprisingly many times, hence this package). Just install `meny` and do
 ```
 meny yourfile.py
 ```

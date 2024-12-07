@@ -81,9 +81,9 @@ def print_os():
     print(f"Your operating is {platform.system()}")
     return operating_system
 ```
-Then you can do
+Then in the terminal you can do
 ```
-meny print_os
+meny os_example.py
 ```
 and you will see
 ```
